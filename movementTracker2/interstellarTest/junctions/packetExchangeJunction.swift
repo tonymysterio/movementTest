@@ -17,6 +17,10 @@ var peerExplorerDidLosePeerObserver = Observable<Peer>()
 
 var peerDataProviderExistingHashesObserver = Observable<exchangedHashes>()
 
+
+var peerDataRequesterRunArrivedObserver = Observable<Run>()
+var peerDataRequesterRunArrivedSavedObserver = Observable<String>()
+
 class PacketExchangeJunction {
     
     var enabled = false;
@@ -64,6 +68,32 @@ class PacketExchangeJunction {
             
             //peerDataRequester initiates a JSON pull from this host
             self.pollNewPeerForData(peer: peer)
+        }
+        
+        peerExplorerDidLosePeerObserver.subscribe() { peer in
+            
+            var id = peer.identifier    //host cannot be seen now
+            
+            
+        }
+        peerDataRequesterRunArrivedObserver.subscribe { run in
+            
+            //peer data requester got a run over the meshlink
+            if let hrr = self.addHoodoRunStreamListener() {
+                
+                //its there
+                hrr.addRun(run: run)
+                
+                
+            }
+            
+            if let strr = self.addRunStreamRecorder(){
+                
+                //this will page us if the run is actually stored
+                strr.storeRun(run: run)
+                
+            }
+            
         }
         /* extension AppDelegate: ExplorerDelegate {
          func explorer(_ explorer: Explorer, didSpotPeer peer: Peer) {
@@ -141,6 +171,20 @@ class PacketExchangeJunction {
         
     }
     
+    func peerExplorerDidLosePeer ( peer: Peer ) {
+        
+        //somebody disappeared
+        let name = "PEER" + peer.identifier;
+        
+        if let mlt = storage.getObject(oID: name) as! PeerDataRequester? {
+            
+            mlt._teardown() //get rid of this guy now
+            
+        }
+        
+        
+    }
+    
     func getPeerDataProvider () -> PeerDataProvider? {
         
         if let mlt = storage.getObject(oID: "peerDataProvider") as! PeerDataProvider? {
@@ -209,6 +253,8 @@ class PacketExchangeJunction {
         pdc._initialize()
         pdc.myID = name;
         pdc.hostname = peer.hostname!
+        pdc.identifier = peer.identifier;
+        
         if (scheduler.addObject(oID: pdc.myID, o: pdc)) {
             return pdc
         }
@@ -217,14 +263,74 @@ class PacketExchangeJunction {
         
     }
     
+    func addHoodoRunStreamListener () -> hoodoRunStreamListener? {
+        
+        //this will listen and act as a general storage
+        
+        if let mlt = storage.getObject(oID: "hoodoRunStreamListener") as! hoodoRunStreamListener? {
+            
+            mlt._pulse(pulseBySeconds: 120)
+            return mlt
+            
+        }
+        
+        //create new, assume that old one is terminaattod
+        let myhoodoRunStreamListener = hoodoRunStreamListener(messageQueue: messageQueue);
+        myhoodoRunStreamListener._initialize()
+        myhoodoRunStreamListener._pulse(pulseBySeconds: 120);
+        
+        if scheduler.addObject(oID: myhoodoRunStreamListener.myID, o: myhoodoRunStreamListener ){
+            //myLocationTracker?.addListener(oCAT: myLiveRunStreamListener.myCategory, oID: myLiveRunStreamListener.myID, name: myLiveRunStreamListener.name)
+            
+            return myhoodoRunStreamListener
+        }
+        
+        return nil
+        
+    }
+    
+    func addRunStreamRecorder () -> RunStreamRecorder? {
+        
+        //this will listen and act as a general storage
+        
+        if let mlt = storage.getObject(oID: "runStreamRecorder") as! RunStreamRecorder? {
+            
+            mlt._pulse(pulseBySeconds: 120)
+            return mlt
+            
+        }
+        
+        //create new, assume that old one is terminaattod
+        let myRunStreamRecorder = RunStreamRecorder(messageQueue: messageQueue);
+        myRunStreamRecorder._initialize()
+        myRunStreamRecorder._pulse(pulseBySeconds: 120);
+        
+        if scheduler.addObject(oID: myRunStreamRecorder.myID, o: myRunStreamRecorder ){
+            //myLocationTracker?.addListener(oCAT: myLiveRunStreamListener.myCategory, oID: myLiveRunStreamListener.myID, name: myLiveRunStreamListener.name)
+            
+            return myRunStreamRecorder
+        }
+        
+        return nil
+        
+    }
+    
+    
     func pollNewPeerForData (peer : Peer ) {
         
         //see if we have a poller for this
         let name = "PEER" + peer.identifier;
         
+        
         if let pdc = self.addPeerDataRequester(peer: peer) {
             
             pdc.requestHashes();
+        }
+        
+        //prime some hash data hopefully
+        //use PullRunsFromDisk to get loads and loads of hashes
+        if let dp = self.addHashSetProvider() {
+            dp.scanForRuns()
         }
         
     }

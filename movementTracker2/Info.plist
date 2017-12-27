@@ -38,10 +38,6 @@
 	<string>I spy you when you want</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoadsInWebContent</key>
-		<true/>
-		<key>NSAllowsArbitraryLoadsForMedia</key>
-		<true/>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>

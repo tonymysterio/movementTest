@@ -75,6 +75,8 @@ class RunStreamRecorder : BaseObject  {
             
             print("storing captured run \(fname) ")
             
+            peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
+            
             //on successfull storage
             self._pulse(pulseBySeconds: 120)    //expect next write in a few mins
             self.finishProcessing()

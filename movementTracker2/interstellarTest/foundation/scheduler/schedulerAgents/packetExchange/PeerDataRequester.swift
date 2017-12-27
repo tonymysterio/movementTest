@@ -21,6 +21,11 @@ class PeerDataRequester : BaseObject  {
     var hashesPrimed = false;
     var myExhangedHashes = exchangedHashes()
     var hostname = "";
+    var identifier = "";
+    
+    var missingRunHashes = [String]()
+    var fetchMissingHashes = false
+    
     //var hisOrderedHashList : orderedHashList
     //ask for the hash list multiple times after exchanging data
     //this way if the recipient is recieving runs from other parties, the changes get reflected
@@ -51,6 +56,7 @@ class PeerDataRequester : BaseObject  {
             
         }
         
+        
         //filter irrelevant runs by distance
         
         //pullRunsFromDisk also shouts here
@@ -78,7 +84,7 @@ class PeerDataRequester : BaseObject  {
         //simple JSON request
         // to: host with requestParameters
         if self.isProcessing { return } //drop
-        
+        if self.terminated { return }
         //PROTO
         //pass hashes of held run data, please give me anything but this
         
@@ -95,29 +101,18 @@ class PeerDataRequester : BaseObject  {
             .validate()
             .responseJSON { (response) -> Void in
                 guard response.result.isSuccess else {
-                    print("peerdatarequest Error while fetching : \(response.result.error)")
+                    print("peerdatarequest Error while fetching : \(resourceUrl)")
+                    
+                    //print("peerdatarequest Error while fetching : \(response.result.error)")
                     //completion(nil)
                     self.orderedHashListRequestErrorHandler()
                     return
                 }
                 
-                guard let value = response.result.value as? [String: Any],
-                    let rows = value["rows"] as? [[String: Any]] else {
-                        print("Malformed data received from fetchAllRooms service")
-                        //completion(nil)
-                        self.orderedHashListRequestErrorHandler()
-                        
-                        return
-                }
-                
-                /*let rooms = rows.flatMap({ (roomDict) -> RemoteRoom? in
-                    return RemoteRoom(jsonData: roomDict)
-                })*/
-                
-                var resString = response.result.value as! Data;
+                if self.terminated { return }
                 
                 let decoder = JSONDecoder()
-                guard let ordHashList = try! decoder.decode( orderedHashList?.self, from : resString ) else {
+                guard let ordHashList = try! decoder.decode( orderedHashList?.self, from : response.data as! Data ) else {
                     
                     self.orderedHashListRequestErrorHandler()
                     
@@ -131,39 +126,129 @@ class PeerDataRequester : BaseObject  {
     
     }
     
+    override func _housekeep_extend() -> DROPcategoryTypes? {
+        
+        if self.isProcessing {  return DROPcategoryTypes.busyProcessesing }
+        
+        if !self.fetchMissingHashes {
+            
+                //try to get dat list
+                self.requestHashes()
+            }
+        
+        self.fetchMissingHash()
+        
+        return nil
+        
+    }
+    
+    func fetchMissingHash(){
+        
+        if self.missingRunHashes.isEmpty {
+            
+            fetchMissingHashes = false;
+            return;
+        }
+        
+        if self.isProcessing {
+            
+            return;
+        }
+        
+        //pull a run hashu
+        
+        self.startProcessing()
+        let hash = self.missingRunHashes.popLast()
+        let resourceUrl = "http://"+self.hostname+":8080/gethash?hash=" + (hash)!
+        //keep responses sho
+        
+        
+        Alamofire.request(
+            URL(string: resourceUrl)!,
+            method: .get,
+            parameters: ["hash": hash])
+            .validate()
+            .responseJSON { (response) -> Void in
+                guard response.result.isSuccess else {
+                    //print("peerdatarequest Error while fetching : \(resourceUrl)")
+                    
+                    print("peerdatarequest Error while fetching : \(response.result.error)")
+                    //completion(nil)
+                    self.orderedHashRequestErrorHandler()
+                    return
+                }
+                
+                if self.terminated { return }
+                
+                let decoder = JSONDecoder()
+                guard let run = try! decoder.decode( Run?.self, from : response.data as! Data ) else {
+                    
+                    self.orderedHashRequestErrorHandler()
+                    
+                    return
+                    
+                }
+                
+                //parsed this clients hashlist
+                self.orderedHashRequestSuccess ( run : run )
+        }
+        
+        
+        
+    }
+    
     func orderedHashListRequestErrorHandler () {
             
             self.finishProcessing()
             
         }
     
+    func orderedHashRequestErrorHandler () {
+        
+        self.finishProcessing()
+        
+    }
+    
+    func orderedHashRequestSuccess ( run : Run ) {
+        
+        self.finishProcessing()
+        peerDataRequesterRunArrivedObserver.update(run) //tell packetExchange that we got the requested run
+        
+    }
+    
+    
     func orderedHashListRequestSuccess ( ordHashList : orderedHashList ) {
         
+        if self.terminated { return }
         self.finishProcessing()
         
         //see if i have received my own hashlist
         if myExhangedHashes.isEmpty() {
             return;
         }
-        
-        let myHlist = myExhangedHashes.getAll();
-        var missing = [String]()
-        for f in ordHashList.list {
+        queue.sync {
+            let myHlist = myExhangedHashes.getAll();
+            var missing = [String]()
+            for f in ordHashList.list {
             
             if !(myHlist!.contains(f)) {
                 missing.append(f)
             }
             
-        }
+            }
         
-        if missing.isEmpty {
+            if missing.isEmpty {
             //hes got nothing for me
             return;
+            }
+            //whats left after my and his overlap?
+            print ("orderedHashListRequestSuccess: im missing  \(missing)" )
+            //push missing ones to request queue
+            self.missingRunHashes = missing;
+            self.fetchMissingHashes = true;
+            self._pulse(pulseBySeconds: 120)
+            
         }
-        //whats left after my and his overlap?
-        print ("orderedHashListRequestSuccess: im missing  \(missing)" )
-        //push missing ones to request queue
-        
         
         //pull one after another
         
@@ -182,12 +267,7 @@ class PeerDataRequester : BaseObject  {
         hashesPrimed = true;
     }
     
-    override func _housekeep_extend() -> DROPcategoryTypes? {
-        
-        
-        return nil
-    }
-    
+   
     
     
     

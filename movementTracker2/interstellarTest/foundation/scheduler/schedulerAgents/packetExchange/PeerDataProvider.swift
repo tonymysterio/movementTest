@@ -9,6 +9,8 @@
 import Foundation
 import Interstellar
 import Swifter
+import Disk
+
 //import GEOSwift
 
 
@@ -103,6 +105,29 @@ class PeerDataProvider : BaseObject  {
                 
             })
         }
+        
+        server["/gethash"] = { r in
+            return HttpResponse.raw(200, "OK", nil, { w in
+                let key = r.queryParams[0]
+                let path = "runData/" + key.1 + ".json"
+                
+                if let retrievedMessage = try Disk.retrieve(path, from: .caches, as: Run?.self) {
+                    
+                    let encoder = JSONEncoder()
+                    let data = try! encoder.encode(retrievedMessage)
+                    let naz = (String(data: data, encoding: .utf8)!)
+                    try w.write([UInt8](naz.utf8))
+                    
+                } else {
+                    
+                    try w.write([UInt8]("NOT_FOUND".utf8))
+                    
+                }
+                
+                
+            })
+        }
+        
         
         do {
             

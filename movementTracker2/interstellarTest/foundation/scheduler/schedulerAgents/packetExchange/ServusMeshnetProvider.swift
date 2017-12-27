@@ -52,7 +52,8 @@ extension ServusMeshnetProvider: ExplorerDelegate {
     
     func explorer(_ explorer: Explorer, didLosePeer peer: Peer) {
         peerExplorerDidLosePeerObserver.update(peer)
-        print("Lost \(peer.hostname) from sight")
+        //hostname is not available
+        print("Lost \(peer.identifier) from sight")
     }
 }
 
