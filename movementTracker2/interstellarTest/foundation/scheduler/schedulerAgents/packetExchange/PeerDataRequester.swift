@@ -26,6 +26,7 @@ class PeerDataRequester : BaseObject  {
     var missingRunHashes = [String]()
     var fetchMissingHashes = false
     var unforgivableAmountOfConnectionErrors = 5;
+    var totalRunItemsImported = 0;  //keep track of how much stuff we have pulled
     
     //var hisOrderedHashList : orderedHashList
     //ask for the hash list multiple times after exchanging data
@@ -160,6 +161,12 @@ class PeerDataRequester : BaseObject  {
         
         self.startProcessing()
         let hash = self.missingRunHashes.popLast()
+        
+        //updates myExhangedHashes needs to update
+        //maybe im downloading from multiple sources now
+        //central storage for exchanged Hashes necessary!!
+        
+        
         let resourceUrl = "http://"+self.hostname+":8080/gethash?hash=" + (hash)!
         //keep responses sho
         
@@ -225,6 +232,13 @@ class PeerDataRequester : BaseObject  {
         self.finishProcessing()
         peerDataRequesterRunArrivedObserver.update(run) //tell packetExchange that we got the requested run
         peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
+        
+        self.totalRunItemsImported = totalRunItemsImported + 1;
+        
+        //if ater ten runs, ask for his hashList in case hes downloading from at different people at the same time
+        //this way we can get the latest blocks on the network
+        myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
+        
     }
     
     

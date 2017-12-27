@@ -151,6 +151,7 @@ class PacketExchangeJunction {
             dp.scanForRuns()
         }
         
+        //stop any mapcombiners
         
     }
     
