@@ -36,6 +36,15 @@
 	<string>i spy u always</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>I spy you when you want</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>NSMotionUsageDescription</key>
 	<string>i spy your motion</string>
 	<key>UISupportedInterfaceOrientations~ipad</key>

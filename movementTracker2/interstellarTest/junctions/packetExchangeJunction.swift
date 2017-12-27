@@ -53,7 +53,7 @@ class PacketExchangeJunction {
             
         }
         
-        peerExplorerDidDeterminePeerObserver.subscribe { toggle in
+        peerExplorerDidDeterminePeerObserver.subscribe { peer in
             
             //inform user. might end up into a big list
             //some of these peers might not be valid data providers
@@ -63,7 +63,7 @@ class PacketExchangeJunction {
             //create one if not found
             
             //peerDataRequester initiates a JSON pull from this host
-            
+            self.pollNewPeerForData(peer: peer)
         }
         /* extension AppDelegate: ExplorerDelegate {
          func explorer(_ explorer: Explorer, didSpotPeer peer: Peer) {
@@ -207,8 +207,8 @@ class PacketExchangeJunction {
         let pdc = PeerDataRequester(messageQueue: messageQueue)
         pdc._pulse(pulseBySeconds: 120) //ample time to get a connection
         pdc._initialize()
-        pdc.nmyID = name;
-        pdc.hostname = peer.hostname
+        pdc.myID = name;
+        pdc.hostname = peer.hostname!
         if (scheduler.addObject(oID: pdc.myID, o: pdc)) {
             return pdc
         }
@@ -222,7 +222,10 @@ class PacketExchangeJunction {
         //see if we have a poller for this
         let name = "PEER" + peer.identifier;
         
-        
+        if let pdc = self.addPeerDataRequester(peer: peer) {
+            
+            pdc.requestHashes();
+        }
         
     }
     
