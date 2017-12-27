@@ -173,11 +173,13 @@ class PeerDataProvider : BaseObject  {
         //if list of hashes does not happen, TTL shortly. no data, no play
         queue.sync {
             
+            //TODO: this should update not overwrite
+            
             myExhangedHashes = hashes
             
             let orderAllLatestFirst = hashes.orderAllLatestFirst()
             
-            print (hashes)
+            //print (hashes)
         }
         
         primed = true;

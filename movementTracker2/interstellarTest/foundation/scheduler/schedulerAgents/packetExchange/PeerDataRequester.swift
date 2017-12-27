@@ -25,6 +25,7 @@ class PeerDataRequester : BaseObject  {
     
     var missingRunHashes = [String]()
     var fetchMissingHashes = false
+    var unforgivableAmountOfConnectionErrors = 5;
     
     //var hisOrderedHashList : orderedHashList
     //ask for the hash list multiple times after exchanging data
@@ -198,12 +199,22 @@ class PeerDataRequester : BaseObject  {
     }
     
     func orderedHashListRequestErrorHandler () {
-            
+        
+        self.unforgivableAmountOfConnectionErrors = unforgivableAmountOfConnectionErrors - 1;
+        if (self.unforgivableAmountOfConnectionErrors == 0) {
+            self._teardown()
+            return;
+        }
             self.finishProcessing()
             
         }
     
     func orderedHashRequestErrorHandler () {
+        
+        if (self.unforgivableAmountOfConnectionErrors == 0) {
+            self._teardown()
+            return;
+        }
         
         self.finishProcessing()
         
@@ -213,7 +224,7 @@ class PeerDataRequester : BaseObject  {
         
         self.finishProcessing()
         peerDataRequesterRunArrivedObserver.update(run) //tell packetExchange that we got the requested run
-        
+        peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
     }
     
     
@@ -247,6 +258,8 @@ class PeerDataRequester : BaseObject  {
             self.missingRunHashes = missing;
             self.fetchMissingHashes = true;
             self._pulse(pulseBySeconds: 120)
+            
+            peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
             
         }
         

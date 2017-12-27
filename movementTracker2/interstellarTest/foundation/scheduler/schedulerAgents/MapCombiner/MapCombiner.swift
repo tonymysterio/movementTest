@@ -128,7 +128,7 @@ class MapCombiner : BaseObject  {
                 return;
             }
             
-            print(d);
+            //print(d);
         }
                 
         if !run.isValid {
@@ -145,7 +145,7 @@ class MapCombiner : BaseObject  {
                 //process when time has passed
                 lastInsertTimestamp = Date().timeIntervalSince1970
                 newDataForSnap = true;  //flag we have new shit on the block
-                print("mapcombiner added run ")
+                //print("mapcombiner added run ")
                 self?._pulse(pulseBySeconds: 10)
                 
                 //when mapCombiner finds something that is going to be displayed on the screen,

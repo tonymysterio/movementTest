@@ -15,9 +15,10 @@ var peerExplorerDidSpotPeerObserver = Observable<Peer>()
 var peerExplorerDidDeterminePeerObserver = Observable<Peer>()
 var peerExplorerDidLosePeerObserver = Observable<Peer>()
 
+//peerDataRequester tries to keep servusMeshnetProvider alive when something meaningful happens
+var peerExplorerKeepAliveObserver = Observable<Bool>()
+
 var peerDataProviderExistingHashesObserver = Observable<exchangedHashes>()
-
-
 var peerDataRequesterRunArrivedObserver = Observable<Run>()
 var peerDataRequesterRunArrivedSavedObserver = Observable<String>()
 
@@ -57,6 +58,12 @@ class PacketExchangeJunction {
             
         }
         
+        peerExplorerKeepAliveObserver.subscribe { toggle in
+            
+            //make servus stay around for longe
+            self.peerExplorerKeepAlive()
+            
+        }
         peerExplorerDidDeterminePeerObserver.subscribe { peer in
             
             //inform user. might end up into a big list
@@ -72,8 +79,8 @@ class PacketExchangeJunction {
         
         peerExplorerDidLosePeerObserver.subscribe() { peer in
             
-            var id = peer.identifier    //host cannot be seen now
-            
+            //var id = peer.identifier    //host cannot be seen now
+            self.peerExplorerDidLosePeer(peer: peer)
             
         }
         peerDataRequesterRunArrivedObserver.subscribe { run in
@@ -168,6 +175,19 @@ class PacketExchangeJunction {
         }
         
         return nil
+        
+    }
+    
+    func peerExplorerKeepAlive (){
+        
+        //data is exchanged or shit, keep servus around
+        //probably ask it to advertise again
+        
+        if let mlt = storage.getObject(oID: "servusMeshnetProvider") as! ServusMeshnetProvider? {
+            
+            mlt._pulse(pulseBySeconds: 30) //ample time to get a connection
+            
+        }
         
     }
     
