@@ -12,7 +12,16 @@ class profileVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        var storyboard = UIStoryboard(name: "profile", bundle: nil)
+        
+    
+        
+        var controller = storyboard.instantiateInitialViewController() as! UINavigationController
+        addChildViewController(controller)
+        view.addSubview(controller.view)
+        controller.didMove(toParentViewController: self)
+        
         // Do any additional setup after loading the view.
     }
 

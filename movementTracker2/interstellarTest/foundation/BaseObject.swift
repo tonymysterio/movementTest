@@ -20,7 +20,7 @@ import Interstellar
 
 typealias PetDictionary = [ String : String]  //oID,name
 
-//
+
 
 class BufferConsumer {
     
@@ -118,7 +118,7 @@ class BaseObject: NSObject {
         //give a bit of lifetime to this guy
         self.TTL = self.TTL + self.PULSEextendBySecondsDefault;
         self.messageQueue = messageQueue    //share message queue object for this guy too
-        print("I AM \(self.name))")
+        //print("BaseObject: initializing new me \(self.name))")
     }
     
     

@@ -7,3 +7,11 @@
 //
 
 import Foundation
+//import Toaster
+
+//add to scheduler to track 
+
+func debuMess (text : String ) {
+    
+    //Toast(text: text , delay: Delay.short, duration: Delay.long)
+}

@@ -1,9 +1,13 @@
-//
-//  ParkMapOverlay.swift
-//  movementTracker2
-//
-//  Created by sami on 2017/12/18.
-//  Copyright © 2017年 pancristal. All rights reserved.
-//
-
-import Foundation
+import UIKit
+import MapKit
+/*
+class ParkMapOverlay: NSObject, MKOverlay {
+    
+    var coordinate: CLLocationCoordinate2D
+    var boundingMapRect: MKMapRect
+    
+    init(park: Park) {
+        boundingMapRect = park.overlayBoundingMapRect
+        coordinate = park.midCoordinate
+    }
+}*/

@@ -74,7 +74,7 @@ enum schedulerDistressCodes {
 class Scheduler {
 
     
-    var maxObjects = 10;
+    var maxObjects : Int = 10;
     //the kill gaps come from baseobject
     
     //let maxLatencyWarningGap = 5.648778915405273  //if things take too long, warm , kill
@@ -93,7 +93,9 @@ class Scheduler {
     
     var worryAuntID = "tat";        //attach listener to worryAunt for debugging purposes
     
-    let schedulingDelayinMs = 1000  //how often we fire housekeeping
+    let schedulingDelayinMs = 3000  //how often we fire housekeeping
+    
+    let schedulerQueue = DispatchQueue(label: "schedulerQueue", qos: .utility)
     
 //    private var objects: [String: BaseObject] {
 //        return storage.objects
@@ -132,7 +134,7 @@ class Scheduler {
             //even if we have no housekeeping to do,
             
             
-            addRandomTimewaster();
+            _ = addRandomTimewaster();
             
             
             initHousekeeping()  //next round of housekeeping
@@ -152,37 +154,47 @@ class Scheduler {
         let objectsCopy = storage.objects
         for ( kez , a) in objectsCopy { //just the the object
             
-            if ( a == nil ) { continue; }
+            //if ( a == nil ) { continue; }
             
             if interruptHousekeeping==false {
                 
-                let result = a._housekeep();
-                housekeepReplies.append(result)
-                if result == DROPcategoryTypes.terminating {
+                schedulerQueue.sync {
                     
-                    //should we remove immediately? separate psychokiller run
-                    print("ALERT: Scheduler got terminating from a housekeepee \(a.name) - delete now" )
-                    removeObject(oID : kez)
-                }
                 
-                if result == DROPcategoryTypes.busyProcessingExceedingLatencyWarningGap {
+                    let result = a._housekeep();
+                    housekeepReplies.append(result)
+                    if result == DROPcategoryTypes.terminating {
+                    
+                        //should we remove immediately? separate psychokiller run
+                        print("ALERT: Scheduler got terminating from a housekeepee \(a.name) - delete now" )
+                        removeObject(oID : kez)
+                    }
+                
+                    if result == DROPcategoryTypes.busyProcessingExceedingLatencyWarningGap {
                     
                     //should we remove immediately? separate psychokiller run
                     //print("ALERT: Scheduler got busyProcessingExceedingLatencyWarningGap from a housekeepee \(a.name) - " )
                     //removeObject(oID : kez)
-                }
+                    }
                 
-                if result == DROPcategoryTypes.busyProcessingExceedingLatencyKillGap {
+                    if result == DROPcategoryTypes.busyProcessingExceedingLatencyKillGap {
                     
-                    //should we remove immediately? separate psychokiller run
-                    print("ALERT: Scheduler got busyProcessingExceedingLatencyKillGap from a housekeepee \(a.name) - delete now" )
-                    removeObject(oID : kez)
-                }
+                        //should we remove immediately? separate psychokiller run
+                        print("ALERT: Scheduler got busyProcessingExceedingLatencyKillGap from a housekeepee \(a.name) - delete now" )
+                        removeObject(oID : kez)
+                    }
                 
                 //busyProcessing DROP is just ignored
                 //let maxLatencyWarningGap = 5.648778915405273  //if things take too long, warm , kill
                 //let maxLatencyKillGap = 23.648778915405273
                 
+                }   //housekeep is a synced operation
+                
+            } else {
+                
+                break;
+                //going to background interrupts housekeeping
+                //manually enable it when coming back from housekeeping
                 
             }
             
@@ -209,11 +221,7 @@ class Scheduler {
             
             //initHousekeeping()  //next round of housekeeping
             
-            addRandomTimewaster()
-            
-            
-            
-            
+            _ = addRandomTimewaster()
             
         }
         
@@ -225,28 +233,28 @@ class Scheduler {
     func addRandomTimewaster () -> DROPcategoryTypes? {
         
         
-        //return DROPcategoryTypes.serviceNotAvailable
+        return DROPcategoryTypes.serviceNotAvailable
         
         //overload myseld adding more timewasters
         let oc = storage.totalObjectCount()
         let bv = maxObjects - 3
         if (oc > bv ) { return DROPcategoryTypes.maxCategoryObjectsExceeded  }
         if (maxObjects < 3 ) { return DROPcategoryTypes.serviceNotReady }
-        let tp = (maxObjects-2)
         
-        //var rh = randomIntFromInterval(min: oc,max: tp );
-        var rh=1
-        
-        var cou = 0;
-        while ( rh > 0 ) {
+        schedulerQueue.sync {
+            
+            
+            //var rh = randomIntFromInterval(min: oc,max: tp );
+            var rh=1
+            while ( rh > 0 ) {
                 
                 //add random child to random timewasters
-                var newTimeWaster = Timewaster(messageQueue: nil );
+                let newTimeWaster = Timewaster(messageQueue: nil );
                 newTimeWaster.houseKeepingRole = houseKeepingRoles.slave;
                 newTimeWaster.name = "timewaster"
                 //talk to worryAunt about your crashing trouble
-                newTimeWaster.addListener(oCAT: objectCategoryTypes.debugger, oID: worryAuntID, name: "worryAunt")
-                var oadd = self.addObject(oID: newTimeWaster.myID,o: newTimeWaster);
+                _ = newTimeWaster.addListener(oCAT: objectCategoryTypes.debugger, oID: worryAuntID, name: "worryAunt")
+                let oadd = self.addObject(oID: newTimeWaster.myID,o: newTimeWaster);
                 if (oadd == true ){
                     //when scheduler is overloaded, it should ask children to purge
                     //make this happen in another thread?
@@ -259,12 +267,12 @@ class Scheduler {
                     
                     print("Schdeuler: failed adding exceeding quota ")
                     break
+                }
+            
+                rh=rh-1
+            
             }
-            
-            rh=rh-1
-            
-        }
-        
+        }   //synced operation
                 //break
                 
             //}
@@ -276,11 +284,14 @@ class Scheduler {
     }
     
     func getObject (oID : String ) -> BaseObject? {
-    
+        
+        //already priviledged
         return storage.objects[oID];
     
     
     }
+    
+    
     
     func addObject (oID : String, o : BaseObject ) -> Bool {
         
@@ -298,23 +309,68 @@ class Scheduler {
         o.scheduler = self  //weak reference to scheduler for future access fun! can be nil!
         o.messageQueue = self.messageQueue //copy reference to mqueue here, leave storage out of mqueue
         
-        self.storage.addObject(label: oID, object: o) //objects[oID]=o;
-        print ("scheduler added \(o.name) ")
-        return true
+        //schedulerQueue.sync {
+            self.storage.addObject(label: oID, object: o) //objects[oID]=o;
+            print ("scheduler added \(o.name) ")
+            debuMess(text: "scheduler added \(o.name) ")
+        //}
         
+        return true
     }
     
     func removeObject (oID : String ) -> Void {
         
-        self.storage.removeObject(label: oID) //objects[oID]=o;
+        //schedulerQueue.sync {
+            self.storage.removeObject(label: oID) //objects[oID]=o;
+        //}
         
-        return
-        
-        if (self.storage.objects[oID] != nil) { print ("removeObject \(oID)") }
-        
-        self.storage.objects[oID] = nil ; //good bye cruel world
     }
     
+    func removeObjectsByName ( name : String ) {
+        
+        guard let cob = self.storage.getObjectsByName(name : name ) else {
+            return
+        }
+        for i in cob {
+            
+            self.removeObject(oID: i)
+            
+        }
+        
+    }
+    
+    
+    func applicationWillResignActive() {
+        
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+        
+        //give all tasks probable TTL to survive the sleep?
+        //interrupt housekeeping will not create a timer that housekeeps again
+        //do that manually on appdidbecome active
+        interruptHousekeeping=true;
+        
+    }
+    
+    func applicationDidBecomeActive() {
+        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        interruptHousekeeping=false;
+        self._housekeep()   //start with a housekeep of all object to make things really slow
+        
+    }
+    
+    func applicationWillTerminate() {
+        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+        interruptHousekeeping=true;
+        let objectsCopy = storage.objects
+        for ( kez , a) in objectsCopy {
+            
+            _ = a._finalize()   //anything without a finalizer (writing data to disk or so such will die
+            //this will be fast, basically setting everything terminated
+        }
+        
+        
+    }
     
     func LISTENtoDistressCode ( code : schedulerDistressCodes ) -> Void {
         
@@ -344,26 +400,35 @@ class Scheduler {
         
         //how about flatMapping storage.objects to get rid of the nills
         
+        var purgedEnough = false;
         
         for ( _ , a) in storage.objects { //just the the object
             
-            if (a != nil ) {
+            //if (a != nil ) {
                 
                 if a.terminated { continue }    //ignore the ones going out anyways
                 
-                //leave the best purge strategy for the object
-                let relief = a._purge( backPressure: remainingBackpressure )
-                //relief is the objects guesstimate how much pressure is relieved
-                //this approach targets older objects earlier in the stack
-                //and we are not wasting time purging too many objects at the same time
-                remainingBackpressure = remainingBackpressure - relief
-                cou = cou + 1
-                
-                if remainingBackpressure<1 {
+                schedulerQueue.sync {
                     
-                    print("finished releasing backpressure with _purge to \(cou) objects ")
-                    break }    //gtfo
-            }
+                    //leave the best purge strategy for the object
+                    let relief = a._purge( backPressure: remainingBackpressure )
+                    //relief is the objects guesstimate how much pressure is relieved
+                    //this approach targets older objects earlier in the stack
+                    //and we are not wasting time purging too many objects at the same time
+                    remainingBackpressure = remainingBackpressure - relief
+                    cou = cou + 1
+                
+                    if remainingBackpressure<1 {
+                    
+                        print("finished releasing backpressure with _purge to \(cou) objects ")
+                        purgedEnough = true
+                        
+                    }    //gtfo
+                    
+                }   //purge is also synced operation
+                
+                if purgedEnough { break; }
+            //}
         }
         
     }
@@ -408,11 +473,12 @@ class Scheduler {
             if ( a == nil ) { continue; }
             //dont care if we are terminating or whatever
             
-                if ( a.updateConfigurationValue(key: k ,val: v) ){
+                schedulerQueue.sync {
+                    if ( a.updateConfigurationValue(key: k ,val: v) ){
                     
-                    updated.append(kez);
+                        updated.append(kez);
+                    }
                 }
-                
                 
                 //busyProcessing DROP is just ignored
             }
@@ -422,7 +488,12 @@ class Scheduler {
         
     }
     
-    
+    func setMaxObjects ( maxO : Int ) {
+        
+        self.maxObjects = maxO
+        //this should trigger purges
+        
+    }
     func initHousekeeping () -> Void {
         
         //add jitter to scheduling?
@@ -431,8 +502,10 @@ class Scheduler {
         
         DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds( next ), execute: {
             
-            print("#house")
-            
+            print("#scheduler housekeep")
+            //if we were sleeping and interrupted housekeeping
+            //this gets fired and we can housekeep again
+            self.interruptHousekeeping = false;
             // Put your code which should be executed with a delay here
             _ = self._housekeep()
             //print("finished wasting time \(self.myID) ")
@@ -445,7 +518,7 @@ class Scheduler {
         
         //excepts a closure closure called instructions
         if let o = fn() {
-            var result = self.addObject(oID: o.myID, o: o);
+            let result = self.addObject(oID: o.myID, o: o);
             return result
         } else {
             return false

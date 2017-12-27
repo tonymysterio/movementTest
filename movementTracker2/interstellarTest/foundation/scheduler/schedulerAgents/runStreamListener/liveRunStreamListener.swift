@@ -81,6 +81,14 @@ class liveRunStreamListener : BaseObject  {
         
     }
     
+    func primeWithRun ( run : Run ) {
+        
+        //when pulling a incomplete run, prime 
+        //runrecorderjunction currentRunReceived
+        currentRun = run
+        
+    }
+    
     func locationMessageGotFromLocationLogger (lm : locationMessage) {
         
         //stuff that comes from observer. location logger sends me these via an observable

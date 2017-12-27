@@ -180,6 +180,8 @@ struct Run : Codable {
         return closeTime - startTime
     }
     
+    //adding rounding of coordinates here would distort the run
+    
     mutating func addCoordinate (coord : coordinate ) -> Bool {
         
         if coordinates.isEmpty {
@@ -246,11 +248,6 @@ struct Run : Codable {
         let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
         
         let d = location1.distance(from: location2)
-        if d > 500 {
-            
-            return false
-            
-        }
         
         if totalDistance() < 250 {
             
@@ -258,11 +255,47 @@ struct Run : Codable {
             
         }
         
+        if d > 500 {
+            
+            return false
+            
+        }
+        
+        
+        
         return true
         
     }   //end of isClosed
     
-}
+    func round(_ value: Double, toDecimalPlaces places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return Darwin.round(value * divisor) / divisor
+    }
+    
+    func simplify ( tolerance : Float ) -> [CLLocationCoordinate2D]? {
+        
+        
+        //24.200481
+        //65.822289999999995
+        var points : [CLLocationCoordinate2D] = []
+        for co in coordinates {
+            
+            //points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(round(co.lon,toDecimalPlaces: 5)), longitude: CLLocationDegrees(round(co.lat,toDecimalPlaces: 5)) ))
+            points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(co.lon), longitude: CLLocationDegrees(co.lat) ))
+            
+        }
+        
+        let simplified = SwiftSimplify.simplify(points, tolerance: tolerance, highQuality: false)
+        
+        /*print ("simplifiCATION tolerance \(tolerance)")
+        print(points.count)
+        print(simplified.count)*/
+        return simplified
+        
+    }
+    
+}   //end of run
+
 
 class jsonBufferScanner : BufferConsumer {
     
@@ -274,7 +307,7 @@ class jsonBufferScanner : BufferConsumer {
     
     
     func addObject(text: String) -> Void {
-        queue.async {
+        queue.sync {
             
             if self.processing {
                 print("DROP ping add object jsonbuffercsa")
@@ -292,7 +325,10 @@ class jsonBufferScanner : BufferConsumer {
             return nil
             
         }
-        //if processing == true { return DROPcategoryTypes.busyProcessesing }
+        if processing == true {
+            return nil //DROPcategoryTypes.busyProcessesing
+            
+        }
         /*if processing {
             
             //tell worryaunt too about my calamity
@@ -308,9 +344,9 @@ class jsonBufferScanner : BufferConsumer {
             //if this is taking loo long because insanely long string parses, trouble
             
             self.processing = true;
-            print("async harvest for data")
+            //print("async harvest for data")
             
-            print(poB.count)
+            //print(poB.count)
             
             
             self.lastProcessedBuffer = poB.count;
@@ -330,13 +366,14 @@ class jsonBufferScanner : BufferConsumer {
             //self.objects = nil
             self.objects = [ String ]();    //empty array
             
-            print("async harvest for prcfal")
+            //print("async harvest for prcfal")
             self.processing = false;
         //}
         
         return nil
         
     }   //end process buffers
+    var brb = false;
     
     func searchFromMultipleEntries (entries : [String]) -> [Run?]? {
     
@@ -344,17 +381,30 @@ class jsonBufferScanner : BufferConsumer {
         buffer = ""
         prefill = false;
         var found = false
+        if brb {
+            print("caatc")
+        }
+        brb = true;
         
         for fxf in entries {
             
             totalPassedBuffers = totalPassedBuffers + 1
             
-            if terminated { return nil }
-            if let gn = searchJson(a: fxf) {
+            let fxfx = String(fxf);
+            
+            if terminated {
+                return nil
+                
+            }
+            if let gn = self.searchJson(a: fxfx) {
                 found = true
                 totalSuccessfullBuffers = totalSuccessfullBuffers + 1
                 
                 validStuff.append(gn)
+                
+            } else {
+                
+                var tum = 1;
                 
             }
             
@@ -363,10 +413,14 @@ class jsonBufferScanner : BufferConsumer {
             
         }   //loop all entries
         
+        brb = false;
         
-        if validStuff.count == 0 { return nil }
-        print (validStuff.count)
-        print ("searchFromMultipleEntries hits ")
+        if validStuff.count == 0 {
+            return nil
+            
+        }
+        //print (validStuff.count)
+        //print ("searchFromMultipleEntries hits ")
         
         totalParsedObjects = totalParsedObjects + 1
         
@@ -431,14 +485,14 @@ class jsonBufferScanner : BufferConsumer {
             let indexS2 = lookingAt.index(lookingAt.startIndex, offsetBy: co[1])
             let xjss2 = lookingAt[indexS2..<lookingAt.endIndex]
             
-            buffer = xjss2; //store for the future
+            buffer = String(xjss2); //store for the future
             prefill = true
             
             
-            if let ro = createRunObject(jsonString: xjss){
+            if let ro = createRunObject(jsonString: String(xjss)){
             //if testForValidJson(jsonString: xjss) {
                 
-                print("legit json")
+                //print("legit json")
                 return (ro)
                 
             } else {
@@ -451,7 +505,7 @@ class jsonBufferScanner : BufferConsumer {
         
         } else {
             
-            print ("skip incomplete json but added to buffer")
+            //print ("skip incomplete json but added to buffer")
             //buffer = buffer + lookingAt
             //prefill = false;
             
@@ -470,7 +524,7 @@ class jsonBufferScanner : BufferConsumer {
         var startI = 0;
         var endI = 0;
 
-        print ("zut length \(zl) " )
+        //print ("zut length \(zl) " )
         for m in zut {
             
             i = i + 1

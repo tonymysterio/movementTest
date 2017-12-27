@@ -123,6 +123,12 @@ class jsonStreamReader : BaseObject {
             return DROPcategoryTypes.serviceNotReady
         }
         
+        if self.isProcessing {
+            
+            return DROPcategoryTypes.busyProcessesing
+            
+        }
+        
         //ask this guy to waste time
         //return wasteTime();
         
@@ -145,12 +151,15 @@ class jsonStreamReader : BaseObject {
          
          }
         
-        if jsBuffScanner.objects.count == 0 { return nil }
+        if jsBuffScanner.objects.count == 0 {
+            return nil
+            
+        }
         //throw into utility queue
         
         self.startProcessing()
         
-        queue.async {
+        queue.sync {
             
             if let gnuk = self.jsBuffScanner.processBuffers() {
                 
@@ -164,9 +173,10 @@ class jsonStreamReader : BaseObject {
                     self.SAY(o: o)
                     
                     //pipe straigt to RunDataIO to be saved or..
-                    if f!.isValid{
+                    if f!.isValid && f!.isClosed(){
                         
                         runStreamReaderDataArrivedObserver.update(f!)
+                        
                     } else {
                         
                         print("invalid crap run. ei jatkoon" )

@@ -11,13 +11,16 @@ import CoreData
 import Interstellar
 import MapKit
 
+//initialize these at appdelegate or they wont exist
 let storage = MainStorageForObjects()
 let messageQueue = MessageQueue(storage: storage)
 let scheduler = Scheduler( storage: storage ,messageQueue : messageQueue );
 
 let runRecorder = runRecorderJunction() //listens to run recording requests
 let runDataIO = runDataIOJunction() //pulling sending run dataaz
-
+let prefSignalJunction = preferenceSignalJunction()
+let mapJunction = mapViewJunction()
+let packetExchange = PacketExchangeJunction()
 //dont put observers here, put them with each producer
 
 //makign this into an enum means updating the base object every time a new variation is created
@@ -28,7 +31,8 @@ enum objectCategoryTypes: String {
     case group = "group"
     case debugger = "debugger"
     case uniqueServiceProvider = "uniqueServiceProvider"  //can only have one of these running at any time
-    //like gps logger, motion logger...
+    //like gps logger, motion logger...  //when adding to object storage, confirm that only on is alive
+    
     case motionlistener = "motionlistener"  //listens to coreMotion events
     case locationlistener = "locationlistener" //listens to coreLocation events
     
@@ -66,6 +70,138 @@ enum CommMessage {
     //case AnyKindOfMessage(userInfo: [String: Any])
 }
 
+//peerDataProvider needs a list of hashes
+struct orderedHashList : Codable {
+    let list: [String]
+}
+
+struct exchangedHashes {
+    
+    //peer data provider keeps track of what whas sent to which user
+    //this data gets purged when peerDataProvider TTL's
+    var list : [String: storedHashes];
+    //list : [String: storedHashes] = [:]
+    init(){
+        
+        list  = [:]
+    }
+    
+    mutating func insertForUser ( user : String , hash : String ) -> Bool {
+        
+        if list[user] == nil {
+            list[user] = storedHashes(list: [hash])
+            return true
+        }
+        list[user]!.list.insert(hash)
+        
+        return true
+    
+    }
+    
+    func isEmpty () -> Bool {
+        
+        if self.list.isEmpty { return true }
+        return false
+        
+    }
+    
+    func getAll () -> Set<String>? {
+     
+        if self.isEmpty() { return nil }
+        var all = Set<String>()
+        for f in self.list {
+            
+            for ff in f.value.list {
+                all.insert(ff)
+            }
+            
+        }
+        
+        return all;
+        
+    }
+    
+    func orderAllLatestFirst () -> orderedHashList? {
+        
+        if self.isEmpty() { return nil }
+        let all = self.getAll()
+        var ord = Set<String>()
+        while ord.count < all!.count {
+            
+            for f in self.list {
+                
+                for ff in f.value.list {
+                    
+                    if !ord.contains(ff) {
+                        ord.insert(ff)
+                        break;
+                    }
+                    
+                }   //loop all hashes
+                
+            } //loop all keys
+            
+        } //fill ord evenly with old crap
+        let r = ord.reversed()
+        let ohl = orderedHashList(list:r)
+        
+        return ohl   //
+        
+    }
+    
+    
+    func findUnique ( users: [String]? ) -> Set<String>? {
+        
+        //whoever might be talking to us now
+        //naturally arrages to oldest first?
+        
+        return nil
+    }
+    
+    func findMissingFromMe ( user: String ) -> Set<String>? {
+        
+        let mine = list[user] //can be nil
+        let notMine = list.filter { $0.key != user } //everyone but me
+        if notMine == nil { return nil }    //nobody around
+    
+        var prevSet = Set<String>()
+        for i in notMine {
+            
+            //prevSet.union(notMine[i.value])    //grab common
+        
+        }
+        
+        //request from the end of the list
+        //when new runs arrive and are accepted, there will be a new instance of this object to scan
+        
+        return prevSet
+        
+    }
+    
+    func findMissingFromUser ( me : String , user : String ) {
+        
+        //i may have something this user wants
+        //return latest first
+        
+    }
+    
+    func findLatestExcluding ( excludedHashes : Set<String> ) -> Set<String>? {
+        
+        //so we got a list of hashes we dont need
+        //see if we have something after excluding these
+        
+        return nil
+        
+    }
+    
+}
+
+struct storedHashes {
+    
+    var list : Set<String>
+    
+}
+
 struct locationMessage  {
     
     
@@ -81,9 +217,9 @@ enum liveConfigurationTypes: String {
     
     case maxCategoryObjects = "maxCategoryObjects" //string out of enums!
     case maxListeners = "maxListeners"
-    
+    case maxObjects = "maxObjects"
     static func allValues() -> [liveConfigurationTypes] {
-        return [.maxCategoryObjects, .maxListeners ]
+        return [.maxCategoryObjects, .maxListeners , .maxObjects ]
     }
 }
 
@@ -121,6 +257,19 @@ enum DROPcategoryTypes {
     //dont give a DROP when terminating
 }
 
+enum distressCodes {
+    
+    //when these things happen, trust scheduler to call appropriate hook on object immediately
+    //instead of listening trough observable
+    //terminate outgoing JSON requests when net is lost
+    //as a rule, all outgoing requests should be triggered thru user interaction. refresh map etc
+    
+    case networkLost    //no WLAN, no CELL
+    case lowPowerWarning    //
+    case goingBackground    //
+    
+}
+
 //wrap in class to pass it as a pointer
 
 struct mapSnapshot {
@@ -140,6 +289,31 @@ class MainStorageForObjects {
         queue.async {
             self.objects[label] = object
         }
+    }
+    
+    func getObjectsByName( name : String ) -> [String]? {
+        
+        //return a collection of objects belonging to specific category, like, get all
+        //motionlisteners to talk to them
+        if self.objects.isEmpty { return nil }
+        
+        var ns = [String]()
+        for a in self.objects {
+            
+            if (a.value.name == name) {
+                
+                ns.append(a.value.myID)
+                
+                
+            }
+            
+            
+        }   //loop all objects
+        
+        if ns.isEmpty { return nil }
+        
+        return ns
+        
     }
     
     func getCategoryObjects( oCAT : objectCategoryTypes) -> [String]? {
@@ -177,9 +351,23 @@ class MainStorageForObjects {
             //print ("MainStorageForObjects:: removed oID \(label) ")
         }
     }
+    
+    //this is for anybody overseen by scheduler
+    
     func getObject(oID : String) -> BaseObject? {
-        return self.objects[oID];
+        
+        if let o = self.objects[oID] {
+            
+            if o.terminated { return nil }  //non supervisors dont need to see dead objects
+            
+            return o
+        }
+        
+        return nil
     }
+    
+    //scheduler has its own direct access to objects
+    
     func totalObjectCount () -> Int {
         return self.objects.count
     }

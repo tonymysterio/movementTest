@@ -7,3 +7,13 @@
 //
 
 import Foundation
+
+class externalMapData {
+    
+    //this listens to appStatus changes
+    //.reachability changes to .unreachable kills requests out
+    //if map component is not shown, do we need data.
+    
+    //https://icons8.com/icon/set/ios-config/ios7   icons
+    
+}

@@ -92,7 +92,7 @@ class runDataIOJunction {
         if let mlt = storage.getObject(oID: "jsonStreamReader") as! jsonStreamReader? {
             mlt._finalize()
         }
-        
+        //persistent storage storing incoming runs
         if let mlt = storage.getObject(oID: "runStreamRecorder") as! RunStreamRecorder? {
             mlt._finalize()
         }

@@ -12,6 +12,11 @@ class conficVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        var storyboard = UIStoryboard(name: "config", bundle: nil)
+        var controller = storyboard.instantiateInitialViewController() as! UIViewController
+        addChildViewController(controller)
+        view.addSubview(controller.view)
+        controller.didMove(toParentViewController: self)
 
         // Do any additional setup after loading the view.
     }

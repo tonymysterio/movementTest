@@ -35,7 +35,7 @@ class RunStreamRecorder : BaseObject  {
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
         //disappears
-        _pulse(pulseBySeconds: 6000000)
+        _pulse(pulseBySeconds: 100)
         
         //if for some reason we cannot store to disk, give this
         //DROPcategoryTypes.serviceNotAvailable
@@ -60,11 +60,17 @@ class RunStreamRecorder : BaseObject  {
         //proof of stake = amount of runs done, exchanged, bandwidth given
         
         //hash a list of transactions, how much da
+        if self.terminated { return }
+        
+        let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
+        
+        //var run2 = run;
+        //run.hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue);
         
         self.startProcessing()
         
         do {
-            let fname = path + "/" + run.hash + ".json"
+            let fname = path + "/" + hash + ".json"
             try Disk.save(run, to: .caches, as: fname)
             
             print("storing captured run \(fname) ")
@@ -91,9 +97,18 @@ class RunStreamRecorder : BaseObject  {
         //if a current run exists, just overwrite it with no mercy
         self.startProcessing()
         
+        let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
+        let timestamp = Double(run.coordinates.last!.timestamp)
+        
+        let geoHash = Geohash.encode(latitude: run.coordinates.last!.lat, longitude: run.coordinates.last!.lon)
+        
+        let srun = Run(missionID: timestamp, user: run.user, clan: run.clan, geoHash: geoHash, version: run.version, hash: hash, startTime: run.startTime, closeTime: timestamp, coordinates: run.coordinates)
+        
+        let fname = path + "/" + hash + ".json"
+        
         do {
-            let fname = "currentRun/" + run.hash + ".json"
-            try Disk.save(run, to: .caches, as: fname)
+            //let fname = "currentRun/" + run.hash + ".json"
+            try Disk.save(srun, to: .caches, as: fname)
             
             self._pulse(pulseBySeconds: 120)
             
