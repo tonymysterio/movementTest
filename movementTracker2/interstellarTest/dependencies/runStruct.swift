@@ -240,36 +240,39 @@ struct Run : Codable {
             let timVar = d / timDif
             
             baseSpeed = baseSpeed + timVar;
-            
-            if timVar < 0.005 {
-                //if baseSpeed == 1 {
-                    validCoords.append(i)
-                acceptedBaseSpeed = acceptedBaseSpeed + timVar
-                //}
-                
-            }
             //print (d)
             //print (timVar)
-            prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            if timVar < 40 && d < 95 {
+                //if baseSpeed == 1 {
+                    validCoords.append(i)
+                    acceptedBaseSpeed = acceptedBaseSpeed + timVar
+                    prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                //}
+                continue;
+            }
+            
+            
         }
-        
+        //print (rcoord.count)
+        //print (validCoords.count)
         let avgBaseSpeed = baseSpeed / Double(rcoord.count)
+        let accavgBaseSpeed = acceptedBaseSpeed / Double(validCoords.count)
         
-        //print ("avg base speed \(avgBaseSpeed ) with \(rcoord.count ) cooridnates" )
+        //print ("avg base speed \(avgBaseSpeed ) with \(rcoord.count ) cooridnates, acccepted \(accavgBaseSpeed ) " )
         
-        if avgBaseSpeed >  0.0062 {
+        /*if avgBaseSpeed >  0.0062 {
             
             let accavgBaseSpeed = acceptedBaseSpeed / Double(validCoords.count)
             if accavgBaseSpeed > 0.0035 {
                 return nil
                 }
             
-            }
+            }*/
         
         //the area can be valid with a very few points
-        /*if validCoords.count < 10 {
+        if validCoords.count < 10 {
             return nil;
-        }*/
+        }
         
         return validCoords
         

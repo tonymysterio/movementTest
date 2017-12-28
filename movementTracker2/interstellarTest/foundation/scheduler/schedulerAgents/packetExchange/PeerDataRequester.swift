@@ -239,8 +239,10 @@ class PeerDataRequester : BaseObject  {
         
         self.totalRunItemsImported = totalRunItemsImported + 1;
         
-        //if ater ten runs, ask for his hashList in case hes downloading from at different people at the same time
+        self.fetchMissingHash()
         
+        //if ater ten runs, ask for his hashList in case hes downloading from at different people at the same time
+        /*
         if (self.totalRunItemsImported % 5 == 0) {
             
             //put me into ask for more recent hashes mode
@@ -250,6 +252,7 @@ class PeerDataRequester : BaseObject  {
         
         //this way we can get the latest blocks on the network
         myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
+        */
         
     }
     

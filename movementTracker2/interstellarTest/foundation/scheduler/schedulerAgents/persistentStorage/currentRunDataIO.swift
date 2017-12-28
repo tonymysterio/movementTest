@@ -126,10 +126,39 @@ class CurrentRunDataIO: BaseObject  {
        
         let filename = self.path + "/currentRun.json";
         //this will crash
-        readQueue.sync (){
+        //readQueue.sync (){
             
+            if let run = try? Disk.retrieve(filename, from: .applicationSupport, as: Run?.self) {
+                
+                
+                print (run?.coordinates.count)
+                print("ReadOfCurrentRun: finished scanning files")
+                //let t = run?.spikeFilteredCoordinates()
+                //tell runRecorderJunction that we are continuing from a run
+                //let tt = run?.totalDistance()
+                //let ttt = run?.isClosed()
+                currentRunReceivedObserver.update(run!)
+                _pulse(pulseBySeconds: 600)
+                
+                if !self.isProcessing {
+                    
+                    //get rid of me. runrecorderjunction will wake me up sometime
+                }
+                
+                
+                return
+                
+                
+            } else {
+                
+                return
+                
+            }
             
+        //}   //and async operazione
+        
             
+            /*
             guard let files = try? Disk.retrieve(filename, from: .applicationSupport, as: [Data].self) else  {
                 //no files found
                 //self.finishProcessing()
@@ -166,8 +195,10 @@ class CurrentRunDataIO: BaseObject  {
             
             
             self.finishProcessing()
-            
-        }   //and async operazione
+ 
+ 
+                */
+        
         
     }
     

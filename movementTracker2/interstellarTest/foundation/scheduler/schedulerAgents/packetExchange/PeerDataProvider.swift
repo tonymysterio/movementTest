@@ -142,6 +142,7 @@ class PeerDataProvider : BaseObject  {
         } catch {
             
             print("server borked")
+            self._teardown()    //bye bye
             
         }
         
