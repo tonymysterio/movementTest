@@ -203,7 +203,74 @@ struct Run : Codable {
         return true
     }
     
+    func spikeFilteredCoordinates () -> [coordinate]? {
+        
+        if self.coordinates.isEmpty {
+            return nil
+        }
+        
+        if self.coordinates.count < 15 {
+            return nil
+        }
+        
+        var validCoords = [coordinate]()
+        
+        let rcoord = self.coordinates.reversed()
+        var baseSpeed : Double = 0;
+        var prevLocation = CLLocation(latitude:0,longitude:0)
+        var prevTimestamp : Double = 0;
+        
+        for i in rcoord {
+            
+            if baseSpeed == 0 {
+                prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                prevTimestamp = i.timestamp
+                baseSpeed = 1;
+                //trust the last coodrina
+                validCoords.append(i)
+                
+                continue
+                
+            }
+            
+            let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            let timDif = prevTimestamp - i.timestamp
+            let d = cur.distance(from: prevLocation)
+            let timVar = d / timDif
+            
+            baseSpeed = baseSpeed + timVar;
+            
+            if timVar < 25 {
+                //if baseSpeed == 1 {
+                    validCoords.append(i)
+                //}
+                
+            }
+            //print (d)
+            //print (timVar)
+            prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+        }
+        
+        let avgBaseSpeed = baseSpeed / Double(rcoord.count)
+        
+        //print ("avg base speed \(avgBaseSpeed ) with \(rcoord.count ) cooridnates" )
+        
+        if avgBaseSpeed >  0.0062 { return nil }
+        
+        //the area can be valid with a very few points
+        /*if validCoords.count < 10 {
+            return nil;
+        }*/
+        
+        return validCoords
+        
+    }
+    
     func totalDistance () -> Double {
+        
+        guard let pp = spikeFilteredCoordinates() else {
+            return 0;
+        }
         
         var td : Double = 0;
         let latitude: CLLocationDegrees = 37.2
@@ -211,7 +278,7 @@ struct Run : Codable {
         var preLoc = CLLocation(latitude: (latitude), longitude: (longitude))
         var eka = false;
         
-        for f in coordinates {
+        for f in pp {
             
             let loc = CLLocation(latitude: (f.lat), longitude: (f.lon))
             if !eka {
@@ -234,6 +301,8 @@ struct Run : Codable {
     get {
         if coordinates.count == 0 { return false }
         if user == "feederbot" { return false }
+        
+        
         return true
         }
         
@@ -243,9 +312,13 @@ struct Run : Codable {
         
         if coordinates.count < 10 { return false }
         
+        guard let pp = spikeFilteredCoordinates() else {
+            return false;
+        }
         
-        let location1 = CLLocation(latitude: (coordinates.first?.lat)!, longitude: (coordinates.first?.lon)!)
-        let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
+        
+        let location1 = CLLocation(latitude: (pp.first?.lat)!, longitude: (pp.first?.lon)!)
+        let location2 = CLLocation(latitude: (pp.last?.lat)!, longitude: (pp.last?.lon)!)
         
         let d = location1.distance(from: location2)
         

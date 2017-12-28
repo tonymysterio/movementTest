@@ -244,13 +244,21 @@ class MapCombiner : BaseObject  {
             //make polylines
             //let tolerance : Float = 0.001 //to 5.0
             //the invoker of mapCombiner asks for tolerance for this map view
-            let simplifiedCoords = i.simplify(tolerance: simplifyTolerance )
+            
+            if let fco = i.spikeFilteredCoordinates() {
+                
+                let simplifiedCoords = i.simplify(tolerance: simplifyTolerance )
+                 mapPolylineSet.append(simplifiedCoords!)
+                
+            }
+            
+            
             
             //let coords = simplifiedCoords.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
             
             //let coords = i.coordinates.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
             //let myPolyline = MKPolyline(coordinates: coords, count: coords.count)
-            mapPolylineSet.append(simplifiedCoords!)
+           
             
         }
         

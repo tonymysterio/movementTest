@@ -77,7 +77,7 @@ class CurrentRunDataIO: BaseObject  {
             self.startProcessing()
             
             do {
-                try Disk.save(run, to: .caches, as: filename )
+                try Disk.save(run, to: .applicationSupport, as: filename )
                 
                 self.lastInsertTimestamp = Date().timeIntervalSince1970
                 
@@ -130,7 +130,7 @@ class CurrentRunDataIO: BaseObject  {
             
             
             
-            guard let files = try? Disk.retrieve(self.path, from: .caches, as: [Data].self) else  {
+            guard let files = try? Disk.retrieve(self.path, from: .applicationSupport, as: [Data].self) else  {
                 //no files found
                 //self.finishProcessing()
                 return

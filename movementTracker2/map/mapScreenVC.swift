@@ -298,7 +298,7 @@ extension mapScreenVC : MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, regionWillChangeAnimated animated: Bool) {
         mapRegionTimer?.invalidate()
-        mapRegionTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { (t) in
+        mapRegionTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true, block: { (t) in
             
             //this happens even when automatically zooming around
             

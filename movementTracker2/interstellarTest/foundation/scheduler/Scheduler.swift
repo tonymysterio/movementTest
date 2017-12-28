@@ -205,7 +205,7 @@ class Scheduler {
                 
                 if result == DROPcategoryTypes.generic {
                     
-                    //should we remove immediately? separate psychokiller run
+                    //should https://github.com/petermetz/cordova-plugin-ibeacon/issues/233 remove immediately? separate psychokiller run
                     print("\(a.name) persisted trough hibernation" )
                     //removeObject(oID : kez)
                     
