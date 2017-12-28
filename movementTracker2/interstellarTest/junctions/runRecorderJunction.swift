@@ -81,6 +81,12 @@ class runRecorderJunction {
     func recordCompleted( run : Run ) {
         
         //my subclass told me
+        //maybe pulling a current run triggered this
+        if let rsr = getRunStreamRecorder(){
+            
+            rsr.storeRun(run: run)
+            
+        }
         
         
     }

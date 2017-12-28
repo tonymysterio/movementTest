@@ -88,6 +88,7 @@ class CurrentRunDataIO: BaseObject  {
                     
                 }   else {
                     
+                    runAreaCompletedObserver.update(run)
                     //runStreamRecorder throws this to disk
                     //self.FinalCommitOfCurrentRun( run : run )
                     return

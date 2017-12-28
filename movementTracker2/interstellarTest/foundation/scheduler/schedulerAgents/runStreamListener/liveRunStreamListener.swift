@@ -130,6 +130,7 @@ class liveRunStreamListener : BaseObject  {
         //we have a closed run, tell somebody to save the daattum
         
         //somebody might be observing this. ui, runRecorderJunction
+        
         runAreaCompletedObserver.update(currentRun!)
         
         return nil
