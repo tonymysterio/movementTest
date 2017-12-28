@@ -26,6 +26,7 @@ class CurrentRunDataIO: BaseObject  {
     //dont store runs here
     var getWithinArea : Double = 3000;
     
+    
     //pull from disk
     //send with runReceivedObservable¥
     
@@ -38,6 +39,9 @@ class CurrentRunDataIO: BaseObject  {
         self.name = "currentRunDataIO"
         self.myID = "currentRunDataIO"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
+        
+        self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.persist
         
         //disappears
         _pulse(pulseBySeconds: 60)

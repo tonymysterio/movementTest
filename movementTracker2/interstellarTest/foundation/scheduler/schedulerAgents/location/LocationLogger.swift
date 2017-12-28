@@ -72,6 +72,9 @@ class LocationLogger : BaseObject {
         
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
+        self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.persist //dont care
+        
         //what services are authorized on this device
         let zit = CLLocationManager.authorizationStatus()
         var isAuthorized = false;

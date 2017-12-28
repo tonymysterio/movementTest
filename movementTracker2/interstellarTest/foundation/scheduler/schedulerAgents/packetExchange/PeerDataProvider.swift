@@ -32,6 +32,9 @@ class PeerDataProvider : BaseObject  {
         self.myID = "PeerDataProvider"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
+        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
+        
         //disappears
         _pulse(pulseBySeconds: 600)
         

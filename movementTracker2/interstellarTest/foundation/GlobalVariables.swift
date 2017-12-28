@@ -244,6 +244,7 @@ enum DROPcategoryTypes {
     case lowMemory  //i cannot allocate resources for my task
     case lowDiskspace   //motherObj told me I dont have diskspace for you picture
     case busyProcessesing   //crunching thru a number set now, dont bother me now
+    case persisting //im not going to sleep even on background, fuck off
     case busyProcessingExceedingLatencyWarningGap
     case busyProcessingExceedingLatencyKillGap
     case terminating    //dont housekeep me now, im trying to terminate
@@ -255,6 +256,8 @@ enum DROPcategoryTypes {
     case serviceNotActivated //turn gps on on your phone
     case duplicate  //anything considered duplicate data
     //dont give a DROP when terminating
+    case hibernating
+    case wokeUpFromHibernation
 }
 
 enum distressCodes {

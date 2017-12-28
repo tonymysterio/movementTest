@@ -60,6 +60,9 @@ class LocationTracker : BaseObject {
         self.myID = "locationTracker"
         self.myCategory = objectCategoryTypes.locationlistener
         
+        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
+        
         //location logger should talk to objects like me
         //dont care for locationListeners EXITs or DROPs, just TTL out and _finalize
         

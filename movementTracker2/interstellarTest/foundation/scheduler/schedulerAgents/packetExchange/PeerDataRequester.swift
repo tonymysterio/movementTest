@@ -42,6 +42,9 @@ class PeerDataRequester : BaseObject  {
         self.myID = "PeerDataRequester"
         self.myCategory = objectCategoryTypes.generic
         
+        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
+        
         //disappears
         _pulse(pulseBySeconds: 60)
         
@@ -236,6 +239,14 @@ class PeerDataRequester : BaseObject  {
         self.totalRunItemsImported = totalRunItemsImported + 1;
         
         //if ater ten runs, ask for his hashList in case hes downloading from at different people at the same time
+        
+        if (self.totalRunItemsImported % 5 == 0) {
+            
+            //put me into ask for more recent hashes mode
+            self.fetchMissingHashes = false;
+            
+        }
+        
         //this way we can get the latest blocks on the network
         myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
         
@@ -264,7 +275,9 @@ class PeerDataRequester : BaseObject  {
         
             if missing.isEmpty {
             //hes got nothing for me
-            return;
+                
+                self._finalize()    //might not stick around for any longer, why bother
+                return;
             }
             //whats left after my and his overlap?
             print ("orderedHashListRequestSuccess: im missing  \(missing)" )

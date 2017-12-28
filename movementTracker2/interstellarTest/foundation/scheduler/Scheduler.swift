@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import Interstellar
 //mother object runs all subObjects  on background thread
 //runs housekeep for everything 
 
@@ -71,6 +71,12 @@ enum schedulerDistressCodes {
 //maybe the scheduler will just do a housekeep round on everything on init, send a purge to all (first purge is not that serious) and not care about the results (excluding EXIT!) on the init round. caring about the results might lead to another scheduler crash. anyway the objects get one housekeep and anything thats really old has a chance to timeout and die 
 //  if the scheduler crashes before it removes
 
+
+
+var scheduler_hibernate_Observer = Observable<Bool>()
+var scheduler_unhibernate_Observer = Observable<Bool>()
+
+
 class Scheduler {
 
     
@@ -97,6 +103,8 @@ class Scheduler {
     
     let schedulerQueue = DispatchQueue(label: "schedulerQueue", qos: .utility)
     
+    var isHibernating = false;
+    
 //    private var objects: [String: BaseObject] {
 //        return storage.objects
 //    }
@@ -104,7 +112,19 @@ class Scheduler {
     init(storage: MainStorageForObjects, messageQueue : MessageQueue) {
         self.storage = storage
         self.messageQueue = messageQueue
-    
+        
+        scheduler_hibernate_Observer.subscribe { toggle in
+            
+            self._hibernate();
+            
+        }
+        
+        scheduler_hibernate_Observer.subscribe { toggle in
+            
+            self._unhibernate()
+            
+        }
+        
     }
     
     /*func prime (storage: MainStorageForObjects, messageQueue : MessageQueue) {
@@ -119,6 +139,94 @@ class Scheduler {
         return true;
         
     }
+    func _hibernate () -> Bool {
+        
+        if self.isHibernating { return false }
+        if (self.storage.objects.isEmpty) {
+            return false
+        }
+        
+        self.isHibernating = true;
+        //self.interruptHousekeeping = true //dont allow housekeeping now
+        
+        var hibernationReplies : [DROPcategoryTypes?] = []
+        //made a copy of storage objects to avoid threading issues
+        let objectsCopy = storage.objects
+        
+        //put everybody to sleep sleep
+        for ( kez , a) in objectsCopy { //just the the object
+            
+                schedulerQueue.sync {
+                    
+                    
+                    let result = a._hibernate();
+                    hibernationReplies.append(result)
+                    
+                    if result == DROPcategoryTypes.terminating {
+                        
+                        //should we remove immediately? separate psychokiller run
+                        print("ALERT: Scheduler got terminating putting \(a.name) to hibernation - delete now" )
+                        removeObject(oID : kez)
+                    }
+                    
+                }
+            }
+        
+        
+        return true;
+    }
+    
+    func _unhibernate () -> Bool {
+        
+        if !self.isHibernating { return false }
+        if (self.storage.objects.isEmpty) {
+            return false
+        }
+        
+        
+        //self.interruptHousekeeping = false //allow housekeeping
+        
+        var hibernationReplies : [DROPcategoryTypes?] = []
+        //made a copy of storage objects to avoid threading issues
+        let objectsCopy = storage.objects
+        
+        //put everybody to sleep sleep
+        for ( kez , a) in objectsCopy { //just the the object
+            
+            schedulerQueue.sync {
+                
+                
+                let result = a._unhibernate();
+                hibernationReplies.append(result)
+                
+                self.isHibernating = false;
+                
+                if result == DROPcategoryTypes.wokeUpFromHibernation {
+                    
+                    //should we remove immediately? separate psychokiller run
+                    print("\(a.name) woke up from hibernation" )
+                    removeObject(oID : kez)
+                    
+                }
+                
+                if result == DROPcategoryTypes.terminating {
+                    
+                    //should we remove immediately? separate psychokiller run
+                    print("\(a.name) terminated when trying to wake up from hibernation. DELETE" )
+                    removeObject(oID : kez)
+                    
+                }
+                
+                
+            }
+        }
+        
+        
+        return true;
+    }
+    
+    
+    
     func _housekeep () -> Bool {
         
         if (self.housekeeping == true) {
@@ -156,13 +264,23 @@ class Scheduler {
             
             //if ( a == nil ) { continue; }
             
-            if interruptHousekeeping==false {
+            if interruptHousekeeping==false  {
                 
                 schedulerQueue.sync {
                     
+                    if self.isHibernating {
+                        
+                        //check if this guy is hibernating
+                        if a.isHibernating {
+                            return;   //do not bother with hibernating guys
+                        }
+                    }
                 
                     let result = a._housekeep();
                     housekeepReplies.append(result)
+                    
+                    
+                    
                     if result == DROPcategoryTypes.terminating {
                     
                         //should we remove immediately? separate psychokiller run
@@ -348,13 +466,16 @@ class Scheduler {
         //give all tasks probable TTL to survive the sleep?
         //interrupt housekeeping will not create a timer that housekeeps again
         //do that manually on appdidbecome active
-        interruptHousekeeping=true;
-        
+        //interruptHousekeeping=true;
+        self._hibernate()
     }
     
     func applicationDidBecomeActive() {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        interruptHousekeeping=false;
+        //interruptHousekeeping=false;
+        
+        self._unhibernate();
+        
         self._housekeep()   //start with a housekeep of all object to make things really slow
         
     }

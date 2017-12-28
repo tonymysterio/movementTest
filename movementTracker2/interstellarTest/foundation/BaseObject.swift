@@ -20,6 +20,27 @@ import Interstellar
 
 typealias PetDictionary = [ String : String]  //oID,name
 
+enum hibernationStrategy: String {
+    
+    case teardown = "teardown" //gtfo dodge
+    case finalize = "finalize" //finalize, disk operations
+    case hibernate = "hibernate"
+    case persist = "persist"
+    //dont do anything memory related here
+    
+}
+
+enum memoryPressureStrategy: String {
+    
+    case teardown = "teardown" //gtfo dodge
+    case finalize = "finalize" //finalize, disk operations
+    case purgeCaches = "purgeCaches"
+    case persist = "persist"
+    //dont do anything memory related here
+    
+}
+
+
 
 
 class BufferConsumer {
@@ -60,6 +81,12 @@ class BaseObject: NSObject {
                                 //exceeding this limit causes DROP and _purge handler, somebody has to retry
     
     var houseKeepingInterval = 1000;	//once  this is decided by scheduler
+    var isHibernating = false
+    
+    var myHibernationStrategy = hibernationStrategy.teardown    //teardown as default
+    
+    var isReleasingMemoryPressure = false;
+    var myMemoryPressureStrategy = memoryPressureStrategy.teardown
     
     var houseKeepingRole = houseKeepingRoles.slave;	//default  even masters get housekeeped by scheduler
                                                     //should schduler ignore slaves? how to know if the master has died?
@@ -354,6 +381,10 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         if (self.terminated) {
             return DROPcategoryTypes.terminating
         }
+        if (self.isHibernating){
+            return DROPcategoryTypes.hibernating
+        }
+        
         
         if ( self.uxT() > self.TTL ) {
             
@@ -975,6 +1006,48 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         self._teardown();
     
         return true
+    }
+    
+    func _hibernate () -> DROPcategoryTypes? {
+        
+        if self.terminated { return DROPcategoryTypes.terminating }
+        if self.isHibernating { return DROPcategoryTypes.hibernating }
+        
+        switch (self.myHibernationStrategy) {
+            
+        case .hibernate :
+            
+            return self._hibernate_extend()
+            
+        case .finalize :
+                return self._finalize()
+            
+        case .persist :
+            return DROPcategoryTypes.persisting
+            
+        default :
+            
+            return self._teardown()
+        }
+    }
+    
+    func _hibernate_extend () -> DROPcategoryTypes? {
+        
+        if self.terminated { return DROPcategoryTypes.terminating }
+        self.isHibernating = true;
+        
+        return DROPcategoryTypes.hibernating
+    }
+    
+    func _unhibernate () -> DROPcategoryTypes? {
+        
+        if self.terminated { return DROPcategoryTypes.terminating }
+        if !self.isHibernating { return DROPcategoryTypes.generic }
+        
+        self.isHibernating = false;
+        self._pulse(pulseBySeconds: 30) //give this guy some time to get his shit together
+        
+        return DROPcategoryTypes.wokeUpFromHibernation
     }
     
     func startProcessing () -> DROPcategoryTypes? {

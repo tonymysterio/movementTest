@@ -34,6 +34,9 @@ class RunStreamRecorder : BaseObject  {
         self.myID = "runStreamRecorder"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
+        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
+        
         //disappears
         _pulse(pulseBySeconds: 100)
         

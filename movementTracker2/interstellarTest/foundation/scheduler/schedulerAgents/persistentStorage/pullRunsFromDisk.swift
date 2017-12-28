@@ -103,7 +103,7 @@ class PullRunsFromDisk: BaseObject  {
                         
                         
                         //send to mapCombiner , hoodoRunStreamListener
-                        print (run.coordinates.count)
+                        //print (run.coordinates.count)
                         
                         
                         runReceivedObservable.update(run)

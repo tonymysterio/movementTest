@@ -30,6 +30,9 @@ class liveRunStreamListener : BaseObject  {
         self.myID = "liveRunStreamListener"
         self.myCategory = objectCategoryTypes.locationlistener
         
+        self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
+        self.myMemoryPressureStrategy = memoryPressureStrategy.persist //dont care
+        
         //disappears
         _pulse(pulseBySeconds: 6000000)
         
