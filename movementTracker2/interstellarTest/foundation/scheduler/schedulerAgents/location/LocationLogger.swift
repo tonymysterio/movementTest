@@ -72,6 +72,9 @@ class LocationLogger : BaseObject {
         
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
+        self.name = "locationLogger"
+        self.myID = "locationLogger"
+        
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.persist //dont care
         

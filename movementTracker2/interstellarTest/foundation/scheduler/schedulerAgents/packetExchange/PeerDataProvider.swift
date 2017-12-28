@@ -50,7 +50,9 @@ class PeerDataProvider : BaseObject  {
         
         //pullRunsFromDisk also shouts here
         peerDataProviderExistingHashesObserver.subscribe{ hashes in
-         
+            
+            if self.isHibernating || self.terminated { return }
+            
             self.peerDataProviderExistingHashesReceived( hashes : hashes )
          
          }
@@ -159,7 +161,7 @@ class PeerDataProvider : BaseObject  {
         
         //just stop the server
         self.server?.stop()
-        return nil
+        return self._teardown()
     }
     
     func primeMyRunHashes ( hashes : [String]) {

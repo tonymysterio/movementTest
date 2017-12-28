@@ -37,6 +37,15 @@ class ServusMeshnetProvider : BaseObject  {
         
         return nil
     }
+    
+    override func _finalize() -> DROPcategoryTypes? {
+        
+        explorer.stopExploring()
+        
+        return self._teardown()
+        
+    }
+    
 }
 
 

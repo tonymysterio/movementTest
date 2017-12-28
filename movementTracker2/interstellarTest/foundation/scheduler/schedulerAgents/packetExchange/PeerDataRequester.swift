@@ -57,6 +57,7 @@ class PeerDataRequester : BaseObject  {
         
         peerDataProviderExistingHashesObserver.subscribe{ hashes in
             
+            if self.isHibernating || self.terminated { return }
             self.peerDataProviderExistingHashesReceived( hashes : hashes )
             
         }

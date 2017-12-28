@@ -201,6 +201,14 @@ class Scheduler {
                 
                 self.isHibernating = false;
                 
+                if result == DROPcategoryTypes.generic {
+                    
+                    //should we remove immediately? separate psychokiller run
+                    print("\(a.name) persisted trough hibernation" )
+                    removeObject(oID : kez)
+                    
+                }
+                
                 if result == DROPcategoryTypes.wokeUpFromHibernation {
                     
                     //should we remove immediately? separate psychokiller run
