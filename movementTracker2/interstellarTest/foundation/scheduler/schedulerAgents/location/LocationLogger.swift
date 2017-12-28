@@ -63,7 +63,7 @@ class LocationLogger : BaseObject {
             CL = CLLocationManager();
         }
         let zuu = CLLocationManager.locationServicesEnabled()
-        
+        CL?.allowsBackgroundLocationUpdates = true;
         if (zuu == false ) {
             
             _teardown()

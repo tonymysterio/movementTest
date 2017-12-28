@@ -628,7 +628,10 @@ class Scheduler {
     func initHousekeeping () -> Void {
         
         //add jitter to scheduling?
-        let jitter = randomIntFromInterval(min: 1, max: schedulingDelayinMs )
+        var jitter = randomIntFromInterval(min: 1, max: schedulingDelayinMs )
+        if self.isHibernating {
+            jitter = jitter + 10000;    //hibernating does not need that many housekeeps
+        }
         let next = schedulingDelayinMs + jitter;
         
         DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds( next ), execute: {
