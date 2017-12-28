@@ -1023,7 +1023,9 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
                 return self._finalize()
             
         case .persist :
-            return DROPcategoryTypes.persisting
+            
+            return self._hibernate_extend()
+            //return DROPcategoryTypes.persisting
             
         default :
             

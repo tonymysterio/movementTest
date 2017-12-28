@@ -146,6 +146,8 @@ class Scheduler {
             return false
         }
         
+        print("scheduler HIBERNATING")
+        
         self.isHibernating = true;
         //self.interruptHousekeeping = true //dont allow housekeeping now
         
@@ -182,7 +184,7 @@ class Scheduler {
         if (self.storage.objects.isEmpty) {
             return false
         }
-        
+        print("scheduler UNHIBERNATING")
         
         //self.interruptHousekeeping = false //allow housekeeping
         
@@ -205,7 +207,7 @@ class Scheduler {
                     
                     //should we remove immediately? separate psychokiller run
                     print("\(a.name) persisted trough hibernation" )
-                    removeObject(oID : kez)
+                    //removeObject(oID : kez)
                     
                 }
                 

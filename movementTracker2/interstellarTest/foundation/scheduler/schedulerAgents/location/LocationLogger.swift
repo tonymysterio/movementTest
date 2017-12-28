@@ -250,6 +250,15 @@ class LocationLogger : BaseObject {
         
     }
     
+    //persisting objects need hibernate extend
+    override func _hibernate_extend () -> DROPcategoryTypes? {
+        
+        if self.terminated { return DROPcategoryTypes.terminating }
+        self._pulse(pulseBySeconds: 1000000)    //keep me going
+        
+        return DROPcategoryTypes.persisting
+    }
+    
     override func _purge ( backPressure : Int ) -> Int {
         
         //default purge. all objects obey to purge except .debugger, .uniqueServiceProvider
