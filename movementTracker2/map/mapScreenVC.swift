@@ -126,6 +126,13 @@ class mapScreenVC: UIViewController {
                 //if this view is freshly created or the user polls for current location
                 //refresh the view accordingly
                 
+                if self.recordingRun {
+                    
+                    //let the user to mess with the map and dont worry about location updates
+                    //in case the user wants to scroll around to see areas of interdust
+                    return;
+                }
+                
                 if !self.primeLocation {
                     self.initialLocation = locationMessage
                     self.centerMap(lat: locationMessage.lat, lon: locationMessage.lon)
@@ -181,6 +188,13 @@ class mapScreenVC: UIViewController {
     }
     
     func centerMap ( lat : CLLocationDegrees , lon: CLLocationDegrees ) {
+        
+        if !self.recordingRun {
+            
+            //let the user to mess with the map and dont worry about location updates
+            //in case the user wants to scroll around to see areas of interdust
+            return;
+        }
         
         let lc = CLLocation(latitude: lat, longitude: lon)
         

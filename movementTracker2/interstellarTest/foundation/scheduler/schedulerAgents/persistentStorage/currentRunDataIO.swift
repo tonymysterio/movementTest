@@ -71,7 +71,7 @@ class CurrentRunDataIO: BaseObject  {
         //save current run
         if self.isProcessing { return }
         
-        let filename = self.path + "currentRun.json";
+        let filename = self.path + "/currentRun.json";
         writeQueue.sync {
             
             self.startProcessing()
@@ -124,13 +124,13 @@ class CurrentRunDataIO: BaseObject  {
         
         //fish out current run
        
-        
+        let filename = self.path + "/currentRun.json";
         //this will crash
         readQueue.sync (){
             
             
             
-            guard let files = try? Disk.retrieve(self.path, from: .applicationSupport, as: [Data].self) else  {
+            guard let files = try? Disk.retrieve(filename, from: .applicationSupport, as: [Data].self) else  {
                 //no files found
                 //self.finishProcessing()
                 return

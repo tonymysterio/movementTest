@@ -219,6 +219,7 @@ struct Run : Codable {
         var baseSpeed : Double = 0;
         var prevLocation = CLLocation(latitude:0,longitude:0)
         var prevTimestamp : Double = 0;
+        var acceptedBaseSpeed : Double = 0;
         
         for i in rcoord {
             
@@ -240,9 +241,10 @@ struct Run : Codable {
             
             baseSpeed = baseSpeed + timVar;
             
-            if timVar < 25 {
+            if timVar < 0.005 {
                 //if baseSpeed == 1 {
                     validCoords.append(i)
+                acceptedBaseSpeed = acceptedBaseSpeed + timVar
                 //}
                 
             }
@@ -255,7 +257,14 @@ struct Run : Codable {
         
         //print ("avg base speed \(avgBaseSpeed ) with \(rcoord.count ) cooridnates" )
         
-        if avgBaseSpeed >  0.0062 { return nil }
+        if avgBaseSpeed >  0.0062 {
+            
+            let accavgBaseSpeed = acceptedBaseSpeed / Double(validCoords.count)
+            if accavgBaseSpeed > 0.0035 {
+                return nil
+                }
+            
+            }
         
         //the area can be valid with a very few points
         /*if validCoords.count < 10 {
