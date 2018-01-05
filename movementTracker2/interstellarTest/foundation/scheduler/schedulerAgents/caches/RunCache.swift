@@ -33,8 +33,24 @@ struct RunCacheDisk : Codable {
         }
         
         if c.count == 0 { return nil; }
-        dirty = false;
+        //dirty = false;
         return c;
+        
+    }
+    func cachedUserHashes () -> [[String]]? {
+        
+        var c = [[String]]();
+        
+        for i in list {
+            
+            c.append([i.value.user,i.value.hash]);
+            
+        }
+        
+        if c.count == 0 { return nil; }
+        //dirty = false;
+        return c;
+        
         
     }
     
@@ -183,6 +199,13 @@ class RunCache : BaseObject  {
         
         //somebody requests for hashes via direct call to me
         return cache.cachedHashes()
+        
+    }
+    
+    func cachedUserHashes () -> [[String]]? {
+        
+        //somebody requests for hashes via direct call to me
+        return cache.cachedUserHashes()
         
     }
     

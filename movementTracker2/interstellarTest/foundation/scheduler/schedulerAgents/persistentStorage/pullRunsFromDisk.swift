@@ -48,13 +48,13 @@ class PullRunsFromDisk: BaseObject  {
         self.myID = "PullRunsFromDisk"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
-        if self.isLowPowerModeEnabled() {
+        /*if self.isLowPowerModeEnabled() {
             //dont allow map combining on low power mode
             //
             self._teardown();
             return DROPcategoryTypes.lowBattery;
             
-        }
+        }*/
         
         //disappears
         _pulse(pulseBySeconds: 60)
@@ -79,6 +79,17 @@ class PullRunsFromDisk: BaseObject  {
         if let cache = storage.getObject(oID: "runCache") as! RunCache? {
             if let cachedHashes = cache.cachedHashes() {
                 self.ignoredCachedHashes = cachedHashes;
+                
+                if let cuha = cache.cachedUserHashes() {
+                    
+                    for i in cuha {
+                        
+                        self.myExhangedHashes.insertForUser(user: i[0], hash: i[1])
+                        
+                    }
+                    //tell peer data provider what we got
+                    peerDataProviderExistingHashesObserver.update(self.myExhangedHashes);
+                }
                 
             }
             
