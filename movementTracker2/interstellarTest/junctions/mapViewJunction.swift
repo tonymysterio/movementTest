@@ -46,7 +46,7 @@ class mapViewJunction {
     init () {
         
         //map functions need run cache
-        if let cache = storage.getObject(oID: "runCache") as! RunCache?  {
+        if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
             
         } else {
             let runcache = RunCache( messageQueue : nil );
@@ -58,6 +58,23 @@ class mapViewJunction {
             //mapCombiner.getWithinArea = self.getWithinArea //
             runcache._initialize()
             let tta = scheduler.addObject(oID: runcache.myID, o: runcache);
+            
+            let tt = 1;
+        }
+        
+        //map functions need run cache
+        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+        } else {
+            let snapcache = SnapshotCache( messageQueue : nil );
+            //mapCombiner.myID = "mapCombiner";
+            //mapCombiner.name = "mapCombiner";
+            //mapCombiner.myCategory = objectCategoryTypes.generic
+            //mapCombiner._pulse(pulseBySeconds: 600);
+            //mapCombiner.initialLocation = locMessage;   //make it look at the right place
+            //mapCombiner.getWithinArea = self.getWithinArea //
+            snapcache._initialize()
+            let tta = scheduler.addObject(oID: snapcache.myID, o: snapcache);
             
             let tt = 1;
         }

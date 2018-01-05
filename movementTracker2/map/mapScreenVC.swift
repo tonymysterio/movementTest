@@ -18,7 +18,7 @@ class mapScreenVC: UIViewController {
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
     var currentFilteringMode = mapFilteringMode.world
     var recordingRun = false;
-    
+    var lastDisplayedSnapshotID = "";   //dont redraw in vain
     
     @IBOutlet var mapView: MKMapView!
     
@@ -58,6 +58,17 @@ class mapScreenVC: UIViewController {
         self.mapView.setRegion(region, animated: true)*/
         
         //self.mapView.setCenter(center, animated: true)
+        requestForMapDataProvider.update(self.initialLocation)
+        
+        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+            //try to get a snap to display immeziately
+            if let snip = snapcache.getApplicableSnapshot(lat: self.initialLocation.lat, lon: self.initialLocation.lon, getWithinArea: self.regionRadius ) {
+                self.mapSnapshotReceived(mapSnap: snip);
+                
+            }
+        }
+        
         
         runRecoderToggleObserver.subscribe { toggle in
             if !toggle {
@@ -185,6 +196,8 @@ class mapScreenVC: UIViewController {
         //the map anim triggers movement that triggers snapshot pull automatically
         //only make sure that map gets combined somehow
         
+        self.browsedToLocation(lat: self.initialLocation.lat, lon: self.initialLocation.lon);
+        
     }
     
     func centerMap ( lat : CLLocationDegrees , lon: CLLocationDegrees ) {
@@ -213,12 +226,38 @@ class mapScreenVC: UIViewController {
         //even on a run, let him check out areas of interdust
         let radiu = self.mapView.currentRadius()
         
+        //detect significant location change
+        var significantLocationChange = false;
+        let l1 = CLLocation(latitude: lat, longitude: lon);
+        let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
+        let d = l1.distance(from: l2)
+        if (d > 150000) {
+            significantLocationChange = true;
+        }
+        
         self.initialLocation = locationMessage(timestamp: radiu, lat: lat, lon: lon)
         //tell mapviewJunction about our desire
         //mapcombiner will ignore if the request was too close to current
         
+        
+        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+            //try to get a snap to display immeziately
+            if let snip = snapcache.getApplicableSnapshot(lat: self.initialLocation.lat, lon: self.initialLocation.lon, getWithinArea: self.regionRadius ) {
+                self.mapSnapshotReceived(mapSnap: snip);
+                return;
+            }
+        }
+        
         requestForMapCombiner.update(self.initialLocation)
-        requestForMapDataProvider.update(self.initialLocation)
+        if significantLocationChange {
+            print("SIGnificant area change \(d)m. ask for disk data");
+            requestForMapDataProvider.update(self.initialLocation);
+        }
+        
+        //let mapview junction to decide to kick in the disk reader
+        
+        //requestForMapDataProvider.update(self.initialLocation)
         
         //somebody needs to make the map compile, timeout since last entry
         
@@ -236,6 +275,13 @@ class mapScreenVC: UIViewController {
          let lon : CLLocationDegrees
          let getWithinArea : Double
          */
+        
+        if (self.lastDisplayedSnapshotID == mapSnap.id) {
+            print ("dup mapsnap")
+            return;
+        }
+        
+        self.lastDisplayedSnapshotID = mapSnap.id;
         
         // track if it is what we want to see now
         let center = CLLocationCoordinate2D(latitude: mapSnap.lat, longitude: mapSnap.lon)

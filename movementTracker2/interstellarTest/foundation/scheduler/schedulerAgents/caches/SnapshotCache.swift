@@ -15,14 +15,32 @@ import Disk
 struct snapshotContainer {
     
     var list = [mapSnapshot]();
+    var dirtySnaps = Set<String>();
     
-    mutating func dirtyApplicableWithNewRunData ( run: Run ) {
+    mutating func dirtyApplicableWithNewRunData ( lat : CLLocationDegrees , lon: CLLocationDegrees , hash : String , getWithinArea : Double ) -> [String]? {
         
         //new run has arrived. see if it applies to the snapshot range
         //dirty the snapshot if this is new data for it
         //the snapshots contain .hashes of runs that were fed to the snap
         //not caring about if they got included or not
+        if list.count == 0 { return nil; }
         
+        if let sreg = self.snapsInRegion(lat: lat, lon: lon, getWithinArea: getWithinArea) {
+            var dirtyIDs = [String]();
+            for f in sreg {
+                
+                if f.hashes.contains(hash) {
+                    continue;   //this is already here
+                }
+                dirtyIDs.append(f.id);
+                dirtySnaps.insert(f.id);
+            }
+            
+            if dirtyIDs.count == 0 { return nil }
+            return dirtyIDs;
+        }
+        
+        return nil;
     }
     
     func snapsInRegion ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double ) -> [mapSnapshot]? {
@@ -64,10 +82,10 @@ struct snapshotContainer {
         
         //we have a collection of deprecating snaps
         
-        /*for f in closest
+        for f in closest
         {
-            f.setDirty();
-        }*/
+            self.dirtySnaps.insert(f.id)    //purge dirty snaps
+        }
         
         list.append(snap);
     }
@@ -83,6 +101,8 @@ class SnapshotCache : BaseObject  {
     let path = "runCache" //runData"
     //dont store runs here
     var cache = snapshotContainer();
+    var cacheIsDirty = false;
+    var getWithinArea : Double = 0;
     
     var lastInsertTimestamp = Date().timeIntervalSince1970
     
@@ -133,7 +153,7 @@ class SnapshotCache : BaseObject  {
 
     override func _housekeep_extend() -> DROPcategoryTypes? {
     
-        _pulse(pulseBySeconds: 60); //keep me alive
+        _pulse(pulseBySeconds: 6000); //keep me alive
         return nil;
     
     }
@@ -171,13 +191,26 @@ class SnapshotCache : BaseObject  {
     
     func getApplicableSnapshot ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double) -> mapSnapshot? {
         
+        self.getWithinArea = getWithinArea; //runs incoming need this too
+        
         if let closest = self.cache.snapsInRegion(lat: lat, lon: lon, getWithinArea: getWithinArea) {
             
+            var gSna = [mapSnapshot]();
+            
+            for i in closest {
+                if self.cache.dirtySnaps.contains(i.id) {
+                    continue;
+                }
+                
+                gSna.append(i)
+            }
             
             
+            if gSna.count == 0 { return nil; }
+            
+            return gSna.last;   //heh heh, the last one is the best one
             
         }
-        
         
         return nil;
         
@@ -187,6 +220,17 @@ class SnapshotCache : BaseObject  {
     func addRun ( run: Run ) {
         
         //dirty applicable caches, if this run is missing from snapshot
+        if let loca = Geohash.decode(run.geoHash) {
+            
+            if let  dirty = self.cache.dirtyApplicableWithNewRunData(lat : loca.latitude, lon : loca.longitude, hash: run.hash, getWithinArea: self.getWithinArea ) {
+                self.cacheIsDirty = true;
+                print("SNAPCACHE addRun dirtied snapshots  \(self.getWithinArea)");
+            } else {
+                if self.cacheIsDirty {
+                    self.cacheIsDirty = false;
+                }
+            }
+         }
         
         
         

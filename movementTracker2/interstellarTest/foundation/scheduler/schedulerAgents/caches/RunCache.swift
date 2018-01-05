@@ -136,7 +136,7 @@ class RunCache : BaseObject  {
     
     override func _housekeep_extend() -> DROPcategoryTypes? {
         
-        _pulse(pulseBySeconds: 60); //keep me alive
+        _pulse(pulseBySeconds: 6000); //keep me alive
         return nil;
     
     }

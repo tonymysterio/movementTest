@@ -328,7 +328,7 @@ class MapCombiner : BaseObject  {
         
         self.finishProcessing();
         
-        self._finalize();   //discard me when a snap is done
+        //self._finalize();   //discard me when a snap is done
         
     }
     
