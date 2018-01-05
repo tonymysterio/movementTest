@@ -11,7 +11,7 @@ import Interstellar
 //import GEOSwift
 import MapKit
 
-class MapCombiner : BaseObject  {
+class MapCombinerDEPRECATED : BaseObject  {
     
     let pullQueue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .utility)
     let runQueue = DispatchQueue(label: "runQueueManipulation", qos: .utility)
@@ -57,44 +57,8 @@ class MapCombiner : BaseObject  {
         self.myID = "mapCombiner"
         self.myCategory = objectCategoryTypes.generic
         
-        //map viewcontroller is the only one who needs heaps of run data possibly
-        
         //disappears
         _pulse(pulseBySeconds: 60)
-        
-        var hadCachedData = false;
-        //prime my data from RunCache if such a thing is alive
-        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
-            if let cachedRunHashesWithinArea = cache.runsInRegion(lat: initialLocation.lat, lon: initialLocation.lon, getWithinArea: self.getWithinArea) {
-                
-                //returns a set of hashes
-                hadCachedData = true;
-                //self.pullQueue.sync { [weak self] in
-                    var hits = 0;
-                    for i in cachedRunHashesWithinArea {
-                        if let run = cache.getRun(hash: i){
-                            //if let ok = self.runs.append( run : run ) {
-                                self.runs.append( run : run )
-                                hits = hits + 1;
-                            //}
-                            
-                        }   //found in cache
-                        
-                    }
-                    
-                    print ("run cache hits \(hits)");
-                    
-                //}   //start fetching cached daatta
-                
-            }
-        }   //end cache monstrosity
-        
-        if !hadCachedData {
-            //cache is empty? no local data?
-            //do a pull runs From Disk and populate the cache
-            
-        }
-        
         
         //if for some reason we cannot store to disk, give this
         //DROPcategoryTypes.serviceNotAvailable
@@ -108,21 +72,14 @@ class MapCombiner : BaseObject  {
         
         //pullRunsFromDisk also shouts here
         runReceivedObservable.subscribe{ run in
-            //if crunching numbers, happily ignore what is coming in
-            //there is another mapcombiner instance to handle the updates
-            //page user via UI to refresh the map with new data in order to
-            //lessen processing load
             
-            if self.isProcessing { return }
             self.addRun( run : run )
-                
+            
         }
         
         //hoodoRunStreamListener pages us when it reads a run from stream etc
         runStreamReaderDataArrivedObserver.subscribe
             { run in
-                
-                if self.isProcessing { return }
                 self.addRun( run : run )
                 
         }
@@ -173,7 +130,7 @@ class MapCombiner : BaseObject  {
             
             //print(d);
         }
-                
+        
         if !run.isValid {
             return }  //this wont happen
         
@@ -199,7 +156,6 @@ class MapCombiner : BaseObject  {
             }
             
         }
-        
     }   //end addRun
     
     func createSnapshot () -> DROPcategoryTypes? {
@@ -280,7 +236,6 @@ class MapCombiner : BaseObject  {
         var mapPolylineSet = [[CLLocationCoordinate2D]]()
         
         var simplifyTolerance = self.calculateSimplifyToleranceForView(getWithinArea: getWithinArea)
-        var runHashes = Set<String>();
         
         //older areas on the background
         for i in r!.o {
@@ -293,43 +248,34 @@ class MapCombiner : BaseObject  {
             if let fco = i.spikeFilteredCoordinates() {
                 
                 let simplifiedCoords = i.simplify(tolerance: simplifyTolerance )
-                 mapPolylineSet.append(simplifiedCoords!)
+                mapPolylineSet.append(simplifiedCoords!)
                 
             }
             
-            //append also non included hashes so cache wont dirty a snap because something that
-            //was not originally included happened again
-            runHashes.insert(i.hash)
+            
             
             //let coords = simplifiedCoords.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
             
             //let coords = i.coordinates.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
             //let myPolyline = MKPolyline(coordinates: coords, count: coords.count)
-           
+            
             
         }
         
         //do this in background queue
-        let newSnap = mapSnapshot( coordinates : mapPolylineSet , filteringMode : self.filteringMode , lat : lat , lon: lon , getWithinArea : getWithinArea , hashes : runHashes , dirty : false,id :"msna"+String(Date().timeIntervalSince1970))
+        let newSnap = mapSnapshot( coordinates : mapPolylineSet , filteringMode : self.filteringMode , lat : lat , lon: lon , getWithinArea : getWithinArea )
         
         /*let o : [MKPolyline]
-        let filteringMode : mapFilteringMode //throw everything in as default
-        let lat : CLLocationDegrees
-        let lon : CLLocationDegrees
-        let getWithinArea : Double */
-        
-        //let mapsnapshot cache listen to this and save the snap for future use
-        //when new runs arrive from somewhere, the snap cache gets dirtied
-        //if snap cache has no data, mapCombiner is called for rescue
+         let filteringMode : mapFilteringMode //throw everything in as default
+         let lat : CLLocationDegrees
+         let lon : CLLocationDegrees
+         let getWithinArea : Double */
         
         mapSnapshotObserver.update(newSnap) //mapView is listening
         
         self._pulse(pulseBySeconds: 5)    //give secs until going out
         
-        self.finishProcessing();
-        
-        self._finalize();   //discard me when a snap is done
-        
+        self.finishProcessing()
     }
     
     func calculateSimplifyToleranceForView ( getWithinArea : Double ) -> Float {
@@ -380,3 +326,4 @@ class MapCombiner : BaseObject  {
     }
     
 }
+

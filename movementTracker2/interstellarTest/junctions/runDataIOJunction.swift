@@ -115,6 +115,13 @@ class runDataIOJunction {
         
     }
     
+    func peerDataRequesterRunArrivedSaved() {
+        
+        //current run was closed and saved
+        
+        
+        
+    }
     
     
     init () {
@@ -129,6 +136,11 @@ class runDataIOJunction {
             self.runStreamReaderDataArrived(run : run)
         }
         
+        peerDataRequesterRunArrivedSavedObserver.subscribe { run in
+         
+            self.peerDataRequesterRunArrivedSaved()
+            
+        }
     }
     
 }

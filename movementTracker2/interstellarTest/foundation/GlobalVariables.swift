@@ -282,6 +282,16 @@ struct mapSnapshot {
     let lat : CLLocationDegrees
     let lon : CLLocationDegrees
     let getWithinArea : Double
+    let hashes : Set<String>   //contains also hashes of things not accepted on the snap
+    var dirty : Bool;
+    let id : String;
+    
+    mutating func setDirty (){
+        
+        dirty = true;
+        
+    }
+    
 }
 
 class MainStorageForObjects {

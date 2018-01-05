@@ -54,6 +54,8 @@
 		2652AD1C1FAAD27400AF3CE5 /* profileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1B1FAAD27400AF3CE5 /* profileVC.swift */; };
 		2652AD1E1FAAD28D00AF3CE5 /* conficVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */; };
 		2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1F1FAAD73E00AF3CE5 /* configOneVC.swift */; };
+		268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23C91FFEF8BB009175BF /* RunCache.swift */; };
+		268C23CE1FFF1A17009175BF /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23CD1FFF1A17009175BF /* SnapshotCache.swift */; };
 		26C43F6F1FEA2330005B7296 /* currentRunDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */; };
 		26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */; };
 		26C43F741FF098FD005B7296 /* PeerDataRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F731FF098FD005B7296 /* PeerDataRequester.swift */; };
@@ -180,6 +182,9 @@
 		2652AD1B1FAAD27400AF3CE5 /* profileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = profileVC.swift; sourceTree = "<group>"; };
 		2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = conficVC.swift; sourceTree = "<group>"; };
 		2652AD1F1FAAD73E00AF3CE5 /* configOneVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configOneVC.swift; sourceTree = "<group>"; };
+		268C23C91FFEF8BB009175BF /* RunCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunCache.swift; sourceTree = "<group>"; };
+		268C23CB1FFF00F2009175BF /* MapCombinerDEPRECATED.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCombinerDEPRECATED.swift; sourceTree = "<group>"; };
+		268C23CD1FFF1A17009175BF /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
 		26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = currentRunDataIO.swift; sourceTree = "<group>"; };
 		26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = packetExchangeJunction.swift; sourceTree = "<group>"; };
 		26C43F731FF098FD005B7296 /* PeerDataRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDataRequester.swift; sourceTree = "<group>"; };
@@ -253,6 +258,7 @@
 		260C5B5F1FE396950020F0AC /* schedulerAgents */ = {
 			isa = PBXGroup;
 			children = (
+				268C23C81FFEF858009175BF /* caches */,
 				26C43F701FF0859D005B7296 /* packetExchange */,
 				260C5B601FE396950020F0AC /* jsonStreamReader */,
 				260C5B631FE396950020F0AC /* location */,
@@ -298,6 +304,7 @@
 			children = (
 				260C5B751FE396950020F0AC /* SwiftSimplify.swift */,
 				260C5B6A1FE396950020F0AC /* MapCombiner.swift */,
+				268C23CB1FFF00F2009175BF /* MapCombinerDEPRECATED.swift */,
 			);
 			path = MapCombiner;
 			sourceTree = "<group>";
@@ -456,6 +463,15 @@
 				2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */,
 			);
 			path = config;
+			sourceTree = "<group>";
+		};
+		268C23C81FFEF858009175BF /* caches */ = {
+			isa = PBXGroup;
+			children = (
+				268C23C91FFEF8BB009175BF /* RunCache.swift */,
+				268C23CD1FFF1A17009175BF /* SnapshotCache.swift */,
+			);
+			path = caches;
 			sourceTree = "<group>";
 		};
 		26C43F701FF0859D005B7296 /* packetExchange */ = {
@@ -618,6 +634,7 @@
 			files = (
 				260C5B9A1FE396980020F0AC /* preferencesSignalJunction.swift in Sources */,
 				260C5B9C1FE396980020F0AC /* runRecorderJunction.swift in Sources */,
+				268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */,
 				2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */,
 				260C5BAB1FE7848B0020F0AC /* debumess.swift in Sources */,
 				26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */,
@@ -627,6 +644,7 @@
 				260C5B871FE396980020F0AC /* Scheduler.swift in Sources */,
 				26E44BF01FAFF6FB00E63007 /* externalData.swift in Sources */,
 				260C5B851FE396980020F0AC /* GlobalVariables.swift in Sources */,
+				268C23CE1FFF1A17009175BF /* SnapshotCache.swift in Sources */,
 				260C5B901FE396980020F0AC /* MotionTracker.swift in Sources */,
 				260C5B861FE396980020F0AC /* MessageQueue.swift in Sources */,
 				26E44BE81FAB15AD00E63007 /* locationDataStorage.swift in Sources */,

@@ -25,6 +25,7 @@ class PullRunsFromDisk: BaseObject  {
     var getWithinArea : Double = 3000;
     var myExhangedHashes = exchangedHashes()
     var initialPull = false;
+    var ignoredCachedHashes = Set<String>();
     
     //pull from disk
     //send with runReceivedObservable¥
@@ -64,6 +65,15 @@ class PullRunsFromDisk: BaseObject  {
         
         self.startProcessing()
         
+        var hadCachedData = false;
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            if let cachedHashes = cache.cachedHashes() {
+                self.ignoredCachedHashes = cachedHashes;
+                
+            }
+            
+        }
+        
         //this will crash
         queue.async (){
             
@@ -75,8 +85,9 @@ class PullRunsFromDisk: BaseObject  {
                 self.finishProcessing()
                 return
             }
-        
+            //print(files);
             for i in files {
+                
                 if let j = String(data:i, encoding:.utf8) {
                     
                     
@@ -90,7 +101,7 @@ class PullRunsFromDisk: BaseObject  {
                         
                         self._pulse(pulseBySeconds: 2)
                         //ignore stuff outside my area
-                        if let loca = Geohash.decode(run.geoHash) {
+                        /*if let loca = Geohash.decode(run.geoHash) {
                             
                             let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
                             let d = location1.distance(from: location2)
@@ -99,7 +110,7 @@ class PullRunsFromDisk: BaseObject  {
                             if d > area {
                                 continue ;
                             }
-                        }
+                        }*/
                         
                         
                         //send to mapCombiner , hoodoRunStreamListener

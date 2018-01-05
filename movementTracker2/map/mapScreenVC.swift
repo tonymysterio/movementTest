@@ -189,12 +189,12 @@ class mapScreenVC: UIViewController {
     
     func centerMap ( lat : CLLocationDegrees , lon: CLLocationDegrees ) {
         
-        if !self.recordingRun {
+        /*if !self.recordingRun {
             
             //let the user to mess with the map and dont worry about location updates
             //in case the user wants to scroll around to see areas of interdust
             return;
-        }
+        }*/
         
         let lc = CLLocation(latitude: lat, longitude: lon)
         
