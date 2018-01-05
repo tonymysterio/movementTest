@@ -26,6 +26,14 @@ class jsonStreamReader : BaseObject {
         self.myID = "jsonStreamReader"
         self.myCategory = objectCategoryTypes.locationlistener
         
+        if self.isLowPowerModeEnabled() {
+            //dont allow map combining on low power mode
+            //
+            self._teardown();
+            return DROPcategoryTypes.lowBattery;
+            
+        }
+        
         if !self.requestMade {
             //set myself as processing if the  stream request works and we get data
             self.makeAndParseArequest()

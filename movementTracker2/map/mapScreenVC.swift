@@ -22,9 +22,13 @@ class mapScreenVC: UIViewController {
     
     @IBOutlet var mapView: MKMapView!
     
-    let regionRadius: CLLocationDistance = 10000
+    var regionRadius: CLLocationDistance = 10000
     let mapRenderQueue = DispatchQueue(label: "mapRenderQueue", qos: .utility)
+    let dataOperationQueue = DispatchQueue(label: "dataOperationQueue", qos: .utility)
+    
     var primeLocation = false;
+    var refreshingMapPolygons = false;
+    var refreshingMapPolygonsBreak = false;
     
     @IBAction func locatorButtonTap(_ sender: Any) {
         
@@ -208,6 +212,11 @@ class mapScreenVC: UIViewController {
             //in case the user wants to scroll around to see areas of interdust
             return;
         }*/
+        if let radius = self.mapView?.currentRadius() {
+            
+            self.regionRadius = radius;
+            
+        }
         
         let lc = CLLocation(latitude: lat, longitude: lon)
         
@@ -224,7 +233,15 @@ class mapScreenVC: UIViewController {
     
         //the user wants to see surroundingusu
         //even on a run, let him check out areas of interdust
-        let radiu = self.mapView.currentRadius()
+        dataOperationQueue.async {
+            
+        
+        if let radius = self.mapView?.currentRadius() {
+            
+            self.regionRadius = radius;
+            self.initialLocation = locationMessage(timestamp: radius, lat: lat, lon: lon)
+            
+        }
         
         //detect significant location change
         var significantLocationChange = false;
@@ -235,7 +252,7 @@ class mapScreenVC: UIViewController {
             significantLocationChange = true;
         }
         
-        self.initialLocation = locationMessage(timestamp: radiu, lat: lat, lon: lon)
+        
         //tell mapviewJunction about our desire
         //mapcombiner will ignore if the request was too close to current
         
@@ -261,7 +278,7 @@ class mapScreenVC: UIViewController {
         
         //somebody needs to make the map compile, timeout since last entry
         
-        
+        }   //dispatch to queue so we are not blocking 
     }
     
     func mapSnapshotReceived( mapSnap : mapSnapshot ) {
@@ -283,9 +300,21 @@ class mapScreenVC: UIViewController {
         
         self.lastDisplayedSnapshotID = mapSnap.id;
         
+        //var refreshingMapPolygons = false;
+        //var refreshingMapPolygonsBreak = false;
+        
         // track if it is what we want to see now
         let center = CLLocationCoordinate2D(latitude: mapSnap.lat, longitude: mapSnap.lon)
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
+        
+        if (self.refreshingMapPolygons) {
+            
+            //drawing the previous shit.
+            //break drawing and retry
+            self.refreshingMapPolygonsBreak = true;
+        }
+        
+        self.refreshingMapPolygons = true;
         
         //check if the snapshot applies to the current viev before purging
         DispatchQueue.main.async {
@@ -296,18 +325,42 @@ class mapScreenVC: UIViewController {
         //self.mapView.setCenter(center, animated: true)
         //self.mapView.setRegion(region, animated: true)
         var polylines = [MKPolyline]();
+        var lines = mapSnap.coordinates.count;
+        
         mapView.delegate = self
         for i in mapSnap.coordinates {
             
+            if self.refreshingMapPolygonsBreak {
+                
+                self.refreshingMapPolygons = false;
+                break;
+            }
             polylines.append( MKPolyline(coordinates: i, count: i.count))
             let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
             //self.mapRenderQueue.sync{
             DispatchQueue.main.async {
-                self.mapView.delegate = self
-                self.mapView.add(pol) //polyline
+                
+                if (!self.refreshingMapPolygonsBreak){
+                
+                    self.mapView.delegate = self
+                    self.mapView.add(pol) //polyline
+                    lines = lines - 1;
+                    //print("mapSnapshotReceived drew \(lines) polygons");
+                    if (lines<1) {
+                        self.refreshingMapPolygons = false;
+                        self.refreshingMapPolygonsBreak = false;
+                        
+                    }
+                    
+                } else {
+                    
+                    self.refreshingMapPolygonsBreak = false; //unbreak
+                }
             }
             
-        }
+        }   //loop all drawables
+        
+        
         
     }   //mapSnapshotReceived
     

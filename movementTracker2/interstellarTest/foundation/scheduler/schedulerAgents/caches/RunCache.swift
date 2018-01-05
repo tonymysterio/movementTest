@@ -87,7 +87,7 @@ class RunCache : BaseObject  {
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "runCache"
         self.myID = "runCache"
-        self.myCategory = objectCategoryTypes.uniqueServiceProvider
+        self.myCategory = objectCategoryTypes.cache
         
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.purgeCaches  //release memory thru _purge

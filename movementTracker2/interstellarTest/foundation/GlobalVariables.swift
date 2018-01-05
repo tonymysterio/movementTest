@@ -35,6 +35,7 @@ enum objectCategoryTypes: String {
     
     case motionlistener = "motionlistener"  //listens to coreMotion events
     case locationlistener = "locationlistener" //listens to coreLocation events
+    case cache = "cache" //cache for something
     
     static func allValues() -> [objectCategoryTypes] {
         return [.generic, .user, .group, .debugger, .uniqueServiceProvider ,.motionlistener , .locationlistener]
@@ -242,6 +243,8 @@ enum DROPcategoryTypes {
     case maxCategoryObjectsExceeded //i cannot handle more tasks of this type, hard limit hit
     case maxListenerObjectsExceeded //trying to register too many listeners
     case lowMemory  //i cannot allocate resources for my task
+    case lowBattery //not going to do it with low battery
+    
     case lowDiskspace   //motherObj told me I dont have diskspace for you picture
     case busyProcessesing   //crunching thru a number set now, dont bother me now
     case persisting //im not going to sleep even on background, fuck off
@@ -258,6 +261,8 @@ enum DROPcategoryTypes {
     //dont give a DROP when terminating
     case hibernating
     case wokeUpFromHibernation
+    case readyImmediately   //something that relies on the cache is ready to its thing
+    
 }
 
 enum distressCodes {

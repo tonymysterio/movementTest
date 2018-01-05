@@ -113,7 +113,7 @@ class RunStreamRecorder : BaseObject  {
         
         do {
             //let fname = "currentRun/" + run.hash + ".json"
-            try Disk.save(srun, to: .caches, as: fname)
+            try Disk.save(srun, to: .applicationSupport, as: fname)
             
             self._pulse(pulseBySeconds: 120)
             

@@ -58,6 +58,16 @@ class MapCombiner : BaseObject  {
         self.myCategory = objectCategoryTypes.generic
         
         //map viewcontroller is the only one who needs heaps of run data possibly
+        /*if self.isLowPowerModeEnabled() {
+            //dont allow map combining on low power mode
+            //
+            self._teardown();
+            return DROPcategoryTypes.lowBattery;
+            
+        }*/
+        
+        //maybe be selective about combining modes
+        
         
         //disappears
         _pulse(pulseBySeconds: 60)
@@ -83,7 +93,8 @@ class MapCombiner : BaseObject  {
                     }
                     
                     print ("run cache hits \(hits)");
-                    
+                
+                    self.newDataForSnap = true;
                 //}   //start fetching cached daatta
                 
             }
@@ -127,7 +138,10 @@ class MapCombiner : BaseObject  {
                 
         }
         
-        
+        if hadCachedData {
+            return DROPcategoryTypes.readyImmediately   //map junction could ask me to crunch
+                    //numbers immediately based on the cache data
+        }
         
         return nil
         

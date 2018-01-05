@@ -1097,6 +1097,17 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         return true
     }
     
+    func isLowPowerModeEnabled () -> Bool {
+        
+        if ProcessInfo.processInfo.isLowPowerModeEnabled {
+            // Low Power Mode is enabled. Start reducing activity to conserve energy.
+            return true;
+        }
+        
+        return false;
+        
+    }
+    
     func updateConfigurationValue ( key : liveConfigurationTypes , val : Any ) -> Bool {
         
         //this is going to be a big method with all of the live conf values. pain in the ass

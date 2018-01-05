@@ -29,10 +29,19 @@ class hoodoRunStreamListener : BaseObject  {
     
     func _initialize () -> DROPcategoryTypes? {
         
+        
         myCategory = objectCategoryTypes.locationlistener
         self.name = "hoodoRunStreamListener"
         self.myID = "hoodoRunStreamListener"
         self.myCategory = objectCategoryTypes.locationlistener
+        
+        if self.isLowPowerModeEnabled() {
+            //dont allow map combining on low power mode
+            //
+            self._teardown();
+            return DROPcategoryTypes.lowBattery;
+            
+        }
         
         //disappears
         _pulse(pulseBySeconds: 6000000)

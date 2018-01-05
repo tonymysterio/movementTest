@@ -41,10 +41,20 @@ class PullRunsFromDisk: BaseObject  {
     
     func _initialize () -> DROPcategoryTypes? {
         
+        
+        
         myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "PullRunsFromDisk"
         self.myID = "PullRunsFromDisk"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
+        
+        if self.isLowPowerModeEnabled() {
+            //dont allow map combining on low power mode
+            //
+            self._teardown();
+            return DROPcategoryTypes.lowBattery;
+            
+        }
         
         //disappears
         _pulse(pulseBySeconds: 60)

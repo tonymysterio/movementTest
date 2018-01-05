@@ -110,7 +110,7 @@ class SnapshotCache : BaseObject  {
 
         self.name = "snapshotCache"
         self.myID = "snapshotCache"
-        self.myCategory = objectCategoryTypes.uniqueServiceProvider
+        self.myCategory = objectCategoryTypes.cache;
         
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.purgeCaches  //release memory thru _purge
@@ -201,12 +201,21 @@ class SnapshotCache : BaseObject  {
                 if self.cache.dirtySnaps.contains(i.id) {
                     continue;
                 }
+                let sizeDiff = getWithinArea - i.getWithinArea;
                 
-                gSna.append(i)
+                if sizeDiff < 2000 {
+                    //bigger view, more to stuff, bigger like 2km bigger
+                    gSna.append(i)
+                }
+                
+                
             }
             
             
-            if gSna.count == 0 { return nil; }
+            if gSna.count == 0 {
+                return nil;
+                
+            }
             
             return gSna.last;   //heh heh, the last one is the best one
             

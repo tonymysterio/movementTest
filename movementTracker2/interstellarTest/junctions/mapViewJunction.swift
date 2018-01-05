@@ -42,42 +42,10 @@ class mapViewJunction {
     //weak var myLiveRunStreamListener : liveRunStreamListener?
     //weak var myPedometer : Pedometer?
     var getWithinArea : Double = 1500; //zoomLevelInMeters
+    var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
     
     init () {
         
-        //map functions need run cache
-        if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
-            
-        } else {
-            let runcache = RunCache( messageQueue : nil );
-            //mapCombiner.myID = "mapCombiner";
-            //mapCombiner.name = "mapCombiner";
-            //mapCombiner.myCategory = objectCategoryTypes.generic
-            //mapCombiner._pulse(pulseBySeconds: 600);
-            //mapCombiner.initialLocation = locMessage;   //make it look at the right place
-            //mapCombiner.getWithinArea = self.getWithinArea //
-            runcache._initialize()
-            let tta = scheduler.addObject(oID: runcache.myID, o: runcache);
-            
-            let tt = 1;
-        }
-        
-        //map functions need run cache
-        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
-            
-        } else {
-            let snapcache = SnapshotCache( messageQueue : nil );
-            //mapCombiner.myID = "mapCombiner";
-            //mapCombiner.name = "mapCombiner";
-            //mapCombiner.myCategory = objectCategoryTypes.generic
-            //mapCombiner._pulse(pulseBySeconds: 600);
-            //mapCombiner.initialLocation = locMessage;   //make it look at the right place
-            //mapCombiner.getWithinArea = self.getWithinArea //
-            snapcache._initialize()
-            let tta = scheduler.addObject(oID: snapcache.myID, o: snapcache);
-            
-            let tt = 1;
-        }
         
         
         mapCombinerToggleObserver.subscribe{ toggle in
@@ -162,6 +130,19 @@ class mapViewJunction {
     func initialize () {
         
         print("mapViewJunction here")
+        self.addRunCache();
+        self.addSnapCache();
+        
+        //detect a clean install without snapcaches
+        //if no snaps on disk, fire pullruns from disk to give our run cache some data
+        self.addMapDataProvider ( locMessage : self.initialLocation );
+        
+        
+    }
+    
+    func initializeForMapview (){
+        
+        
         
     }
     
@@ -209,47 +190,93 @@ class mapViewJunction {
         
         //cad add multiple
         //keep caching here. send snapshot if cached
-        
-        if locMessage.timestamp > 1000 && locMessage.timestamp < 50000 {
+        var gwa :Double = 2500;
+        if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
             //sneaking view radius through timestamp, naughty
             self.getWithinArea = locMessage.timestamp
             //calculate simplification level in mapcombiner
-            
+            gwa = locMessage.timestamp;
         }
         
-        var mapCombiner = MapCombiner( messageQueue : nil );
+        let mapCombiner = MapCombiner( messageQueue : nil );
         mapCombiner.myID = "mapCombiner";
         mapCombiner.name = "mapCombiner";
         mapCombiner.myCategory = objectCategoryTypes.generic
         mapCombiner._pulse(pulseBySeconds: 600);
         mapCombiner.initialLocation = locMessage;   //make it look at the right place
-        mapCombiner.getWithinArea = self.getWithinArea //
-        mapCombiner._initialize()
+        mapCombiner.getWithinArea = gwa //
+        let rep = mapCombiner._initialize()
         
         scheduler.addObject(oID: mapCombiner.myID, o: mapCombiner)
+        
+        if rep == DROPcategoryTypes.readyImmediately {
+            //lets start working?
+            //serviceNotReady is returned if no runs
+            mapCombiner.createSnapshot();
+        }
         
     }
     
     func addMapDataProvider ( locMessage : locationMessage ){
         
-        if locMessage.timestamp > 1000 && locMessage.timestamp < 50000 {
+        var gwa : Double = 2500;
+        if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
             //sneaking view radius through timestamp, naughty
             self.getWithinArea = locMessage.timestamp
             //calculate simplification level in mapcombiner
-            
+            gwa = locMessage.timestamp;
         }
         
         //read stored runs if any
         let mc = PullRunsFromDisk(messageQueue: messageQueue)
         //ignore runs from outside my scope
         mc.initialLocation = locMessage;
-        mc.getWithinArea = self.getWithinArea;
-        mc._initialize()
+        mc.getWithinArea = gwa; //self.getWithinArea;
         scheduler.addObject(oID: mc.myID, o: mc)
+        mc._initialize()
         
         mc.scanForRuns()
         
     }
     
+    func addRunCache (){
+        //map functions need run cache
+        if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
+            
+        } else {
+            let runcache = RunCache( messageQueue : nil );
+            //mapCombiner.myID = "mapCombiner";
+            //mapCombiner.name = "mapCombiner";
+            //mapCombiner.myCategory = objectCategoryTypes.generic
+            //mapCombiner._pulse(pulseBySeconds: 600);
+            //mapCombiner.initialLocation = locMessage;   //make it look at the right place
+            //mapCombiner.getWithinArea = self.getWithinArea //
+            runcache._initialize()
+            let tta = scheduler.addObject(oID: runcache.myID, o: runcache);
+            
+            let tt = 1;
+        }
+        
+    }
     
+    func addSnapCache (){
+        
+        //map functions need run cache
+        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+        } else {
+            let snapcache = SnapshotCache( messageQueue : nil );
+            //mapCombiner.myID = "mapCombiner";
+            //mapCombiner.name = "mapCombiner";
+            //mapCombiner.myCategory = objectCategoryTypes.generic
+            //mapCombiner._pulse(pulseBySeconds: 600);
+            //mapCombiner.initialLocation = locMessage;   //make it look at the right place
+            //mapCombiner.getWithinArea = self.getWithinArea //
+            snapcache._initialize()
+            let tta = scheduler.addObject(oID: snapcache.myID, o: snapcache);
+            
+            let tt = 1;
+        }
+        
+    }
 }
