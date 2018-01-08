@@ -21,6 +21,8 @@ let runDataIO = runDataIOJunction() //pulling sending run dataaz
 let prefSignalJunction = preferenceSignalJunction()
 let mapJunction = mapViewJunction()
 let packetExchange = PacketExchangeJunction()
+let serviceStatus = serviceStatusJunction()
+
 //dont put observers here, put them with each producer
 
 //makign this into an enum means updating the base object every time a new variation is created
@@ -87,6 +89,22 @@ struct exchangedHashes {
         list  = [:]
     }
     
+    mutating func merge ( hashes : exchangedHashes ) {
+        
+        //getting a bulk of hashes user : hash
+        if hashes.list.count == 0 { return; }
+        for (key , i) in hashes.list {
+            
+            for ii in i.list {
+                
+                self.insertForUser(user: key, hash: ii )
+                
+            }
+            
+            
+        }
+        
+    }
     mutating func insertForUser ( user : String , hash : String ) -> Bool {
         
         if list[user] == nil {

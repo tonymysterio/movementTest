@@ -58,6 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         mapJunction.initialize();
         prefSignalJunction.initialize();
         packetExchange.initialize();
+        serviceStatus.initialize(); //config screen shows running services
         return true
     }
 

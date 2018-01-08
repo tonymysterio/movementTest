@@ -21,6 +21,16 @@ class configOneVC: UIViewController {
     @IBOutlet var maxCatObjectsSlider: UISlider!
     @IBOutlet var pullRunStreamSwitch: UISwitch!
     @IBOutlet var mapCombinerSwitch: UISwitch!
+    
+    //status icons
+    @IBAction func runCacheB(_ sender: Any) {
+    }
+    
+    @IBOutlet var statusIcons: [UIButton]!
+    
+    @IBOutlet var statusIconCollection: [UIButton]!
+    
+    @IBOutlet var statusIc: [UIButton]!
     @IBAction func maxCatObjectsChanged(_ sender: UISlider!) {
         
         let vx = sender.value
@@ -65,8 +75,11 @@ class configOneVC: UIViewController {
         // Do any additional setup after loading the view.
         
         //set the screen style
-        
-        
+        serviceStatusJunctionObserver.subscribe{ statusItem in
+            
+            self.updateServiceStatusItem(s: statusItem);
+            
+        }
         //self.view.backgroundColor = UIColor.flatGreenColorDark()
         //label1.tintColor = viewColors.labelText
         
@@ -76,6 +89,8 @@ class configOneVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated) // No need for semicolon
        
+        serviceStatus.getServiceStatuses();
+        
         //myView.backgroundColor = #colorLiteral(red: 0.6029270887, green: 0.6671635509, blue: 0.8504692912, alpha: 1)
         self.view.setNeedsDisplay()
     }
@@ -86,7 +101,89 @@ class configOneVC: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
+    func serviceItemDisable ( key : Int) {
+        
+        
+        //💾 📔 📓🕸📡 📣
+        self.statusIc[key].isHidden = true;
+        self.statusIc[key].isSelected = false;
+    }
+    
+    func serviceItemEnable ( key : Int) {
+         self.statusIc[key].isHidden = false;
+        self.statusIc[key].isSelected = false;
+    }
+    
+    
+    func updateServiceStatusItem ( s : serviceStatusItem) {
+        
+        //[,"","runCache",,"servusMeshnetProvider","PeerDataProvider","PeerDataRequester"];
+        
+        switch (s.name ){
+            
+        /*case "mapCombiner" :
+            if (s.active){
+                self.serviceItemEnable(key: <#T##Int#>)
+            } else {
+                self.serviceItemDisable(key: <#T##Int#>)
+            }*/
+            
+        case "PullRunsFromDisk":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 2)
+            } else {
+                self.serviceItemDisable(key: 2)
+            }
+            
+        case "runCache":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 0)
+            } else {
+                self.serviceItemDisable(key: 0)
+            }
+            
+        case "snapshotCache":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 1)
+            } else {
+                self.serviceItemDisable(key: 1)
+            }
+            
+        case "servusMeshnetProvider":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 3)
+            } else {
+                self.serviceItemDisable(key: 3)
+            }
+            
+        case "PeerDataProvider":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 4)
+            } else {
+                self.serviceItemDisable(key: 4)
+            }
+            
+            
+        case "PeerDataRequester":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 5)
+            } else {
+                self.serviceItemDisable(key: 5)
+            }
+        
+        default:
+            return;
+            
+        }
+        
+        
+    }   //updateServiceStatusItem
     /*
     // MARK: - Navigation
 

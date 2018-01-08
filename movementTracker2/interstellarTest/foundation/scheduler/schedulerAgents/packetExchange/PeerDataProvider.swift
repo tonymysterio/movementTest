@@ -181,7 +181,8 @@ class PeerDataProvider : BaseObject  {
             
             //TODO: this should update not overwrite
             
-            myExhangedHashes = hashes
+            //myExhangedHashes = hashes
+            myExhangedHashes.merge(hashes: hashes);
             
             let orderAllLatestFirst = hashes.orderAllLatestFirst()
             

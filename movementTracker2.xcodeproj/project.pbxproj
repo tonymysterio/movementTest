@@ -56,6 +56,7 @@
 		2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1F1FAAD73E00AF3CE5 /* configOneVC.swift */; };
 		268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23C91FFEF8BB009175BF /* RunCache.swift */; };
 		268C23CE1FFF1A17009175BF /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23CD1FFF1A17009175BF /* SnapshotCache.swift */; };
+		26A0CEFD200305160012BD5B /* serviceStatusJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */; };
 		26C43F6F1FEA2330005B7296 /* currentRunDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */; };
 		26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */; };
 		26C43F741FF098FD005B7296 /* PeerDataRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F731FF098FD005B7296 /* PeerDataRequester.swift */; };
@@ -185,6 +186,7 @@
 		268C23C91FFEF8BB009175BF /* RunCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunCache.swift; sourceTree = "<group>"; };
 		268C23CB1FFF00F2009175BF /* MapCombinerDEPRECATED.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCombinerDEPRECATED.swift; sourceTree = "<group>"; };
 		268C23CD1FFF1A17009175BF /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
+		26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = serviceStatusJunction.swift; sourceTree = "<group>"; };
 		26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = currentRunDataIO.swift; sourceTree = "<group>"; };
 		26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = packetExchangeJunction.swift; sourceTree = "<group>"; };
 		26C43F731FF098FD005B7296 /* PeerDataRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDataRequester.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 				260C5B7B1FE396960020F0AC /* preferencesSignalJunction.swift */,
 				260C5B7C1FE396960020F0AC /* runDataIOJunction.swift */,
 				260C5B7D1FE396960020F0AC /* runRecorderJunction.swift */,
+				26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */,
 			);
 			path = junctions;
 			sourceTree = "<group>";
@@ -635,6 +638,7 @@
 				260C5B9A1FE396980020F0AC /* preferencesSignalJunction.swift in Sources */,
 				260C5B9C1FE396980020F0AC /* runRecorderJunction.swift in Sources */,
 				268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */,
+				26A0CEFD200305160012BD5B /* serviceStatusJunction.swift in Sources */,
 				2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */,
 				260C5BAB1FE7848B0020F0AC /* debumess.swift in Sources */,
 				26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */,

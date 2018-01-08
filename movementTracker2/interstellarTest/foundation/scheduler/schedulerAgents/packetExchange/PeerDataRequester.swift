@@ -109,7 +109,7 @@ class PeerDataRequester : BaseObject  {
                 guard response.result.isSuccess else {
                     print("peerdatarequest Error while fetching : \(resourceUrl)")
                     
-                    //print("peerdatarequest Error while fetching : \(response.result.error)")
+                    print("peerdatarequest Error while fetching : \(response.result.error)")
                     //completion(nil)
                     self.orderedHashListRequestErrorHandler()
                     return

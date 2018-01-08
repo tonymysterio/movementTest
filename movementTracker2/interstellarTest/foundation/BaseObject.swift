@@ -1098,7 +1098,7 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
     }
     
     func isLowPowerModeEnabled () -> Bool {
-        
+        return false;
         if ProcessInfo.processInfo.isLowPowerModeEnabled {
             // Low Power Mode is enabled. Start reducing activity to conserve energy.
             return true;

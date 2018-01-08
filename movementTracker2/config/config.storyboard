@@ -129,6 +129,43 @@
                                             <action selector="mapSimplifySlider:" destination="v80-Nu-aNx" eventType="valueChanged" id="o1F-XB-ITg"/>
                                         </connections>
                                     </slider>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="alU-Ep-smJ">
+                                        <rect key="frame" x="14" y="305" width="34" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="📔"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="XDl-81-bGO">
+                                        <rect key="frame" x="56" y="305" width="35" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="📓"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3St-AV-xrp">
+                                        <rect key="frame" x="99" y="305" width="30" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="💾"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xkb-xK-Ebu">
+                                        <rect key="frame" x="181" y="305" width="37" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="📣"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gcj-gb-XaD">
+                                        <rect key="frame" x="226" y="305" width="38" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="📡"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" selected="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7ba-DG-khS">
+                                        <rect key="frame" x="14" y="305" width="34" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="runCacheB:" destination="v80-Nu-aNx" eventType="touchUpInside" id="09O-q3-EeU"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W54-pX-iEr">
+                                        <rect key="frame" x="143" y="305" width="30" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="🕸"/>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.47660902142524719" green="0.37373736500740051" blue="0.28653344511985779" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
@@ -144,6 +181,14 @@
                         <outlet property="maxObjectsSlider" destination="HMu-dD-LRF" id="LMh-8o-Lzt"/>
                         <outlet property="pullRunStreamSwitch" destination="ete-AJ-tFJ" id="Kpp-3R-Bp1"/>
                         <outlet property="view" destination="HbV-Hd-BbJ" id="Ab2-rU-Rt5"/>
+                        <outletCollection property="statusIcons" destination="7ba-DG-khS" collectionClass="NSMutableArray" id="B3p-bG-rFK"/>
+                        <outletCollection property="statusIconCollection" destination="Xkb-xK-Ebu" collectionClass="NSMutableArray" id="gsY-ah-7pt"/>
+                        <outletCollection property="statusIc" destination="7ba-DG-khS" collectionClass="NSMutableArray" id="egU-xq-p9U"/>
+                        <outletCollection property="statusIc" destination="XDl-81-bGO" collectionClass="NSMutableArray" id="WUJ-aK-pcl"/>
+                        <outletCollection property="statusIc" destination="3St-AV-xrp" collectionClass="NSMutableArray" id="WcM-rZ-Y7D"/>
+                        <outletCollection property="statusIc" destination="W54-pX-iEr" collectionClass="NSMutableArray" id="HYN-ah-R04"/>
+                        <outletCollection property="statusIc" destination="Xkb-xK-Ebu" collectionClass="NSMutableArray" id="go6-Ka-5o4"/>
+                        <outletCollection property="statusIc" destination="Gcj-gb-XaD" collectionClass="NSMutableArray" id="TWn-ZR-ZSp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qUT-HE-vnX" userLabel="First Responder" sceneMemberID="firstResponder"/>
