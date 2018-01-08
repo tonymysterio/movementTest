@@ -239,6 +239,9 @@ class Scheduler {
     
     func _housekeep () -> Bool {
         
+        //ping servicestatus junction to get new stats
+        serviceStatusJunctionRefresh.update(true)
+        
         if (self.housekeeping == true) {
             
             //this should not happen, report a DROP error
@@ -247,6 +250,8 @@ class Scheduler {
             initHousekeeping()  //next round of housekeeping
             return false    //try again next year
         }
+        
+        
         if (self.storage.objects.isEmpty) {
             
             //even if we have no housekeeping to do,
@@ -352,6 +357,7 @@ class Scheduler {
             _ = addRandomTimewaster()
             
         }
+        
         
         initHousekeeping()  //next round of housekeeping
         

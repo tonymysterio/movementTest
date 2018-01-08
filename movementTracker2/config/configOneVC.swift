@@ -22,6 +22,7 @@ class configOneVC: UIViewController {
     @IBOutlet var pullRunStreamSwitch: UISwitch!
     @IBOutlet var mapCombinerSwitch: UISwitch!
     
+    @IBOutlet var amountOfCachedRuns: UILabel!
     //status icons
     @IBAction func runCacheB(_ sender: Any) {
     }
@@ -80,6 +81,12 @@ class configOneVC: UIViewController {
             self.updateServiceStatusItem(s: statusItem);
             
         }
+        
+        serviceStatusJunctionTotalCachedRuns.subscribe{ cruns in
+            
+            self.amountOfCachedRuns.text = String(cruns);
+            
+        }
         //self.view.backgroundColor = UIColor.flatGreenColorDark()
         //label1.tintColor = viewColors.labelText
         
@@ -104,6 +111,9 @@ class configOneVC: UIViewController {
     func serviceItemDisable ( key : Int) {
         
         
+        
+        //📲 💽
+       // 📟
         //💾 📔 📓🕸📡 📣
         self.statusIc[key].isHidden = true;
         self.statusIc[key].isSelected = false;
@@ -177,6 +187,27 @@ class configOneVC: UIViewController {
                 self.serviceItemDisable(key: 5)
             }
         
+        case "hoodoRunStreamListener":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 6)
+            } else {
+                self.serviceItemDisable(key: 6)
+            }
+        case "jsonStreamReader":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 7)
+            } else {
+                self.serviceItemDisable(key: 7)
+            }
+        case "runStreamRecorder":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 8)
+            } else {
+                self.serviceItemDisable(key: 8)
+            }
         default:
             return;
             

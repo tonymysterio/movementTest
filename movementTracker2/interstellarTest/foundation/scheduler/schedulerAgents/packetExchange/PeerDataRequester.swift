@@ -110,6 +110,8 @@ class PeerDataRequester : BaseObject  {
                     print("peerdatarequest Error while fetching : \(resourceUrl)")
                     
                     print("peerdatarequest Error while fetching : \(response.result.error)")
+                    
+                    
                     //completion(nil)
                     self.orderedHashListRequestErrorHandler()
                     return
@@ -150,6 +152,11 @@ class PeerDataRequester : BaseObject  {
     
     func fetchMissingHash(){
         
+        if self.terminated {
+            
+            return;
+        }
+        
         if self.missingRunHashes.isEmpty {
             
             fetchMissingHashes = false;
@@ -160,6 +167,7 @@ class PeerDataRequester : BaseObject  {
             
             return;
         }
+        
         
         //pull a run hashu
         
@@ -172,6 +180,7 @@ class PeerDataRequester : BaseObject  {
         
         
         let resourceUrl = "http://"+self.hostname+":8080/gethash?hash=" + (hash)!
+        print (resourceUrl);
         //keep responses sho
         
         
@@ -211,6 +220,8 @@ class PeerDataRequester : BaseObject  {
     
     func orderedHashListRequestErrorHandler () {
         
+        if self.terminated { return }
+        
         self.unforgivableAmountOfConnectionErrors = unforgivableAmountOfConnectionErrors - 1;
         if (self.unforgivableAmountOfConnectionErrors == 0) {
             self._teardown()
@@ -222,6 +233,8 @@ class PeerDataRequester : BaseObject  {
     
     func orderedHashRequestErrorHandler () {
         
+        if self.terminated { return }
+        
         if (self.unforgivableAmountOfConnectionErrors == 0) {
             self._teardown()
             return;
@@ -232,6 +245,8 @@ class PeerDataRequester : BaseObject  {
     }
     
     func orderedHashRequestSuccess ( run : Run ) {
+        
+        if self.terminated { return }
         
         self.finishProcessing()
         peerDataRequesterRunArrivedObserver.update(run) //tell packetExchange that we got the requested run
@@ -304,7 +319,7 @@ class PeerDataRequester : BaseObject  {
         //list of stuff we have got
         queue.sync {
             
-            myExhangedHashes = hashes
+            myExhangedHashes.merge(hashes: hashes);
             
         }
         

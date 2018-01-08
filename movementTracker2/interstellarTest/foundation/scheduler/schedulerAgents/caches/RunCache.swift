@@ -187,6 +187,10 @@ class RunCache : BaseObject  {
             
         }
         
+        //page conf screen about cached runs
+        
+        serviceStatusJunctionTotalCachedRuns.update(cache.list.count)
+        
     }   //end addRun
     
     func getRun ( hash : String ) -> Run? {

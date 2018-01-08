@@ -60,9 +60,16 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="map simplify" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0sG-nm-5TT">
-                                        <rect key="frame" x="8" y="242" width="97" height="21"/>
+                                        <rect key="frame" x="19" y="242" width="97" height="21"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="cached runs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5IM-bT-5Dx">
+                                        <rect key="frame" x="14" y="274" width="72" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="11"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <nil key="highlightedColor"/>
                                     </label>
@@ -144,6 +151,11 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <state key="normal" title="💾"/>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W54-pX-iEr">
+                                        <rect key="frame" x="143" y="305" width="30" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="🕸"/>
+                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xkb-xK-Ebu">
                                         <rect key="frame" x="181" y="305" width="37" height="30"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -161,11 +173,28 @@
                                             <action selector="runCacheB:" destination="v80-Nu-aNx" eventType="touchUpInside" id="09O-q3-EeU"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W54-pX-iEr">
-                                        <rect key="frame" x="143" y="305" width="30" height="30"/>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UTB-xQ-SwX">
+                                        <rect key="frame" x="143" y="343" width="30" height="30"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <state key="normal" title="🕸"/>
+                                        <state key="normal" title="📲"/>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eLX-Ki-y1b">
+                                        <rect key="frame" x="181" y="343" width="37" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="📟"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ZR-GG-SuP">
+                                        <rect key="frame" x="226" y="343" width="38" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <state key="normal" title="💽"/>
+                                    </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nl3-7N-zlL">
+                                        <rect key="frame" x="99" y="274" width="46" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMinX="YES" widthSizable="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" red="0.47660902142524719" green="0.37373736500740051" blue="0.28653344511985779" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
@@ -175,6 +204,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="Cyy-db-zIb"/>
                     <connections>
+                        <outlet property="amountOfCachedRuns" destination="nl3-7N-zlL" id="Cj6-SS-tnl"/>
                         <outlet property="label1" destination="HbV-Hd-BbJ" id="r9r-yj-oqF"/>
                         <outlet property="mapCombinerSwitch" destination="fyi-xh-6kj" id="kSx-Nb-44c"/>
                         <outlet property="maxCatObjectsSlider" destination="PMF-GD-CKQ" id="qLK-88-yVz"/>
@@ -189,6 +219,9 @@
                         <outletCollection property="statusIc" destination="W54-pX-iEr" collectionClass="NSMutableArray" id="HYN-ah-R04"/>
                         <outletCollection property="statusIc" destination="Xkb-xK-Ebu" collectionClass="NSMutableArray" id="go6-Ka-5o4"/>
                         <outletCollection property="statusIc" destination="Gcj-gb-XaD" collectionClass="NSMutableArray" id="TWn-ZR-ZSp"/>
+                        <outletCollection property="statusIc" destination="UTB-xQ-SwX" collectionClass="NSMutableArray" id="y1Q-ge-T9U"/>
+                        <outletCollection property="statusIc" destination="eLX-Ki-y1b" collectionClass="NSMutableArray" id="pLU-4c-x2I"/>
+                        <outletCollection property="statusIc" destination="3ZR-GG-SuP" collectionClass="NSMutableArray" id="Pgm-So-13d"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qUT-HE-vnX" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -16,7 +16,7 @@ class jsonStreamReader : BaseObject {
     var requestMade = false;
     var jsBuffScanner = jsonBufferScanner()
     var urlString = "http://192.168.11.54:5000/"
-    let queue = DispatchQueue(label: "streamAnalyzerQueue", qos: .utility)
+    let queue = DispatchQueue(label: "streamAnalyzerQueue", qos: .userInitiated)
     
     func _initialize () -> DROPcategoryTypes? {
     
@@ -159,7 +159,7 @@ class jsonStreamReader : BaseObject {
          
          }
         
-        if jsBuffScanner.objects.count == 0 {
+        if jsBuffScanner.inpipe.count == 0 {
             return nil
             
         }
@@ -167,18 +167,24 @@ class jsonStreamReader : BaseObject {
         
         self.startProcessing()
         
+        //copy data
+        self.jsBuffScanner.shiftInpipe();
+        
         queue.sync {
+            
+            
             
             if let gnuk = self.jsBuffScanner.processBuffers() {
                 
                 for f in gnuk {
                     
-                    let tS = self.uxT()
+                    /*let tS = self.uxT()
                     //let mu = locationMessage (timestamp: tS, lat: ll.latitude, lon: ll.longitude)
                     let o = CommMessage.RunMessage(type: "runStreamUpdate", oCAT: self.myCategory, oID: self.myID, run: f!)
                     
                     //DANGER to do this here , worryAunt gets this too
                     self.SAY(o: o)
+                    */
                     
                     //pipe straigt to RunDataIO to be saved or..
                     if f!.isValid && f!.isClosed(){
@@ -194,8 +200,7 @@ class jsonStreamReader : BaseObject {
                 }
                 
                 
-                print("asdf")
-                let to = 1
+                
             }
             
             _ = self.finishProcessing()

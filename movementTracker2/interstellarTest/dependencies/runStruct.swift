@@ -385,7 +385,10 @@ struct Run : Codable {
 class jsonBufferScanner : BufferConsumer {
     
     var queue = DispatchQueue(label: "jsonBufferDataQueue")
-    var objects = [ String ]();
+    var data = String();
+    
+    var inpipe = String();
+    
     
     var buffer : String = "";
     var prefill = false;
@@ -394,33 +397,73 @@ class jsonBufferScanner : BufferConsumer {
     func addObject(text: String) -> Void {
         queue.sync {
             
-            if self.processing {
+            /*if self.processing {
                 print("DROP ping add object jsonbuffercsa")
                 return
                 
             }    //just drop when we are busy
-            self.objects.append(text)
+ 
+            */
+            self.inpipe = self.inpipe + text;
             
         }
     }
     
+    func shiftInpipe () {
+        
+        if self.processing {
+            return;
+        }
+        queue.sync {
+            
+            self.data = String(self.inpipe);
+            self.inpipe = "" ;
+        }
+        
+        
+    }
+    
     func processBuffers () -> [Run?]? {
+    
+        var validStuff = [Run?]()
+        
+        var found = false;
+        
+        if let gn = self.searchJson(a: self.data) {
+            found = true
+            totalSuccessfullBuffers = totalSuccessfullBuffers + 1
+        
+            validStuff.append(gn)
+        
+        } else {
+    
+            var tum = 1;
+    
+        }
+        
+        if !found { return nil }
+        
+        return validStuff;
+        
+    }
+    
+    /*
+    func processBuffersxx () -> [Run?]? {
         
         if objects.count == 0 {
             return nil
             
         }
+        
+    
+        
         if processing == true {
             return nil //DROPcategoryTypes.busyProcessesing
             
         }
-        /*if processing {
-            
-            //tell worryaunt too about my calamity
-            //DROP(dropCode: DROPcategoryTypes.busyProcessesing, reason: "busy parsing json objects with jsBufScanner")
-            return DROPcategoryTypes.busyProcessesing;
-            
-        }*/
+        
+        
+    
         
         let poB = self.objects
         
@@ -429,7 +472,7 @@ class jsonBufferScanner : BufferConsumer {
             //if this is taking loo long because insanely long string parses, trouble
             
             self.processing = true;
-            //print("async harvest for data")
+            print("async harvest for data")
             
             //print(poB.count)
             
@@ -449,7 +492,7 @@ class jsonBufferScanner : BufferConsumer {
         
         
             //self.objects = nil
-            self.objects = [ String ]();    //empty array
+            //self.objects = [ String ]();    //empty array
             
             //print("async harvest for prcfal")
             self.processing = false;
@@ -458,6 +501,9 @@ class jsonBufferScanner : BufferConsumer {
         return nil
         
     }   //end process buffers
+    
+    */
+    
     var brb = false;
     
     func searchFromMultipleEntries (entries : [String]) -> [Run?]? {
@@ -470,8 +516,9 @@ class jsonBufferScanner : BufferConsumer {
             print("caatc")
         }
         brb = true;
+        let firb = entries;
         
-        for fxf in entries {
+        for fxf in firb {
             
             totalPassedBuffers = totalPassedBuffers + 1
             
@@ -514,7 +561,7 @@ class jsonBufferScanner : BufferConsumer {
     }
     
     func searchJson ( a : String )  -> Run? {
-    
+        //print(a);
         let jss = a.unescaped; //convert to string
         let tit = jss.replacingOccurrences(of: "\\", with: "")
         //let tit = a

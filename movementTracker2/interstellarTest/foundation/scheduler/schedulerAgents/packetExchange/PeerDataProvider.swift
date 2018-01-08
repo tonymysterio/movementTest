@@ -116,6 +116,22 @@ class PeerDataProvider : BaseObject  {
                 let key = r.queryParams[0]
                 let path = "runData/" + key.1 + ".json"
                 
+                //see if we have this baby in cache
+                if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
+                    
+                    if let run = runcache.getRun(hash: key.1){
+                        let encoder = JSONEncoder()
+                        let data = try! encoder.encode(run)
+                        
+                        let naz = (String(data: data, encoding: .utf8)!)
+                        try w.write([UInt8](naz.utf8));
+                        return;
+                        
+                    }
+                    
+                }
+                
+                
                 if let retrievedMessage = try Disk.retrieve(path, from: .caches, as: Run?.self) {
                     
                     let encoder = JSONEncoder()

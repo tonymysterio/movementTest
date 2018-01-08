@@ -147,6 +147,12 @@ class SnapshotCache : BaseObject  {
             
         }
         
+        runStreamReaderDataArrivedObserver.subscribe{ run in
+        
+            //this is via meshnet pull
+            self.addRun( run : run )
+        }
+        
         return  nil
     }
     
@@ -213,6 +219,8 @@ class SnapshotCache : BaseObject  {
             
             
             if gSna.count == 0 {
+                
+                //TODO: purge dirty snaps
                 return nil;
                 
             }

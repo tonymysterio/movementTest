@@ -74,9 +74,9 @@ class RunStreamRecorder : BaseObject  {
         
         do {
             let fname = path + "/" + hash + ".json"
-            try Disk.save(run, to: .caches, as: fname)
-            
-            print("storing captured run \(fname) ")
+            //try Disk.save(run, to: .caches, as: fname)
+            try Disk.save(run, to: .applicationSupport, as: fname)
+            print("storing captured run to app support \(fname) ")
             
             peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
             

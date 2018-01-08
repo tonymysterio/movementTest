@@ -10,7 +10,8 @@ import Foundation
 import Interstellar
 
 var serviceStatusJunctionObserver = Observable<serviceStatusItem>()
-
+var serviceStatusJunctionRefresh = Observable<Bool>()
+var serviceStatusJunctionTotalCachedRuns = Observable<Int>()
 
 
 struct serviceStatusItem {
@@ -23,6 +24,7 @@ struct serviceStatusItem {
     
 }
 
+
 class serviceStatusJunction {
     
     var recording = false;
@@ -31,12 +33,18 @@ class serviceStatusJunction {
     weak var myLiveRunStreamListener : liveRunStreamListener?
     weak var myPedometer : Pedometer?
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
-    let services = ["mapCombiner","PullRunsFromDisk","runCache","snapshotCache","servusMeshnetProvider","PeerDataProvider","PeerDataRequester"];
+    let services = ["mapCombiner","PullRunsFromDisk","runCache","snapshotCache","servusMeshnetProvider","PeerDataProvider","PeerDataRequester","jsonStreamReader","runStreamRecorder","hoodoRunStreamListener"];
     
         
     func initialize () {
         
         print("serviceStatusJunction here")
+        
+        //let scheduler to ping me to keep statuses fresh
+        serviceStatusJunctionRefresh.subscribe { b in
+            self.getServiceStatuses()
+            
+        }
         
     }
     
@@ -46,8 +54,8 @@ class serviceStatusJunction {
         for i in self.services {
             
             if let mlt = storage.getObject(oID: i)  {
-             
-                respo[i]=serviceStatusItem(name: mlt.name, data: 0, ttl: mlt.TTL, active: true);
+                //name can be diff
+                respo[i]=serviceStatusItem(name: mlt.myID, data: 0, ttl: mlt.TTL, active: true);
                 
             } else {
                 
@@ -60,7 +68,7 @@ class serviceStatusJunction {
         
         //print(respo);
         
-        //let lummox=1;
+        let lummox=1;
         
     }
     

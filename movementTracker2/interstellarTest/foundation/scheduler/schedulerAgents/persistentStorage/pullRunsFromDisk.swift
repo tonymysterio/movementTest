@@ -101,7 +101,8 @@ class PullRunsFromDisk: BaseObject  {
             let location1 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon)
             let area = self.getWithinArea
             
-            guard let files = try? Disk.retrieve(self.path, from: .caches, as: [Data].self) else  {
+            guard let files = try? Disk.retrieve(self.path, from: .applicationSupport, as: [Data].self) else  {
+            //guard let files = try? Disk.retrieve(self.path, from: .caches, as: [Data].self) else  {
                 //no files found
                 self.finishProcessing()
                 return

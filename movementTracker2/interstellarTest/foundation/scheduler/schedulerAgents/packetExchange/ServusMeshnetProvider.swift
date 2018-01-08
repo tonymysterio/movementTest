@@ -35,6 +35,13 @@ class ServusMeshnetProvider : BaseObject  {
         explorer.startExploring()
         print("Started exploring nearby peers...")
         
+        peerExplorerKeepAliveObserver.subscribe { toggle in
+         
+            //some data came in thru active connection
+            self._pulse(pulseBySeconds: 60)
+            
+        }
+        
         return nil
     }
     
@@ -45,6 +52,8 @@ class ServusMeshnetProvider : BaseObject  {
         return self._teardown()
         
     }
+    //peerDataRequesterRunArrivedObserver
+    
     
 }
 
