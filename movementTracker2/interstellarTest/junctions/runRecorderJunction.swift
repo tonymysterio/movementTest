@@ -84,10 +84,14 @@ class runRecorderJunction {
         //maybe pulling a current run triggered this
         if let rsr = getRunStreamRecorder(){
             
-            rsr.storeRun(run: run)
+            //set closetime and proper geohash
+            var r2 = run;
+            r2.finalizeRun();
+            rsr.storeRun(run: r2)
             
         }
         
+        //todo: destroy processes for recording a run
         
     }
     

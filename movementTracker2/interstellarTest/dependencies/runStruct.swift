@@ -175,6 +175,16 @@ struct Run : Codable {
    
     var coordinates : [coordinate]
     
+    mutating func finalizeRun () {
+        
+        //called when personal run closes
+        let lac = self.coordinates.last
+        self.closeTime = lac!.timestamp;
+        let gh = Geohash.encode(latitude: lac!.lat, longitude: lac!.lon)
+        self.geoHash = gh;
+        
+    }
+    
     var totalTime : Double {
     
         return closeTime - startTime

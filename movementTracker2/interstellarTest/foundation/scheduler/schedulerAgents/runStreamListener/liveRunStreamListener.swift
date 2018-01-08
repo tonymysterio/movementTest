@@ -68,16 +68,16 @@ class liveRunStreamListener : BaseObject  {
         
     }
     
-    func prime (user : String) {
+    func prime (user : Player) {
         
         let startTime =  Date().timeIntervalSince1970
         
         let mid = startTime;
-        let clan = "camphastur"
+        //let clan = "camphastur"
         let geoHash  = "123"
         let ver = "z.0"
         
-        let run = Run(missionID: mid, user: user, clan: clan, geoHash: geoHash, version: ver, hash: "", startTime: startTime, closeTime: 0, coordinates: [])
+        let run = Run(missionID: mid, user: user.name, clan: user.clan, geoHash: geoHash, version: ver, hash: "", startTime: startTime, closeTime: 0, coordinates: [])
         
         currentRun = run
         
@@ -104,7 +104,10 @@ class liveRunStreamListener : BaseObject  {
     func addRunCoordinate ( timestamp : Double , lat : CLLocationDegrees , lon : CLLocationDegrees) -> DROPcategoryTypes? {
         
         if currentRun == nil {
-            prime(user : "samui@hastur.com")
+            if let pl = playerRoster.getPlayer(name: "samui@hastur.com") {
+                prime(user : pl )
+                
+            }
         }
         
         let inse = currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon))
