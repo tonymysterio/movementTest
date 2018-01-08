@@ -54,6 +54,7 @@
 		2652AD1C1FAAD27400AF3CE5 /* profileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1B1FAAD27400AF3CE5 /* profileVC.swift */; };
 		2652AD1E1FAAD28D00AF3CE5 /* conficVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */; };
 		2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2652AD1F1FAAD73E00AF3CE5 /* configOneVC.swift */; };
+		268A53CE20036A6700ACC613 /* userProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268A53CD20036A6700ACC613 /* userProfile.swift */; };
 		268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23C91FFEF8BB009175BF /* RunCache.swift */; };
 		268C23CE1FFF1A17009175BF /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23CD1FFF1A17009175BF /* SnapshotCache.swift */; };
 		26A0CEFD200305160012BD5B /* serviceStatusJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */; };
@@ -183,6 +184,7 @@
 		2652AD1B1FAAD27400AF3CE5 /* profileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = profileVC.swift; sourceTree = "<group>"; };
 		2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = conficVC.swift; sourceTree = "<group>"; };
 		2652AD1F1FAAD73E00AF3CE5 /* configOneVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = configOneVC.swift; sourceTree = "<group>"; };
+		268A53CD20036A6700ACC613 /* userProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = userProfile.swift; sourceTree = "<group>"; };
 		268C23C91FFEF8BB009175BF /* RunCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunCache.swift; sourceTree = "<group>"; };
 		268C23CB1FFF00F2009175BF /* MapCombinerDEPRECATED.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCombinerDEPRECATED.swift; sourceTree = "<group>"; };
 		268C23CD1FFF1A17009175BF /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
@@ -372,6 +374,7 @@
 		260C5B7F1FE396980020F0AC /* dependencies */ = {
 			isa = PBXGroup;
 			children = (
+				268A53CC20036A5200ACC613 /* userProfile */,
 				260C5B801FE396980020F0AC /* geoHash */,
 				260C5B831FE396980020F0AC /* runStruct.swift */,
 				260C5BAA1FE7848B0020F0AC /* debumess.swift */,
@@ -466,6 +469,14 @@
 				2652AD1D1FAAD28D00AF3CE5 /* conficVC.swift */,
 			);
 			path = config;
+			sourceTree = "<group>";
+		};
+		268A53CC20036A5200ACC613 /* userProfile */ = {
+			isa = PBXGroup;
+			children = (
+				268A53CD20036A6700ACC613 /* userProfile.swift */,
+			);
+			path = userProfile;
 			sourceTree = "<group>";
 		};
 		268C23C81FFEF858009175BF /* caches */ = {
@@ -641,6 +652,7 @@
 				26A0CEFD200305160012BD5B /* serviceStatusJunction.swift in Sources */,
 				2652AD201FAAD73E00AF3CE5 /* configOneVC.swift in Sources */,
 				260C5BAB1FE7848B0020F0AC /* debumess.swift in Sources */,
+				268A53CE20036A6700ACC613 /* userProfile.swift in Sources */,
 				26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */,
 				260C5B8E1FE396980020F0AC /* MapCombiner.swift in Sources */,
 				2652AD1E1FAAD28D00AF3CE5 /* conficVC.swift in Sources */,

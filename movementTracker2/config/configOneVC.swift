@@ -27,6 +27,7 @@ class configOneVC: UIViewController {
     @IBAction func runCacheB(_ sender: Any) {
     }
     
+    @IBOutlet var amountOfUserProfiles: UILabel!
     @IBOutlet var statusIcons: [UIButton]!
     
     @IBOutlet var statusIconCollection: [UIButton]!
@@ -90,7 +91,11 @@ class configOneVC: UIViewController {
         //self.view.backgroundColor = UIColor.flatGreenColorDark()
         //label1.tintColor = viewColors.labelText
         
-        
+        serviceStatusJunctionTotalUserProfiles.subscribe{ cruns in
+            
+            self.amountOfUserProfiles.text = String(cruns);
+            
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {

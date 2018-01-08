@@ -12,7 +12,7 @@ import Interstellar
 var serviceStatusJunctionObserver = Observable<serviceStatusItem>()
 var serviceStatusJunctionRefresh = Observable<Bool>()
 var serviceStatusJunctionTotalCachedRuns = Observable<Int>()
-
+var serviceStatusJunctionTotalUserProfiles = Observable<Int>()
 
 struct serviceStatusItem {
     

@@ -61,6 +61,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         prefSignalJunction.initialize();
         packetExchange.initialize();
         serviceStatus.initialize(); //config screen shows running services
+        playerRoster.initialize();
+        //add own user
+        playerRoster.addPlayerWithCompute(name:"samui",email:"samui@hastur.org")
+        
+
         return true
     }
 

@@ -22,6 +22,9 @@ let prefSignalJunction = preferenceSignalJunction()
 let mapJunction = mapViewJunction()
 let packetExchange = PacketExchangeJunction()
 let serviceStatus = serviceStatusJunction()
+let playerRoster = PlayerRoster();
+
+
 
 //dont put observers here, put them with each producer
 
