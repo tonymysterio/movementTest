@@ -10,6 +10,7 @@ import UIKit
 import SwiftLocation
 import Interstellar
 
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
@@ -27,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
         
         // If you start monitoring significant location changes and your app is subsequently terminated,
         /// the system automatically relaunches the app into the background if a new event arrives.
