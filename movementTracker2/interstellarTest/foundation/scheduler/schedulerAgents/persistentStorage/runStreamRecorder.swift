@@ -102,6 +102,10 @@ class RunStreamRecorder : BaseObject  {
         //if a current run exists, just overwrite it with no mercy
         self.startProcessing()
         
+        //dont store too short runs at all
+        if run.coordinates.count < 10 { return; }
+        
+        
         let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
         let timestamp = Double(run.coordinates.last!.timestamp)
         

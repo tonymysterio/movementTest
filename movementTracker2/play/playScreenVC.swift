@@ -16,7 +16,12 @@ class playScreenVC: UIViewController {
     @IBOutlet weak var recordingStarted: UILabel!
     @IBOutlet weak var totalDistance: UILabel!
     
+    @IBOutlet var currentRunIsValid: UILabel!
+    @IBOutlet var currentRunIsClosed: UILabel!
+    
     var runRecordOn = false;
+    var borkedRunsReceived = 0;
+    
     @IBAction func recordSwitch(_ sender: UISwitch) {
         
         //are we recording? if not switch off
@@ -47,6 +52,12 @@ class playScreenVC: UIViewController {
         
         
     }
+    @IBAction func storeBorkedRun(_ sender: Any) {
+        
+        requestCommitOfCurrentBorkedRunObserver.update(true)
+        //if our run data has dubious stuff, store it for debugging
+        
+    }
     
     @IBAction func transferData(_ sender: UIButton) {
         
@@ -69,8 +80,25 @@ class playScreenVC: UIViewController {
     
     func signalListeners () {
     
+    borkedRunReceivedObserver.subscribe { borkedRun in
+        
+        DispatchQueue.global(qos: .utility).async {
+            self.borkedRunsReceived = self.borkedRunsReceived + 1
+        
+            //runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
+            //probably reading from currentRun, data was fucked
+            self.totalCoordinates.text = "borked";
+            self.totalDistance.text = "runs";
+            self.recordingStarted.text = String(self.borkedRunsReceived);
+        }
+        
+        }
+        
+        
     runAreaProgressObserver.subscribe { currentRun in
-    
+        
+        DispatchQueue.global(qos: .utility).async {
+            
         //update screen
         let coordAm = String(currentRun.coordinates.count)
         let tt = currentRun.totalTime
@@ -94,12 +122,22 @@ class playScreenVC: UIViewController {
         self.totalDistance.text = dis;
         self.recordingStarted.text = guko;
         
+        //notify user
+        
+        
         if currentRun.isClosed() {
             
             let das = "CL!"+dis
             self.totalDistance.text = dis;
+        
+        } else {
+            
+            let distanceOfEndpoints = currentRun.distanceBetweenStartAndEndSpikeFiltered();
+            self.currentRunIsClosed.text = "end dst: \(distanceOfEndpoints)"
+            
         }
         
+        }   //end dispaaaaatch
     }
     
     pedometerMessageObserver.subscribe { pedoMessage in

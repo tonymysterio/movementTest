@@ -18,6 +18,11 @@ var locationMessageObserver = Observable<locationMessage>()
 var requestCurrentLocationObserver = Observable<Bool>()
 var requestCommitOfCurrentRunObserver = Observable<Bool>()
 var requestReadOfCurrentRunObserver = Observable<Bool>()
+var requestCommitOfCurrentBorkedRunObserver = Observable<Bool>()
+
+//runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
+var borkedRunReceivedObserver = Observable<Run>()
+
 
 var currentRunReceivedObserver = Observable<Run>()
 
@@ -88,6 +93,10 @@ class runRecorderJunction {
             var r2 = run;
             r2.finalizeRun();
             rsr.storeRun(run: r2)
+            
+        } else {
+            
+            print("runrecorder junction: dailed to getRunStreamRecorder!");
             
         }
         
@@ -194,6 +203,23 @@ class runRecorderJunction {
     
     }
     
+    func CommitOfCurrentBorkedRun (){
+        
+        //see if we have a pulled run
+        if let mstl = getLiveRunStreamListener() {
+            
+            if let run = mstl.currentRun {
+                
+                if let rdIO = getCurrentRunDataIO() {
+                    rdIO.CommitOfCurrentBorkedRun(run: run);
+                }
+            }
+            
+        }
+        
+        
+    }
+    
     func currentRunReceived (run : Run) {
         
         if recording { return }
@@ -209,7 +235,14 @@ class runRecorderJunction {
         }
         if let mstl = getLiveRunStreamListener() {
             
-            mstl.primeWithRun( run: run )
+            if !mstl.primeWithRun( run: run ) {
+                
+                
+                
+            } else {
+                //the run was garbage, timeouted, whatever, probably got messed up on disk write
+                
+            }
             
         }
         
@@ -357,50 +390,74 @@ class runRecorderJunction {
     init () {
         
         runRecoderToggleObserver.subscribe { toggle in
-            self.recordStatusChange( toggle : toggle)
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.recordStatusChange( toggle : toggle)
+            }
         }
         
         runAreaCompletedObserver.subscribe { run in
-            self.recordCompleted(run : run)
-            
+            //liveRunStreamListener deducts if something is complete or not
+            //DO NOT put this logic elsewhere
+            DispatchQueue.global(qos: .utility).async {
+                self.recordCompleted(run : run)
+            }
         }
         
         LocationLoggerMessageObserver.subscribe
             { locationMessage in
-            self.locationMessageGotFromLocationLogger(locationMessage : locationMessage)
-            
+                DispatchQueue.global(qos: .utility).async {
+                    self.locationMessageGotFromLocationLogger(locationMessage : locationMessage)
+                }
         }
         
         runAreaProgressObserver.subscribe { run in
-            self.runAreaProgress( run : run )
+            
+            //coordinate or event added on the run
+            DispatchQueue.global(qos: .utility).async {
+                self.runAreaProgress( run : run )
+            }
             
         }
         
         requestCurrentLocationObserver.subscribe { toggle in
-            self.requestCurrentLocation()
-            
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.requestCurrentLocation()
+            }
         }
         
         requestCommitOfCurrentRunObserver.subscribe { toggle in
             //user taps a button to save to disk
-            self.CommitOfCurrentRun()
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.CommitOfCurrentRun()
+            }
         }
         
         
         requestReadOfCurrentRunObserver.subscribe{ toggle in
             
             //user taps a button to load from disk
-            self.ReadOfCurrentRun()
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.ReadOfCurrentRun()
+            }
             
         }
         
         currentRunReceivedObserver.subscribe { run in
             
             // currentRunDataIO has retrieved something of a current run
-            self.currentRunReceived( run : run )
+            //this has to be main because it might start a location manager that has to be in
+            //the main queue
+            DispatchQueue.main.async {
+                self.currentRunReceived( run : run )
+            }
             
+        }
+        
+        requestCommitOfCurrentBorkedRunObserver.subscribe{ toggle in
+            //user taps a button to save to disk
+            DispatchQueue.global(qos: .utility).async {
+                self.CommitOfCurrentBorkedRun()
+            }
         }
     }
     

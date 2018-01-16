@@ -57,8 +57,9 @@ class CurrentRunDataIO: BaseObject  {
         
         runAreaProgressObserver.subscribe { run in
             
-            self.CommitOfCurrentRun( run : run )
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.CommitOfCurrentRun( run : run )
+            }
         }
         
         
@@ -69,7 +70,14 @@ class CurrentRunDataIO: BaseObject  {
     func CommitOfCurrentRun ( run: Run ) {
         
         //save current run
-        if self.isProcessing { return }
+        if self.isProcessing {
+            
+            return
+            
+        }
+        
+        
+        
         
         let filename = self.path + "/currentRun.json";
         writeQueue.sync {
@@ -81,7 +89,10 @@ class CurrentRunDataIO: BaseObject  {
                 
                 self.lastInsertTimestamp = Date().timeIntervalSince1970
                 
-                if !run.isClosed() {
+                //do not observe run closes here
+                //run dataIO junction should take care of this
+                
+                /*if !run.isClosed() {
                     
                     
                     _pulse(pulseBySeconds: 600)  //expect more data to follow
@@ -89,12 +100,13 @@ class CurrentRunDataIO: BaseObject  {
                 }   else {
                     
                     runAreaCompletedObserver.update(run)
+                    self.finishProcessing()
                     //runStreamRecorder throws this to disk
                     //self.FinalCommitOfCurrentRun( run : run )
                     return
                     //_pulse(pulseBySeconds: 1)  //get rid of this item as its done its job
                     
-                }
+                }*/
                 
                 self.finishProcessing()
                 
@@ -112,6 +124,46 @@ class CurrentRunDataIO: BaseObject  {
         
     }   //commit of current run
     
+    func CommitOfCurrentBorkedRun ( run: Run ) {
+        
+        //save current run
+        if self.isProcessing {
+            
+            return
+            
+        }
+        
+        let lat = run.coordinates.last!.lat
+        let lon = run.coordinates.last!.lon
+        
+        let nameGeo = Geohash.encode(latitude: lat, longitude: lon)
+        let filename = "borkedRun/"+nameGeo+".json"
+        
+        writeQueue.sync {
+            
+            self.startProcessing()
+            
+            do {
+                try Disk.save(run, to: .applicationSupport, as: filename )
+                
+                self.lastInsertTimestamp = Date().timeIntervalSince1970
+                
+                self.finishProcessing()
+                
+            } catch {
+                // ...
+                //cannot write for some reason
+                
+                self.finishProcessing()
+                _pulse(pulseBySeconds: 600)
+                
+            }
+            
+            
+        }
+        
+    }   //commit of currentBorked run
+    
     //persisting objects need hibernate extend
     override func _hibernate_extend () -> DROPcategoryTypes? {
         
@@ -124,22 +176,56 @@ class CurrentRunDataIO: BaseObject  {
     func ReadOfCurrentRun() {
         
         //fish out current run
+        if self.isProcessing {
+            
+            return
+            
+        }
+        self.startProcessing()
        
         let filename = self.path + "/currentRun.json";
         //this will crash
         //readQueue.sync (){
             
-            if let run = try? Disk.retrieve(filename, from: .applicationSupport, as: Run?.self) {
+            if let data = try? Disk.retrieve(filename, from: .applicationSupport, as: Data.self) {
+                
+                if let j = String(data:data, encoding:.utf8) {
+                    let decoder = JSONDecoder()
+                    if let run = try? decoder.decode(Run.self, from: j.data(using: .utf8)!) {
+                        
+                        print (run.coordinates.count)
+                        print("ReadOfCurrentRun: finished scanning files")
+                        
+                        if !run.isValid {
+                            
+                            //runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
+                            borkedRunReceivedObserver.update(run)
+                            
+                            
+                            return;
+                            
+                        }
+                        
+                        currentRunReceivedObserver.update(run)
+                    }
+                }
+                        
                 
                 
-                print (run?.coordinates.count)
-                print("ReadOfCurrentRun: finished scanning files")
-                //let t = run?.spikeFilteredCoordinates()
-                //tell runRecorderJunction that we are continuing from a run
-                //let tt = run?.totalDistance()
-                //let ttt = run?.isClosed()
-                currentRunReceivedObserver.update(run!)
+                //readQueue.sync {
+                    
+                    //let ruru = run! as Run;
+                    //let t = run?.spikeFilteredCoordinates()
+                    //tell runRecorderJunction that we are continuing from a run
+                    //let tt = run?.totalDistance()
+                    //let ttt = run?.isClosed()
+                
+                    
+                //}
+                
                 _pulse(pulseBySeconds: 600)
+                
+                self.finishProcessing();
                 
                 if !self.isProcessing {
                     
@@ -152,53 +238,12 @@ class CurrentRunDataIO: BaseObject  {
                 
             } else {
                 
+                self.finishProcessing();
                 return
                 
             }
             
-        //}   //and async operazione
         
-            
-            /*
-            guard let files = try? Disk.retrieve(filename, from: .applicationSupport, as: [Data].self) else  {
-                //no files found
-                //self.finishProcessing()
-                return
-            }
-            
-            for i in files {
-                if let j = String(data:i, encoding:.utf8) {
-                    
-                    let decoder = JSONDecoder()
-                    
-                    if let run = try! decoder.decode(Run?.self, from: i) {
-                        
-                        //ignore stuff outside my area
-                        
-                        //send to mapCombiner , hoodoRunStreamListener
-                        print (run.coordinates.count)
-                        print("ReadOfCurrentRun: finished scanning files")
-                        
-                        //tell runRecorderJunction that we are continuing from a run
-                        currentRunReceivedObserver.update(run)
-                        _pulse(pulseBySeconds: 600)
-                        
-                        if !self.isProcessing {
-                            
-                            //get rid of me. runrecorderjunction will wake me up sometime
-                        }
-                        
-                    }
-                    
-                }
-                
-            }
-            
-            
-            self.finishProcessing()
- 
- 
-                */
         
         
     }

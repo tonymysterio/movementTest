@@ -210,6 +210,9 @@ struct Run : Codable {
         coordinates.append(coord)
         closeTime = coord.timestamp
         
+        let gh = Geohash.encode(latitude: coord.lat, longitude: coord.lon)
+        self.geoHash = gh;
+        
         return true
     }
     
@@ -328,6 +331,22 @@ struct Run : Codable {
         return true
         }
         
+    }
+    
+    func distanceBetweenStartAndEndSpikeFiltered () -> Double {
+        
+        if coordinates.count < 10 { return 999999 }
+        
+        guard let pp = spikeFilteredCoordinates() else {
+            return 999999;
+        }
+        
+        let location1 = CLLocation(latitude: (pp.first?.lat)!, longitude: (pp.first?.lon)!)
+        let location2 = CLLocation(latitude: (pp.last?.lat)!, longitude: (pp.last?.lon)!)
+        
+        let d = location1.distance(from: location2)
+        
+        return d;
     }
     
     func isClosed () -> Bool {

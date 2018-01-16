@@ -84,11 +84,16 @@ class liveRunStreamListener : BaseObject  {
         
     }
     
-    func primeWithRun ( run : Run ) {
+    func primeWithRun ( run : Run ) -> Bool {
         
         //when pulling a incomplete run, prime 
         //runrecorderjunction currentRunReceived
+        
+        //check if run is not garbage data
+        
         currentRun = run
+        
+        return true;
         
     }
     
@@ -110,15 +115,12 @@ class liveRunStreamListener : BaseObject  {
             }
         }
         
-        let inse = currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon))
+        guard let inse = currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
+            return DROPcategoryTypes.duplicate
+        }
         
         _pulse(pulseBySeconds: 16000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
         
-        if !inse! {
-            //skips coords that are too close
-            
-            return DROPcategoryTypes.duplicate
-        }
         
         //maybe the map is listening to display my run
         //maybe runRecorderJunction has a currentRunSaver for us to throw this to storage

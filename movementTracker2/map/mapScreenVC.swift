@@ -109,51 +109,20 @@ class mapScreenVC: UIViewController {
         
         LocationLoggerMessageObserver.subscribe
             { locationMessage in
-                
-                if !self.recordingRun {
-                    
-                    //let the user to mess with the map and dont worry about location updates
-                    //in case the user wants to scroll around to see areas of interdust
-                    return;
+                DispatchQueue.global(qos: .utility).async {
+                    self.locationLoggerMessageReceived( loc : locationMessage)
                 }
-                let lc = CLLocation(latitude: locationMessage.lat, longitude: locationMessage.lon)
-                let center = CLLocationCoordinate2D(latitude: lc.coordinate.latitude, longitude: lc.coordinate.longitude)
-                
-                
-                //self.locationMessageGotFromLocationLogger(locationMessage : locationMessage)
-                // Drop a pin at user's Current Location
-                let myAnnotation: MKPointAnnotation = MKPointAnnotation()
-                myAnnotation.coordinate = CLLocationCoordinate2DMake(lc.coordinate.latitude, lc.coordinate.longitude);
-                myAnnotation.title = "Current location"
-                DispatchQueue.main.async {
-                    
-                    self.mapView.setCenter(center,animated: true)
-                    self.mapView.addAnnotation(myAnnotation)
-                    self.mapView?.showsUserLocation = true
-                    
-                }
-                
-        }
+            }
+        
+        
         
         locationMessageObserver.subscribe
             { locationMessage in
-               //runRecorderJunction is sending the last location it knows
-                //if this view is freshly created or the user polls for current location
-                //refresh the view accordingly
                 
-                if self.recordingRun {
-                    
-                    //let the user to mess with the map and dont worry about location updates
-                    //in case the user wants to scroll around to see areas of interdust
-                    return;
+                DispatchQueue.global(qos: .utility).async {
+                    self.locationMessageReceived( loc : locationMessage)
                 }
-                
-                if !self.primeLocation {
-                    self.initialLocation = locationMessage
-                    self.centerMap(lat: locationMessage.lat, lon: locationMessage.lon)
-                    self.primeLocation = true;
-                    
-                }
+               
             }
         
         //we are appearing. screen moving will call this again but ignore from the mapJunction
@@ -364,6 +333,55 @@ class mapScreenVC: UIViewController {
         
     }   //mapSnapshotReceived
     
+    func locationLoggerMessageReceived ( loc : locationMessage) {
+        
+        
+                if !self.recordingRun {
+                    
+                    //let the user to mess with the map and dont worry about location updates
+                    //in case the user wants to scroll around to see areas of interdust
+                    return;
+                }
+                let lc = CLLocation(latitude: loc.lat, longitude: loc.lon)
+                let center = CLLocationCoordinate2D(latitude: lc.coordinate.latitude, longitude: lc.coordinate.longitude)
+                
+                
+                //self.locationMessageGotFromLocationLogger(locationMessage : locationMessage)
+                // Drop a pin at user's Current Location
+                let myAnnotation: MKPointAnnotation = MKPointAnnotation()
+                myAnnotation.coordinate = CLLocationCoordinate2DMake(lc.coordinate.latitude, lc.coordinate.longitude);
+                myAnnotation.title = "Current location"
+        
+                DispatchQueue.main.async {
+                    
+                    //self.mapView.setCenter(center,animated: true)
+                    self.mapView.addAnnotation(myAnnotation)
+                    self.mapView?.showsUserLocation = true
+                    
+                }
+                
+        }
+    
+    func locationMessageReceived ( loc : locationMessage) {
+        //runRecorderJunction is sending the last location it knows
+        //if this view is freshly created or the user polls for current location
+        //refresh the view accordingly
+        
+        if self.recordingRun {
+            
+            //let the user to mess with the map and dont worry about location updates
+            //in case the user wants to scroll around to see areas of interdust
+            return;
+        }
+        
+        if !self.primeLocation {
+            self.initialLocation = loc
+            self.centerMap(lat: loc.lat, lon: loc.lon)
+            self.primeLocation = true;
+            
+        }
+        
+    }
     
 }
 

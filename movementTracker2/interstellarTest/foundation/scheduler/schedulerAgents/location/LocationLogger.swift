@@ -59,6 +59,10 @@ class LocationLogger : BaseObject {
     
     func _initialize () -> DROPcategoryTypes? {
         
+        //DispatchQueue.main.async {
+        
+        
+        
         if (CL==nil){
             CL = CLLocationManager();
         }

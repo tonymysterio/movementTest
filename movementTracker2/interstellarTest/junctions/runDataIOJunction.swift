@@ -13,6 +13,8 @@ var runStreamReaderObserver = Observable<Bool>()
 var runStreamReaderDataArrivedObserver = Observable<Run>()
 var runStreamReaderRawDataArrivedObserver = Observable<Run>()
 
+
+
 class runDataIOJunction {
     
     var recording = false;
