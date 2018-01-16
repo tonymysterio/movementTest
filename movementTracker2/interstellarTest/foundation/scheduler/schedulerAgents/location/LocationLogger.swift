@@ -38,6 +38,8 @@ class LocationLogger : BaseObject {
     
     var CL : CLLocationManager?
     
+    var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
+    
     //kalman filter to clean the gps spikes
     var hcKalmanFilter : HCKalmanAlgorithm?
     //var myNewStartLocation : CLLocation?     //prime this
@@ -175,7 +177,13 @@ class LocationLogger : BaseObject {
         return nil
     }
     
-    
+    func requestCurrentLocation () -> locationMessage {
+        
+        //this gets updated as the adapter gives more data
+        return self.initialLocation;
+        
+        
+    }
         
     override func _housekeep_extend() -> DROPcategoryTypes? {
         
@@ -358,7 +366,7 @@ extension LocationLogger: CLLocationManagerDelegate {
         let tS = self.uxT()
         //let mu = locationMessage (timestamp: tS, lat: ll.latitude, lon: ll.longitude)
         //let o = CommMessage.LocationMessage(type: "locationUpdate", oCAT: myCategory, oID: myID, timestamp: tS, lat: ll.latitude, lon: ll.longitude)
-        
+        self.initialLocation = locationMessage( timestamp : 0 , lat : lastLocation.coordinate.latitude, lon: lastLocation.coordinate.longitude )
         LocationLoggerMessageObserver.update(locationMessage(timestamp: tS, lat: ll.latitude, lon: ll.longitude))
         
         self._pulse(pulseBySeconds: 60 )

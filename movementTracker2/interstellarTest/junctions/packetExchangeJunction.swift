@@ -47,8 +47,9 @@ class PacketExchangeJunction {
         
         packetExchangeRequestObserver.subscribe { toggle in
             
-            self.initiateMeshnet();
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.initiateMeshnet();
+            }
         }
         
         peerExplorerDidSpotPeerObserver.subscribe { toggle in
@@ -61,7 +62,9 @@ class PacketExchangeJunction {
         peerExplorerKeepAliveObserver.subscribe { toggle in
             
             //make servus stay around for longe
-            self.peerExplorerKeepAlive()
+            DispatchQueue.global(qos: .utility).async {
+                self.peerExplorerKeepAlive()
+            }
             
         }
         peerExplorerDidDeterminePeerObserver.subscribe { peer in
@@ -74,33 +77,39 @@ class PacketExchangeJunction {
             //create one if not found
             
             //peerDataRequester initiates a JSON pull from this host
-            self.pollNewPeerForData(peer: peer)
+            DispatchQueue.global(qos: .utility).async {
+                self.pollNewPeerForData(peer: peer)
+            }
         }
         
         peerExplorerDidLosePeerObserver.subscribe() { peer in
             
             //var id = peer.identifier    //host cannot be seen now
-            self.peerExplorerDidLosePeer(peer: peer)
+            DispatchQueue.global(qos: .utility).async {
+                self.peerExplorerDidLosePeer(peer: peer)
+            }
             
         }
         peerDataRequesterRunArrivedObserver.subscribe { run in
             
+            DispatchQueue.global(qos: .utility).async {
             //peer data requester got a run over the meshlink
-            if let hrr = self.addHoodoRunStreamListener() {
+                if let hrr = self.addHoodoRunStreamListener() {
                 
                 //its there
                 hrr.addRun(run: run)
                 
                 
-            }
+                }
             
-            if let strr = self.addRunStreamRecorder(){
+                if let strr = self.addRunStreamRecorder(){
                 
                 //this will page us if the run is actually stored
                 strr.storeRun(run: run)
                 
-            }
+                }
             
+            }
         }
         /* extension AppDelegate: ExplorerDelegate {
          func explorer(_ explorer: Explorer, didSpotPeer peer: Peer) {

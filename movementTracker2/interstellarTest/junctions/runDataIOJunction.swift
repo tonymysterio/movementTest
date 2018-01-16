@@ -129,19 +129,23 @@ class runDataIOJunction {
     init () {
         
         runStreamReaderObserver.subscribe { toggle in
-            self.streamPullStatusChange( toggle : toggle)
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.streamPullStatusChange( toggle : toggle)
+            }
         }
         
         runStreamReaderDataArrivedObserver.subscribe { run in
             //run data picked from stream. save it
-            self.runStreamReaderDataArrived(run : run)
+            DispatchQueue.global(qos: .utility).async {
+                self.runStreamReaderDataArrived(run : run)
+            }
         }
         
         peerDataRequesterRunArrivedSavedObserver.subscribe { run in
             //runstream recorder has saved the run
-            self.peerDataRequesterRunArrivedSaved()
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.peerDataRequesterRunArrivedSaved()
+            }
         }
     }
     

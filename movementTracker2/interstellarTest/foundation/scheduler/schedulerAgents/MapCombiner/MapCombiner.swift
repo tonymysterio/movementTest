@@ -53,9 +53,9 @@ class MapCombiner : BaseObject  {
     func _initialize () -> DROPcategoryTypes? {
         
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
-        self.name = "mapCombiner"
-        self.myID = "mapCombiner"
-        self.myCategory = objectCategoryTypes.generic
+        //self.name = "mapCombiner"
+        //self.myID = "mapCombiner"
+        self.myCategory = objectCategoryTypes.mapCombiner
         
         //map viewcontroller is the only one who needs heaps of run data possibly
         /*if self.isLowPowerModeEnabled() {
@@ -125,8 +125,9 @@ class MapCombiner : BaseObject  {
             //lessen processing load
             
             if self.isProcessing { return }
-            self.addRun( run : run )
-                
+            DispatchQueue.global(qos: .utility).async {
+                self.addRun( run : run )
+            }
         }
         
         //hoodoRunStreamListener pages us when it reads a run from stream etc
@@ -134,8 +135,9 @@ class MapCombiner : BaseObject  {
             { run in
                 
                 if self.isProcessing { return }
-                self.addRun( run : run )
-                
+                DispatchQueue.global(qos: .utility).async {
+                    self.addRun( run : run )
+                }
         }
         
         if hadCachedData {
@@ -162,6 +164,34 @@ class MapCombiner : BaseObject  {
             }
         }
         return nil
+    }
+    
+    func closeEnoughTo ( locMessage : locationMessage ) -> Bool {
+        
+        //when trying to create a new mapCombiner, we might be asked are you already doing the job
+        if self.terminated { return false; }
+        
+        let arDif = locMessage.timestamp - self.getWithinArea;
+        //if the request is for a bigger chunk of the map, autolose
+        if arDif > 1000 {
+            
+            return false;
+        }
+        
+        let location1 = CLLocation(latitude: locMessage.lat, longitude: locMessage.lon)
+        let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
+        
+        let d = location1.distance(from: location2)
+        
+        //clearly outside my area
+        if d > self.getWithinArea {
+            return true;
+        }
+        
+        
+        
+        return false;
+        
     }
     
     func addRun ( run : Run ) {

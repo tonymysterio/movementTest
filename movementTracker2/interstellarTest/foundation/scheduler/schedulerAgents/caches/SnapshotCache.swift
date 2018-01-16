@@ -115,6 +115,7 @@ class SnapshotCache : BaseObject  {
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.purgeCaches  //release memory thru _purge
         
+        //would be better do dirty snaps on housekeep
         
         //disappears
         _pulse(pulseBySeconds: 60)
@@ -141,16 +142,18 @@ class SnapshotCache : BaseObject  {
         runReceivedObservable.subscribe{ run in
             
             //disk reader vibes with this
-            
-            self.addRun( run : run )
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.addRun( run : run )
+            }
             
         }
         
         runStreamReaderDataArrivedObserver.subscribe{ run in
         
             //this is via meshnet pull
-            self.addRun( run : run )
+            DispatchQueue.global(qos: .utility).async {
+                self.addRun( run : run )
+            }
         }
         
         return  nil

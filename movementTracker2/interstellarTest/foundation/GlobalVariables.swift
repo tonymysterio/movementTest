@@ -41,9 +41,9 @@ enum objectCategoryTypes: String {
     case motionlistener = "motionlistener"  //listens to coreMotion events
     case locationlistener = "locationlistener" //listens to coreLocation events
     case cache = "cache" //cache for something
-    
+    case mapCombiner = "mapCombiner";
     static func allValues() -> [objectCategoryTypes] {
-        return [.generic, .user, .group, .debugger, .uniqueServiceProvider ,.motionlistener , .locationlistener]
+        return [.generic, .user, .group, .debugger, .uniqueServiceProvider ,.motionlistener , .locationlistener, .cache, .mapCombiner]
     }
 }
 

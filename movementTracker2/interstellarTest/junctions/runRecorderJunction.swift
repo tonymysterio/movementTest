@@ -150,6 +150,8 @@ class runRecorderJunction {
     }
     func requestCurrentLocation () {
         
+        
+        
         //map view is requesting for location probably
         if (self.myLocationTracker == nil) {
             initLocationServices()
@@ -372,18 +374,26 @@ class runRecorderJunction {
         
         if let mlt = storage.getObject(oID: "locationLogger") as! LocationLogger? {
             
-            myLocationTracker = mlt
-            _ = myLocationTracker?._pulse(pulseBySeconds: 600000)
+            //myLocationTracker = mlt
+            mlt._pulse(pulseBySeconds: 600000)
+            
+            //will talk thru observable
+            //map screen listens to this
+            LocationLoggerMessageObserver.update (mlt.requestCurrentLocation());
+            
+            //if this exists, we could pry the current location now
+            
             
         } else {
             
-            let myLocationTracker = LocationLogger( messageQueue : messageQueue )
-            myLocationTracker._initialize()
-            scheduler.addObject(oID: myLocationTracker.myID, o: myLocationTracker)
-            //myLocationTracker.addListener(oCAT: worryAunt.myCategory, oID: worryAunt.myID, name: worryAunt.name)
-            myLocationTracker._pulse(pulseBySeconds: 60000)
+            DispatchQueue.main.async {
+                let myLocationTracker = LocationLogger( messageQueue : messageQueue )
+                myLocationTracker._initialize()
+                scheduler.addObject(oID: myLocationTracker.myID, o: myLocationTracker)
+                //myLocationTracker.addListener(oCAT: worryAunt.myCategory, oID: worryAunt.myID, name: worryAunt.name)
+                myLocationTracker._pulse(pulseBySeconds: 60000)
             
-            
+            }
         }
         
     }
@@ -420,7 +430,11 @@ class runRecorderJunction {
         }
         
         requestCurrentLocationObserver.subscribe { toggle in
-            DispatchQueue.global(qos: .userInitiated).async {
+            
+            //this has to be main because it might start a location manager that has to be in
+            //the main queue
+            DispatchQueue.global(qos: .utility).async {
+            
                 self.requestCurrentLocation()
             }
         }

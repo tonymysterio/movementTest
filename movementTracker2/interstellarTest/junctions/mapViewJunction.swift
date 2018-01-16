@@ -50,7 +50,9 @@ class mapViewJunction {
         
         mapCombinerToggleObserver.subscribe{ toggle in
             
-            if toggle {
+            DispatchQueue.global(qos: .utility).async {
+                
+                if toggle {
                 
                 //just create a new one, all the battery power in the world
                 self.addMapCombiner(locMessage: locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 ))
@@ -64,40 +66,43 @@ class mapViewJunction {
                 
                 mc.scanForRuns()
                 
-            } else {
+                } else {
                 
                 //scheduler pages all combiner with quite
                 scheduler.removeObjectsByName(name: "mapCombiner")
                 
-            }
+                }
             
+            }
         }
         
         mapCombinerToleranceObserver.subscribe{ tolerance in
-            
-            //adjust simplifier tolerance
-            self.mapCombinerToleranceSet ( tolerance : tolerance)
-            
+            DispatchQueue.global(qos: .utility).async {
+                //adjust simplifier tolerance
+                self.mapCombinerToleranceSet ( tolerance : tolerance)
+            }
         }
         
         mapFilteringModeToggleObserver.subscribe { filteringMode in
             
             //tell MapCombiner to change mode
             //self.recordCompleted(run : run)
-            self.mapFilteringModeToggle(filteringMode : filteringMode)
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.mapFilteringModeToggle(filteringMode : filteringMode)
+            }
         }
         
         requestForMapCombiner.subscribe {locationMessage in
             
-            self.addMapCombiner(locMessage : locationMessage )
-            
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.addMapCombiner(locMessage : locationMessage )
+            }
         }
         
         requestForMapDataProvider.subscribe {locationMessage in
-            
-            self.addMapDataProvider(locMessage : locationMessage )
-            
+            DispatchQueue.global(qos: .utility).async {
+                self.addMapDataProvider(locMessage : locationMessage )
+            }
         }
         
         
@@ -130,13 +135,17 @@ class mapViewJunction {
     func initialize () {
         
         print("mapViewJunction here")
-        self.addRunCache();
-        self.addSnapCache();
         
-        //detect a clean install without snapcaches
-        //if no snaps on disk, fire pullruns from disk to give our run cache some data
-        self.addMapDataProvider ( locMessage : self.initialLocation );
+        //DispatchQueue.global(qos: .utility).async {
+            
+            self.addRunCache();
+            self.addSnapCache();
         
+            //detect a clean install without snapcaches
+            //if no snaps on disk, fire pullruns from disk to give our run cache some data
+            self.addMapDataProvider ( locMessage : self.initialLocation );
+        
+        //}
         
     }
     
@@ -186,9 +195,49 @@ class mapViewJunction {
         
     }
     
+    func getLocalMapCombiners (locMessage : locationMessage) -> Bool {
+        
+        //check if we have somebody working on this
+        
+        
+        //returns array of ID's
+        if let mcs = scheduler.getCategoryObjects(oCAT: .mapCombiner ) {
+            
+            for i in mcs {
+                
+                print(i);
+                if let mm = scheduler.getObject(oID: i) as! MapCombiner? {
+                    
+                    //if the mapCombiner thinks hes got it, returns true
+                    if mm.closeEnoughTo(locMessage : locMessage) {
+                        print("on the job \(i) for lat \(locMessage.lat) lon \(locMessage.lon) dsi \(locMessage.timestamp)");
+                        return true;
+                    }
+                    
+                    
+                }
+                
+            }
+            
+            
+        }
+        
+        
+        return false;
+        
+    }
+    
+    
     func addMapCombiner ( locMessage : locationMessage ){
         
         //cad add multiple
+        
+        let someBodyOnTheJobAlready = self.getLocalMapCombiners(locMessage:locMessage);
+        if someBodyOnTheJobAlready {
+            
+            return;
+        }
+        
         //keep caching here. send snapshot if cached
         var gwa :Double = 2500;
         if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
@@ -197,10 +246,12 @@ class mapViewJunction {
             //calculate simplification level in mapcombiner
             gwa = locMessage.timestamp;
         }
+        let name = "mapCombiner_"+Geohash.encode(latitude: locMessage.lat, longitude: locMessage.lon) + "_" + String(locMessage.timestamp);
+        
         
         let mapCombiner = MapCombiner( messageQueue : nil );
-        mapCombiner.myID = "mapCombiner";
-        mapCombiner.name = "mapCombiner";
+        mapCombiner.myID = name; //"mapCombiner";
+        mapCombiner.name = name //"mapCombiner";
         mapCombiner.myCategory = objectCategoryTypes.generic
         mapCombiner._pulse(pulseBySeconds: 600);
         mapCombiner.initialLocation = locMessage;   //make it look at the right place

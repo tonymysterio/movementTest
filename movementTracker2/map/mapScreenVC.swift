@@ -29,6 +29,7 @@ class mapScreenVC: UIViewController {
     var primeLocation = false;
     var refreshingMapPolygons = false;
     var refreshingMapPolygonsBreak = false;
+    var isVisible = false;
     
     @IBAction func locatorButtonTap(_ sender: Any) {
         
@@ -100,9 +101,11 @@ class mapScreenVC: UIViewController {
             
             //got a snapshot from mapCombiner
             //quickly throw it in the queue and get out of observer handler
-            self.mapRenderQueue.sync{
+            //self.mapRenderQueue.sync{
+            if self.isVisible {
                 self.mapSnapshotReceived( mapSnap : mapSnap )
             }
+            //}
             
             
         }
@@ -137,8 +140,14 @@ class mapScreenVC: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        
+        self.isVisible = false;
+        
+    }
     override func viewDidAppear(_ animated: Bool) {
         
+        self.isVisible = true;
         //let overlays = mapView.overlays
         //mapView.removeOverlays(overlays)
         
@@ -168,6 +177,14 @@ class mapScreenVC: UIViewController {
         
         //the map anim triggers movement that triggers snapshot pull automatically
         //only make sure that map gets combined somehow
+        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+            //try to get a snap to display immeziately
+            if let snip = snapcache.getApplicableSnapshot(lat: self.initialLocation.lat, lon: self.initialLocation.lon, getWithinArea: self.regionRadius ) {
+                self.mapSnapshotReceived(mapSnap: snip);
+                
+            }
+        }
         
         self.browsedToLocation(lat: self.initialLocation.lat, lon: self.initialLocation.lon);
         
@@ -204,41 +221,46 @@ class mapScreenVC: UIViewController {
         //even on a run, let him check out areas of interdust
         dataOperationQueue.async {
             
-        
-        if let radius = self.mapView?.currentRadius() {
-            
-            self.regionRadius = radius;
-            self.initialLocation = locationMessage(timestamp: radius, lat: lat, lon: lon)
-            
-        }
-        
-        //detect significant location change
-        var significantLocationChange = false;
-        let l1 = CLLocation(latitude: lat, longitude: lon);
-        let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
-        let d = l1.distance(from: l2)
-        if (d > 150000) {
-            significantLocationChange = true;
-        }
-        
-        
-        //tell mapviewJunction about our desire
-        //mapcombiner will ignore if the request was too close to current
-        
-        
-        if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
-            
-            //try to get a snap to display immeziately
-            if let snip = snapcache.getApplicableSnapshot(lat: self.initialLocation.lat, lon: self.initialLocation.lon, getWithinArea: self.regionRadius ) {
-                self.mapSnapshotReceived(mapSnap: snip);
+            //detect significant location change
+            var significantLocationChange = false;
+            let l1 = CLLocation(latitude: lat, longitude: lon);
+            let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
+            let d = l1.distance(from: l2)
+            if (d > 150000) {
+                significantLocationChange = true;
+            }
+            print ("drag distance \(d)");
+            if (d < 100) {
                 return;
             }
-        }
         
-        requestForMapCombiner.update(self.initialLocation)
+            if let radius = self.mapView?.currentRadius() {
+            
+                self.regionRadius = radius;
+                //self.initialLocation = locationMessage(timestamp: radius, lat: lat, lon: lon)
+            
+            }
+            let targetLocation = locationMessage(timestamp: self.regionRadius, lat: lat, lon: lon);
+        
+        
+            //tell mapviewJunction about our desire
+            //mapcombiner will ignore if the request was too close to current
+        
+        
+            if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+            
+            //try to get a snap to display immeziately
+            if let snip = snapcache.getApplicableSnapshot(lat: lat, lon: lon, getWithinArea: self.regionRadius ) {
+                self.mapSnapshotReceived(mapSnap: snip);
+                return;
+                }
+            }
+        
+        requestForMapCombiner.update(targetLocation)
+            
         if significantLocationChange {
             print("SIGnificant area change \(d)m. ask for disk data");
-            requestForMapDataProvider.update(self.initialLocation);
+            requestForMapDataProvider.update(targetLocation);
         }
         
         //let mapview junction to decide to kick in the disk reader
@@ -266,6 +288,8 @@ class mapScreenVC: UIViewController {
             print ("dup mapsnap")
             return;
         }
+        
+        self.mapRenderQueue.sync{
         
         self.lastDisplayedSnapshotID = mapSnap.id;
         
@@ -330,7 +354,7 @@ class mapScreenVC: UIViewController {
         }   //loop all drawables
         
         
-        
+        }   //end render queue
     }   //mapSnapshotReceived
     
     func locationLoggerMessageReceived ( loc : locationMessage) {
