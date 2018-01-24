@@ -22,6 +22,9 @@ var mapCombinerToggleObserver = Observable<Bool>()
 //for setting simplification level
 var mapCombinerToleranceObserver = Observable<Float>()
 
+
+var stopAllMapCombinersObserver = Observable<Float>()
+
 var mapFilteringModeToggleObserver = Observable<mapFilteringMode>()
 var currentLocationMessageObserver = Observable<locationMessage>()
 var mapSnapshotObserver = Observable<mapSnapshot>()
@@ -46,7 +49,13 @@ class mapViewJunction {
     
     init () {
         
-        
+        stopAllMapCombinersObserver.subscribe{ toggle in
+            
+            //DispatchQueue.global(qos: .utility).async {
+                
+                self.stopAllMapCombiners();
+            //}
+        }
         
         mapCombinerToggleObserver.subscribe{ toggle in
             
@@ -195,6 +204,27 @@ class mapViewJunction {
         
     }
     
+    func stopAllMapCombiners () {
+        
+        //exiting map screen, getting into data exchange.. flush dat shit
+        //maybe extend so that only outside areas are stopped
+        
+        //returns array of ID's
+        if let mcs = scheduler.getCategoryObjects(oCAT: .mapCombiner ) {
+            
+            for i in mcs {
+                
+                print(i);
+                if let mm = scheduler.getObject(oID: i) as! MapCombiner? {
+                    mm._finalize();
+                    print("terminated \(i) ");
+                }
+            }
+        
+        }
+    }
+    
+    
     func getLocalMapCombiners (locMessage : locationMessage) -> Bool {
         
         //check if we have somebody working on this
@@ -270,6 +300,13 @@ class mapViewJunction {
     
     func addMapDataProvider ( locMessage : locationMessage ){
         
+        //requestForMapDataProvider
+        if let runcache = storage.getObject(oID: "PullRunsFromDisk") as! PullRunsFromDisk?  {
+            
+            print("requestForMapDataProvider requested via mapviewjunction on addMapDataProvider. already running, deny")
+            return;
+        }
+        
         var gwa : Double = 2500;
         if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
             //sneaking view radius through timestamp, naughty
@@ -283,8 +320,12 @@ class mapViewJunction {
         //ignore runs from outside my scope
         mc.initialLocation = locMessage;
         mc.getWithinArea = gwa; //self.getWithinArea;
-        scheduler.addObject(oID: mc.myID, o: mc)
-        mc._initialize()
+        mc.name = "PullRunsFromDisk"
+        mc.myID = "PullRunsFromDisk"
+        mc.myCategory = objectCategoryTypes.uniqueServiceProvider
+        
+        mc._initialize();
+        scheduler.addObject(oID: mc.myID, o: mc);
         
         mc.scanForRuns()
         

@@ -125,10 +125,11 @@ class liveRunStreamListener : BaseObject  {
         //maybe the map is listening to display my run
         //maybe runRecorderJunction has a currentRunSaver for us to throw this to storage
         
-        runAreaProgressObserver.update(currentRun!)     //
+        //runAreaProgressObserver.update(currentRun!)     //
         
         if !(currentRun?.isClosed())! {
             
+            runAreaProgressObserver.update(currentRun!)
             return nil
         }
         

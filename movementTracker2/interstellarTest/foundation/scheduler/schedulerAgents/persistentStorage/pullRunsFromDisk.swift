@@ -17,7 +17,7 @@ var runReceivedObservable = Observable<Run>()
 
 class PullRunsFromDisk: BaseObject  {
 
-    let queue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .utility)
+    let queue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .background)
     let path = "runData"
     //filter runs by area eventually
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
@@ -110,7 +110,9 @@ class PullRunsFromDisk: BaseObject  {
             //print(files);
             for i in files {
                 
-                if let j = String(data:i, encoding:.utf8) {
+                //queue.async (){
+                    
+                    if let j = String(data:i, encoding:.utf8) {
                     
                     
                     
@@ -144,6 +146,8 @@ class PullRunsFromDisk: BaseObject  {
                     }
                 
                 }   //decipherable data
+                    
+                //}   //end async
             
             }   //all data
             
@@ -160,7 +164,11 @@ class PullRunsFromDisk: BaseObject  {
         
         }   //and async operazione
         
-        func scanForRunHashes()  {
+        
+    }
+    
+        
+    func scanForRunHashes()  {
             
             //peerDataProvider wants to know
             //peerDataExhanger wants to know
@@ -186,5 +194,5 @@ class PullRunsFromDisk: BaseObject  {
             
         }   //end of scan run hashes
         
-    }
+    
 }

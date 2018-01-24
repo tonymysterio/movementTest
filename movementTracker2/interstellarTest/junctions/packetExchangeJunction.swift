@@ -154,11 +154,13 @@ class PacketExchangeJunction {
         
         //when data connection is lost, scheduler will page PeerDataProvider to shut down immediately
         
+        //peer data provider needs hashes. look at cache first
+        
         //the dataPeerProvider needs to know about my hash situation
         //use PullRunsFromDisk to get loads and loads of hashes
-        if let dp = self.addHashSetProvider() {
+        /*if let dp = self.addHashSetProvider() {
             dp.scanForRuns()
-        }
+        }*/
         
         //stop any mapcombiners
         
@@ -229,6 +231,29 @@ class PacketExchangeJunction {
         myPeerDataProvider._initialize()
         myPeerDataProvider._pulse(pulseBySeconds: 120);
         
+        //read hashes from cache to prime me. the code in primeMyRunHashes is copied from readFromDisk
+        //do
+        
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            if let cachedHashes = cache.cachedHashes() {
+                
+                if let cuha = cache.cachedUserHashes() {
+                    
+                    for i in cuha {
+                        
+                        myPeerDataProvider.myExhangedHashes.insertForUser(user: i[0], hash: i[1])
+                        
+                    }
+                    //tell peer data provider what we got
+                    //peerDataProviderExistingHashesObserver.update(self.myExhangedHashes);
+                }
+                
+            }
+            
+        }
+        
+        //myPeerDataProvider.primeMyRunHashes();
+        
         if scheduler.addObject(oID: myPeerDataProvider.myID, o: myPeerDataProvider ){
             //myLocationTracker?.addListener(oCAT: myLiveRunStreamListener.myCategory, oID: myLiveRunStreamListener.myID, name: myLiveRunStreamListener.name)
             
@@ -242,6 +267,8 @@ class PacketExchangeJunction {
     
     func addHashSetProvider () -> PullRunsFromDisk? {
         //comes from mapView
+        //if there is something on cache, prime
+        
         
         if let mlt = storage.getObject(oID: "pullRunsFromDisk") as! PullRunsFromDisk? {
             

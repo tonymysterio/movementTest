@@ -191,22 +191,22 @@ class CurrentRunDataIO: BaseObject  {
                 
                 if let j = String(data:data, encoding:.utf8) {
                     let decoder = JSONDecoder()
-                    if let run = try? decoder.decode(Run.self, from: j.data(using: .utf8)!) {
+                    if let run = try? decoder.decode(Run?.self, from: j.data(using: .utf8)!) {
                         
-                        print (run.coordinates.count)
+                        print (run!.coordinates.count)
                         print("ReadOfCurrentRun: finished scanning files")
                         
-                        if !run.isValid {
+                        if !run!.isValid {
                             
                             //runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
-                            borkedRunReceivedObserver.update(run)
+                            borkedRunReceivedObserver.update(run!)
                             
                             
                             return;
                             
                         }
                         
-                        currentRunReceivedObserver.update(run)
+                        currentRunReceivedObserver.update(run!)
                     }
                 }
                         

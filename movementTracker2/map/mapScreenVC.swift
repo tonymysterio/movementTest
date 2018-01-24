@@ -259,6 +259,9 @@ class mapScreenVC: UIViewController {
         requestForMapCombiner.update(targetLocation)
             
         if significantLocationChange {
+            
+            //stop all other mapcombining
+            stopAllMapCombinersObserver.update(1);
             print("SIGnificant area change \(d)m. ask for disk data");
             requestForMapDataProvider.update(targetLocation);
         }
@@ -398,7 +401,27 @@ class mapScreenVC: UIViewController {
             return;
         }
         
+        //getting a message here with the init location being different might mean a significant location change!
+        var significantLocationChange = false;
+        let l1 = CLLocation(latitude: loc.lat, longitude: loc.lon);
+        let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
+        let d = l1.distance(from: l2)
+        if (d > 150000) {
+            significantLocationChange = true;
+            //meshnet is interested in sig location change
+            //caches too for purging unrelated data
+            //diskreader?
+            //purge all map combining happening a million miles away
+            //fire the observer here because we want to keep tornio visible until
+            //heading to current for tax... i mean debugging purposes
+        }
+        
+        
         if !self.primeLocation {
+            
+            
+            
+            
             self.initialLocation = loc
             self.centerMap(lat: loc.lat, lon: loc.lon)
             self.primeLocation = true;

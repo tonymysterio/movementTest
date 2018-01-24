@@ -181,10 +181,29 @@ class PeerDataProvider : BaseObject  {
         return self._teardown()
     }
     
-    func primeMyRunHashes ( hashes : [String]) {
+    func primeMyRunHashes () {
         
         //query pullRunsFromDisk for this
         //self.server?.GET
+        
+        //normally this should not be on cache
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            if let cachedHashes = cache.cachedHashes() {
+                
+                if let cuha = cache.cachedUserHashes() {
+                    
+                    for i in cuha {
+                        
+                        self.myExhangedHashes.insertForUser(user: i[0], hash: i[1])
+                        
+                    }
+                    //tell peer data provider what we got
+                    //peerDataProviderExistingHashesObserver.update(self.myExhangedHashes);
+                }
+                
+            }
+            
+        }
         
     }
     
