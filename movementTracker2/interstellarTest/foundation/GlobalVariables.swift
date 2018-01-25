@@ -16,7 +16,7 @@ let storage = MainStorageForObjects()
 let messageQueue = MessageQueue(storage: storage)
 let scheduler = Scheduler( storage: storage ,messageQueue : messageQueue );
 
-let runRecorder = runRecorderJunction() //listens to run recording requests
+let runRecorderJunct = runRecorderJunction() //listens to run recording requests
 let runDataIO = runDataIOJunction() //pulling sending run dataaz
 let prefSignalJunction = preferenceSignalJunction()
 let mapJunction = mapViewJunction()

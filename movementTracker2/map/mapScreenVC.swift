@@ -46,11 +46,24 @@ class mapScreenVC: UIViewController {
         
     }
     
+    func getRunStreamRecorderStatus () -> Bool {
+        
+        //see if we have a live run recorder
+        //do this on screen init
+        
+        let s = runRecorderJunct.getRunStreamRecorderStatus();
+        self.recordingRun = s;
+            
+        return s;
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         // let gg = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
         
+        //see if we are recording
+        _ = getRunStreamRecorderStatus();
         
         self.centerMap(lat: self.initialLocation.lat, lon: self.initialLocation.lon)
         
@@ -75,7 +88,7 @@ class mapScreenVC: UIViewController {
         }
         
         
-        runRecoderToggleObserver.subscribe { toggle in
+        /*runRecoderToggleObserver.subscribe { toggle in
             if !toggle {
                 
                 self.recordingRun = false;
@@ -86,7 +99,7 @@ class mapScreenVC: UIViewController {
                 
             }
             
-        }
+        }*/
         
         //when mapCombiner finds something that is going to be displayed on the screen,
         //notify user with something, data is incoming!
@@ -112,9 +125,9 @@ class mapScreenVC: UIViewController {
         
         LocationLoggerMessageObserver.subscribe
             { locationMessage in
-                DispatchQueue.global(qos: .utility).async {
+                //DispatchQueue.global(qos: .utility).sync {
                     self.locationLoggerMessageReceived( loc : locationMessage)
-                }
+                //}
             }
         
         
@@ -122,9 +135,9 @@ class mapScreenVC: UIViewController {
         locationMessageObserver.subscribe
             { locationMessage in
                 
-                DispatchQueue.global(qos: .utility).async {
+                //DispatchQueue.global(qos: .utility).sync {
                     self.locationMessageReceived( loc : locationMessage)
-                }
+                //}
                
             }
         
@@ -148,6 +161,10 @@ class mapScreenVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         
         self.isVisible = true;
+        
+        //see if we are recording
+        _ = getRunStreamRecorderStatus();
+        
         //let overlays = mapView.overlays
         //mapView.removeOverlays(overlays)
         
@@ -198,27 +215,36 @@ class mapScreenVC: UIViewController {
             //in case the user wants to scroll around to see areas of interdust
             return;
         }*/
-        if let radius = self.mapView?.currentRadius() {
+        self.mapRenderQueue.sync{
             
-            self.regionRadius = radius;
+            if let radius = self.mapView?.currentRadius() {
             
-        }
+                self.regionRadius = radius;
+            
+            }
         
-        let lc = CLLocation(latitude: lat, longitude: lon)
+            let lc = CLLocation(latitude: lat, longitude: lon)
         
-        let center = CLLocationCoordinate2D(latitude: lc.coordinate.latitude, longitude: lc.coordinate.longitude)
+            let center = CLLocationCoordinate2D(latitude: lc.coordinate.latitude, longitude: lc.coordinate.longitude)
         
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
         
-        DispatchQueue.main.async {
-            self.mapView.setRegion(region, animated: true)
-        }
+            DispatchQueue.main.async {
+                self.mapView.setRegion(region, animated: true)
+            
+            }
+            
+        }   //renderQueue
+        
+        
     }
     
     func browsedToLocation ( lat : CLLocationDegrees , lon: CLLocationDegrees ) {
     
         //the user wants to see surroundingusu
         //even on a run, let him check out areas of interdust
+        _ = self.getRunStreamRecorderStatus();
+        
         dataOperationQueue.async {
             
             //detect significant location change
@@ -362,13 +388,19 @@ class mapScreenVC: UIViewController {
     
     func locationLoggerMessageReceived ( loc : locationMessage) {
         
+        //see if we are recording
+        //_ = getRunStreamRecorderStatus();
+        //these messages coming means we are recording
         
-                if !self.recordingRun {
+        if !self.getRunStreamRecorderStatus() {
                     
-                    //let the user to mess with the map and dont worry about location updates
-                    //in case the user wants to scroll around to see areas of interdust
-                    return;
-                }
+            //let the user to mess with the map and dont worry about location updates
+            //in case the user wants to scroll around to see areas of interdust
+            return;
+        }
+        
+        dataOperationQueue.sync {
+            
                 let lc = CLLocation(latitude: loc.lat, longitude: loc.lon)
                 let center = CLLocationCoordinate2D(latitude: lc.coordinate.latitude, longitude: lc.coordinate.longitude)
                 
@@ -386,49 +418,52 @@ class mapScreenVC: UIViewController {
                     self.mapView?.showsUserLocation = true
                     
                 }
-                
-        }
+            
+            }   //
+        
+        }   //end of locationLoggerMessageReceived
     
     func locationMessageReceived ( loc : locationMessage) {
         //runRecorderJunction is sending the last location it knows
         //if this view is freshly created or the user polls for current location
         //refresh the view accordingly
+        dataOperationQueue.sync {
+            
+            if !self.primeLocation {
+            
+                self.initialLocation = loc
+                self.centerMap(lat: loc.lat, lon: loc.lon)
+                self.primeLocation = true;
+            
+            }
         
-        if self.recordingRun {
+            if self.getRunStreamRecorderStatus() {
             
-            //let the user to mess with the map and dont worry about location updates
-            //in case the user wants to scroll around to see areas of interdust
-            return;
-        }
+                //let the user to mess with the map and dont worry about location updates
+                //in case the user wants to scroll around to see areas of interdust
+                return;
+            }
         
-        //getting a message here with the init location being different might mean a significant location change!
-        var significantLocationChange = false;
-        let l1 = CLLocation(latitude: loc.lat, longitude: loc.lon);
-        let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
-        let d = l1.distance(from: l2)
-        if (d > 150000) {
-            significantLocationChange = true;
-            //meshnet is interested in sig location change
-            //caches too for purging unrelated data
-            //diskreader?
-            //purge all map combining happening a million miles away
-            //fire the observer here because we want to keep tornio visible until
-            //heading to current for tax... i mean debugging purposes
-        }
+            //getting a message here with the init location being different might mean a significant location change!
+            var significantLocationChange = false;
+            let l1 = CLLocation(latitude: loc.lat, longitude: loc.lon);
+            let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
+            let d = l1.distance(from: l2)
+            if (d > 150000) {
+                significantLocationChange = true;
+                //meshnet is interested in sig location change
+                //caches too for purging unrelated data
+                //diskreader?
+                //purge all map combining happening a million miles away
+                //fire the observer here because we want to keep tornio visible until
+                //heading to current for tax... i mean debugging purposes
+                mapViewJunctionSignificantViewChange.update(loc);
+            }
+        
+        }   //end dataOperationQueue.sync {
         
         
-        if !self.primeLocation {
-            
-            
-            
-            
-            self.initialLocation = loc
-            self.centerMap(lat: loc.lat, lon: loc.lon)
-            self.primeLocation = true;
-            
-        }
-        
-    }
+    }   //locationMessageReceived
     
 }
 

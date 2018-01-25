@@ -17,6 +17,15 @@ struct snapshotContainer {
     var list = [mapSnapshot]();
     var dirtySnaps = Set<String>();
     
+    func isDirty() -> Bool {
+        
+        if dirtySnaps.count == 0 {
+            return false;
+        }
+        
+        return true;
+    }
+    
     mutating func dirtyApplicableWithNewRunData ( lat : CLLocationDegrees , lon: CLLocationDegrees , hash : String , getWithinArea : Double ) -> [String]? {
         
         //new run has arrived. see if it applies to the snapshot range
@@ -42,6 +51,66 @@ struct snapshotContainer {
         
         return nil;
     }
+    
+    
+    /*func getNonDirtySnaps () -> [mapSnapshot]? {
+        
+        //what happens when all snaps are dirty?
+        
+        if dirtySnaps.count == 0 {  return nil; }
+        var nonDirty = [mapSnapshot]();
+        
+        for i in list {
+            
+            if ( !dirtySnaps.contains(i.id)) {
+                
+                nonDirty.append(i)
+                
+            }
+            
+        }
+        
+        if nonDirty.count == 0 { return nil }
+        
+        return nonDirty;
+        
+    }*/
+    
+    
+    mutating func deleteDirtySnaps () -> Bool {
+        
+        //what happens when all snaps are dirty?
+        
+        if dirtySnaps.count == 0 {  return false; }
+        //var nonDirty = [mapSnapshot]();
+        var deleteThese = [Int]();
+        
+        var k : Int = 0;
+        for i  in list {
+            
+            if ( dirtySnaps.contains(i.id)) {
+                
+                deleteThese.append(k)
+                
+            }
+            k = k + 1;
+            
+        }
+        
+        if deleteThese.count == 0 { return false }
+        
+        for i in deleteThese {
+            
+            list.remove(at: i);
+            
+        }
+        
+        dirtySnaps = Set<String>();
+        
+        return true;
+        
+    }
+    
     
     func snapsInRegion ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double ) -> [mapSnapshot]? {
         
@@ -163,6 +232,14 @@ class SnapshotCache : BaseObject  {
     override func _housekeep_extend() -> DROPcategoryTypes? {
     
         _pulse(pulseBySeconds: 6000); //keep me alive
+        
+        if (self.cache.isDirty()) {
+            
+            //quite violent approach to purge dirty data
+            //maybe do purging on mapViewJunction, purge depending on power saving mode etc
+            self.purgeDirtyCachedItems();
+            
+        }
         return nil;
     
     }
@@ -188,6 +265,17 @@ class SnapshotCache : BaseObject  {
     
     }
     
+    func purgeDirtyCachedItems () {
+        
+        
+        dataQueue.sync (){
+            
+            self.cache.deleteDirtySnaps();
+            
+        }
+        
+    }
+    
     func addSnapshot ( snap : mapSnapshot ) {
         
         dataQueue.sync (){
@@ -199,6 +287,7 @@ class SnapshotCache : BaseObject  {
     }
     
     func getApplicableSnapshot ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double) -> mapSnapshot? {
+        
         
         self.getWithinArea = getWithinArea; //runs incoming need this too
         

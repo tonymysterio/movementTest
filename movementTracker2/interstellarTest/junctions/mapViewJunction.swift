@@ -36,6 +36,8 @@ var requestForMapDataProvider = Observable<locationMessage>()
 //notify user with something, data is incoming!
 var mapCombinerPertinentDataFound = Observable<locationMessage>()
 
+var mapViewJunctionSignificantViewChange = Observable<locationMessage>()
+
 
 class mapViewJunction {
     
@@ -114,7 +116,11 @@ class mapViewJunction {
             }
         }
         
-        
+        mapViewJunctionSignificantViewChange.subscribe {locationMessage in
+            //when user jumps to current location far away from tornio
+            
+            
+        }
         
         //runRecorder shows intent we want to record a runinit
         //this might not happen, lets not care about it

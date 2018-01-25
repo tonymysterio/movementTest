@@ -55,7 +55,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         messageQueue.initHousekeeping()
         scheduler.initHousekeeping();
-        runRecorder.initialize();
+        runRecorderJunct.initialize();
         runDataIO.initialize();
         mapJunction.initialize();
         prefSignalJunction.initialize();

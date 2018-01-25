@@ -281,6 +281,19 @@ class runRecorderJunction {
         
     }
     
+    func getRunStreamRecorderStatus () -> Bool {
+        
+        if let runStreamRecorder = storage.getObject(oID: "runStreamRecorder") as? RunStreamRecorder {
+            
+            if runStreamRecorder.terminated { return false; }
+            
+            return true;
+        }
+        
+        return false;
+        
+    }
+    
     func getRunStreamRecorder () -> RunStreamRecorder? {
         
         if let runStreamRecorder = storage.getObject(oID: "runStreamRecorder") as? RunStreamRecorder {

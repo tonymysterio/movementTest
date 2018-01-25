@@ -14,6 +14,8 @@ var serviceStatusJunctionRefresh = Observable<Bool>()
 var serviceStatusJunctionTotalCachedRuns = Observable<Int>()
 var serviceStatusJunctionTotalUserProfiles = Observable<Int>()
 
+
+
 struct serviceStatusItem {
     
     let name : String;
