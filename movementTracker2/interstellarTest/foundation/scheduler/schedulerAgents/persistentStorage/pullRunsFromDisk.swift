@@ -120,7 +120,7 @@ class PullRunsFromDisk: BaseObject  {
                 
                     if let run = try! decoder.decode(Run?.self, from: i) {
                         
-                        if (run.isValid) {
+                        if (run.isValid || run.isClosed() ) {
                             
                         
                         self.myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
@@ -129,9 +129,11 @@ class PullRunsFromDisk: BaseObject  {
                         self._pulse(pulseBySeconds: 2)
                         runReceivedObservable.update(run)
                         
+                        print("run pulled \(run.hash) at \(run.geoHash) ")
+                            
                         } else {
                             
-                            print("ignored run at scan for runs disk");
+                            //print("ignored run at scan for runs disk");
                         
                         }
                         

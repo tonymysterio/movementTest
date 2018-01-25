@@ -251,7 +251,7 @@ class mapScreenVC: UIViewController {
             var significantLocationChange = false;
             let l1 = CLLocation(latitude: lat, longitude: lon);
             let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
-            let d = l1.distance(from: l2)
+            let d = l1.distance(from: l2) as Double;
             if (d > 150000) {
                 significantLocationChange = true;
             }
@@ -448,7 +448,7 @@ class mapScreenVC: UIViewController {
             var significantLocationChange = false;
             let l1 = CLLocation(latitude: loc.lat, longitude: loc.lon);
             let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
-            let d = l1.distance(from: l2)
+            let d = l1.distance(from: l2) as Double;
             if (d > 150000) {
                 significantLocationChange = true;
                 //meshnet is interested in sig location change

@@ -83,11 +83,17 @@ class MapCombiner : BaseObject  {
                 //returns a set of hashes
                 hadCachedData = true;
                 //self.pullQueue.sync { [weak self] in
+                
+                if cachedRunHashesWithinArea.count > 400 {
+                    
+                    let sirdalud = cache.runsInRegion(lat: initialLocation.lat, lon: initialLocation.lon, getWithinArea: self.getWithinArea) ;
+                }
+                
                     var hits = 0;
                     for i in cachedRunHashesWithinArea {
                         if let run = cache.getRun(hash: i){
                             //if let ok = self.runs.append( run : run ) {
-                                self.runs.append( run : run )
+                            self.addRun(run: run);
                                 hits = hits + 1;
                             //}
                             
@@ -185,7 +191,7 @@ class MapCombiner : BaseObject  {
         let location1 = CLLocation(latitude: locMessage.lat, longitude: locMessage.lon)
         let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
         
-        let d = location1.distance(from: location2)
+        let d = location1.distance(from: location2) as Double;
         
         //clearly outside my area
         if d > self.getWithinArea {
@@ -228,7 +234,7 @@ class MapCombiner : BaseObject  {
                 let location1 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
                 let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
                 
-                let d = location1.distance(from: location2)
+                let d = location1.distance(from: location2) as Double;
                 if d == 0 { return  }
                 if d > (self?.getWithinArea)! {
                     return;

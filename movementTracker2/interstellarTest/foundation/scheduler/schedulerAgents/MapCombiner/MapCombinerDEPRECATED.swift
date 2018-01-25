@@ -122,7 +122,7 @@ class MapCombinerDEPRECATED : BaseObject  {
             let location1 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
             let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
             
-            let d = location1.distance(from: location2)
+            let d = location1.distance(from: location2) as Double;
             if d == 0 { return  }
             if d > self.getWithinArea {
                 return;

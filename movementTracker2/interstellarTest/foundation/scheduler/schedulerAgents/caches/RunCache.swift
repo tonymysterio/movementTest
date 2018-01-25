@@ -69,8 +69,8 @@ struct RunCacheDisk : Codable {
             
                 let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
             
-                let d = location1.distance(from: location2)
-                if d == 0 { continue; }
+                let d = location1.distance(from: location2) as Double;
+                if d < 1 { continue; }
                 if d > getWithinArea {
                     continue;
                 }
@@ -101,7 +101,7 @@ struct RunCacheDisk : Codable {
                 
                 let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
                 
-                let d = location1.distance(from: location2)
+                let d = location1.distance(from: location2) as Double;
                 if d == 0 { continue; }
                 if d < getWithinArea {
                     continue;
@@ -228,7 +228,9 @@ class RunCache : BaseObject  {
     
     func addRun ( run : Run ) {
         
-        
+        if !run.isValid {
+            return;
+        }
         self.dataQueue.sync { [weak self] in
             
             cache.append(run: run)

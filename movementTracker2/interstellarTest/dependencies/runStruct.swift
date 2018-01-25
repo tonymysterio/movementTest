@@ -116,7 +116,7 @@ struct Runs {
             if let loca = Geohash.decode(f.geoHash) {
                 let location1 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
             
-                let d = location1.distance(from: location2)
+                let d = location1.distance(from: location2) as Double;
                 if d == 0 { continue }
                 if d < distanceInMeters {
                 
@@ -202,7 +202,7 @@ struct Run : Codable {
         //are we too close
         let location1 = CLLocation(latitude: (coord.lat), longitude: (coord.lon))
         let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
-        let d = location1.distance(from: location2)
+        let d = location1.distance(from: location2) as Double;
         if (d<10){ return false }
         
         //time based filtering too?
@@ -249,7 +249,7 @@ struct Run : Codable {
             
             let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
             let timDif = prevTimestamp - i.timestamp
-            let d = cur.distance(from: prevLocation)
+            let d = cur.distance(from: prevLocation) as Double;
             let timVar = d / timDif
             
             baseSpeed = baseSpeed + timVar;
@@ -313,7 +313,7 @@ struct Run : Codable {
             }
             
             let noc = CLLocation(latitude: (f.lat), longitude: (f.lon))
-            let d = noc.distance(from: preLoc)
+            let d = noc.distance(from: preLoc) as Double;
             td = td + d
             preLoc = noc
         }
@@ -346,7 +346,7 @@ struct Run : Codable {
         let location1 = CLLocation(latitude: (pp.first?.lat)!, longitude: (pp.first?.lon)!)
         let location2 = CLLocation(latitude: (pp.last?.lat)!, longitude: (pp.last?.lon)!)
         
-        let d = location1.distance(from: location2)
+        let d = location1.distance(from: location2) as Double;
         
         return d;
     }
@@ -363,7 +363,7 @@ struct Run : Codable {
         let location1 = CLLocation(latitude: (pp.first?.lat)!, longitude: (pp.first?.lon)!)
         let location2 = CLLocation(latitude: (pp.last?.lat)!, longitude: (pp.last?.lon)!)
         
-        let d = location1.distance(from: location2)
+        let d = location1.distance(from: location2) as Double;
         
         if totalDistance() < 250 {
             

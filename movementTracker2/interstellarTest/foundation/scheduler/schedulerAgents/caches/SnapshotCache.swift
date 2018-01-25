@@ -35,14 +35,23 @@ struct snapshotContainer {
         if list.count == 0 { return nil; }
         
         if let sreg = self.snapsInRegion(lat: lat, lon: lon, getWithinArea: getWithinArea) {
+            
+            
             var dirtyIDs = [String]();
+            
             for f in sreg {
+                
+                if dirtySnaps.contains(f.id) {
+                    continue;
+                }
                 
                 if f.hashes.contains(hash) {
                     continue;   //this is already here
                 }
                 dirtyIDs.append(f.id);
                 dirtySnaps.insert(f.id);
+                
+                
             }
             
             if dirtyIDs.count == 0 { return nil }
@@ -131,12 +140,16 @@ struct snapshotContainer {
         for i in list {
             
             let location2 = CLLocation(latitude: i.lat, longitude: i.lon)
-            let d = location1.distance(from: location2)
+            let d = location1.distance(from: location2) as Double;
             //if d == 0 { continue; }
-            if d > getWithinArea {
+            
+            if getWithinArea > 1500 {
+                if d > getWithinArea {
                     continue;
                 }
                 
+            }
+           
             c.append(i);
             
         }   //list
