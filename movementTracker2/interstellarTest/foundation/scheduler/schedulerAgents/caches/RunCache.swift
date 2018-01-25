@@ -86,6 +86,39 @@ struct RunCacheDisk : Codable {
         
     }   //runsInRegion
     
+    func runsOutsideRegion ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double ) -> Set<String>? {
+        
+        
+        //var lat : CLLocationDegrees = 0
+        //var lon : CLLocationDegrees = 0
+        
+        var c = Set<String>()
+        let location1 = CLLocation(latitude: lat, longitude: lon)
+        
+        for i in list {
+            
+            if let loca = Geohash.decode(i.value.geoHash) {
+                
+                let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
+                
+                let d = location1.distance(from: location2)
+                if d == 0 { continue; }
+                if d < getWithinArea {
+                    continue;
+                }
+                
+                c.insert(i.value.hash)
+            }
+            
+        }   //list
+        
+        if c.count == 0 { return nil; }
+        
+        return c;
+        
+    }   //runsInRegion
+    
+    
 }
 
 class RunCache : BaseObject  {
@@ -175,6 +208,21 @@ class RunCache : BaseObject  {
         //get flushing the caches
         
         return backPressure;
+        
+    }
+    
+    func freezedryRunsOutsideRegion ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double ) {
+        
+        //having a peerDataProvider active would mean that we are passing runs on
+        //dont freezedry while doing that
+        
+        if let runHashes = self.cache.runsOutsideRegion(lat: lat,lon: lon,getWithinArea: getWithinArea ) {
+            
+            //hashes for runs that can be freeze dried
+            
+            
+        }
+        
         
     }
     

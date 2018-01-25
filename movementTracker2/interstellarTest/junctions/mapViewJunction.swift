@@ -47,6 +47,8 @@ class mapViewJunction {
     //weak var myLiveRunStreamListener : liveRunStreamListener?
     //weak var myPedometer : Pedometer?
     var getWithinArea : Double = 1500; //zoomLevelInMeters
+    let junctionQueue = DispatchQueue(label: "MapJunctionQueue", qos: .utility)
+    
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
     
     init () {
@@ -105,15 +107,15 @@ class mapViewJunction {
         
         requestForMapCombiner.subscribe {locationMessage in
             
-            DispatchQueue.global(qos: .userInitiated).async {
+            //DispatchQueue.global(qos: .userInitiated).async {
                 self.addMapCombiner(locMessage : locationMessage )
-            }
+            //}
         }
         
         requestForMapDataProvider.subscribe {locationMessage in
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.addMapDataProvider(locMessage : locationMessage )
-            }
+            //}
         }
         
         mapViewJunctionSignificantViewChange.subscribe {locationMessage in
@@ -267,12 +269,14 @@ class mapViewJunction {
     func addMapCombiner ( locMessage : locationMessage ){
         
         //cad add multiple
-        
-        let someBodyOnTheJobAlready = self.getLocalMapCombiners(locMessage:locMessage);
-        if someBodyOnTheJobAlready {
+        junctionQueue.sync {
             
-            return;
-        }
+        
+            let someBodyOnTheJobAlready = self.getLocalMapCombiners(locMessage:locMessage);
+            if someBodyOnTheJobAlready {
+            
+                return;
+            }
         
         //keep caching here. send snapshot if cached
         var gwa :Double = 2500;
@@ -288,7 +292,7 @@ class mapViewJunction {
         let mapCombiner = MapCombiner( messageQueue : nil );
         mapCombiner.myID = name; //"mapCombiner";
         mapCombiner.name = name //"mapCombiner";
-        mapCombiner.myCategory = objectCategoryTypes.generic
+        mapCombiner.myCategory = objectCategoryTypes.mapCombiner
         mapCombiner._pulse(pulseBySeconds: 600);
         mapCombiner.initialLocation = locMessage;   //make it look at the right place
         mapCombiner.getWithinArea = gwa //
@@ -302,6 +306,7 @@ class mapViewJunction {
             mapCombiner.createSnapshot();
         }
         
+        }   //end queue
     }
     
     func addMapDataProvider ( locMessage : locationMessage ){
@@ -313,27 +318,32 @@ class mapViewJunction {
             return;
         }
         
-        var gwa : Double = 2500;
-        if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
-            //sneaking view radius through timestamp, naughty
-            self.getWithinArea = locMessage.timestamp
-            //calculate simplification level in mapcombiner
-            gwa = locMessage.timestamp;
+        junctionQueue.sync {
+            
+        
+            var gwa : Double = 2500;
+            if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
+                //sneaking view radius through timestamp, naughty
+                self.getWithinArea = locMessage.timestamp
+                //calculate simplification level in mapcombiner
+                gwa = locMessage.timestamp;
+            }
+        
+            //read stored runs if any
+            let mc = PullRunsFromDisk(messageQueue: messageQueue)
+            //ignore runs from outside my scope
+            mc.initialLocation = locMessage;
+            mc.getWithinArea = gwa; //self.getWithinArea;
+            mc.name = "PullRunsFromDisk"
+            mc.myID = "PullRunsFromDisk"
+            mc.myCategory = objectCategoryTypes.uniqueServiceProvider
+        
+            mc._initialize();
+            scheduler.addObject(oID: mc.myID, o: mc);
+        
+            mc.scanForRuns()
+        
         }
-        
-        //read stored runs if any
-        let mc = PullRunsFromDisk(messageQueue: messageQueue)
-        //ignore runs from outside my scope
-        mc.initialLocation = locMessage;
-        mc.getWithinArea = gwa; //self.getWithinArea;
-        mc.name = "PullRunsFromDisk"
-        mc.myID = "PullRunsFromDisk"
-        mc.myCategory = objectCategoryTypes.uniqueServiceProvider
-        
-        mc._initialize();
-        scheduler.addObject(oID: mc.myID, o: mc);
-        
-        mc.scanForRuns()
         
     }
     

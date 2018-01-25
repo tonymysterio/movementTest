@@ -120,10 +120,22 @@ class PullRunsFromDisk: BaseObject  {
                 
                     if let run = try! decoder.decode(Run?.self, from: i) {
                         
+                        if (run.isValid) {
+                            
+                        
                         self.myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
                         self.initialPull = true;
                         
                         self._pulse(pulseBySeconds: 2)
+                        runReceivedObservable.update(run)
+                        
+                        } else {
+                            
+                            print("ignored run at scan for runs disk");
+                        
+                        }
+                        
+                        
                         //ignore stuff outside my area
                         /*if let loca = Geohash.decode(run.geoHash) {
                             
@@ -141,7 +153,7 @@ class PullRunsFromDisk: BaseObject  {
                         //print (run.coordinates.count)
                         
                         
-                        runReceivedObservable.update(run)
+                        
                         
                     }
                 

@@ -324,7 +324,8 @@ struct Run : Codable {
     
     var isValid: Bool {
     get {
-        if coordinates.count == 0 { return false }
+        if coordinates.count < 10 { return false }
+        if coordinates.count > 5000 { return false; }
         if user == "feederbot" { return false }
         if user == "mapfeeder" { return false }
         if startTime < 125000000 { return false; }

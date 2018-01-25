@@ -82,7 +82,7 @@ struct snapshotContainer {
         //what happens when all snaps are dirty?
         
         if dirtySnaps.count == 0 {  return false; }
-        //var nonDirty = [mapSnapshot]();
+        var nonDirty = [mapSnapshot]();
         var deleteThese = [Int]();
         
         var k : Int = 0;
@@ -90,6 +90,7 @@ struct snapshotContainer {
             
             if ( dirtySnaps.contains(i.id)) {
                 
+                nonDirty.append(i);
                 deleteThese.append(k)
                 
             }
@@ -99,13 +100,18 @@ struct snapshotContainer {
         
         if deleteThese.count == 0 { return false }
         
+        list = nonDirty;
+        dirtySnaps = Set<String>();
+        
+        return true;
+        
         for i in deleteThese {
             
             list.remove(at: i);
             
         }
         
-        dirtySnaps = Set<String>();
+        
         
         return true;
         
@@ -233,6 +239,8 @@ class SnapshotCache : BaseObject  {
     
         _pulse(pulseBySeconds: 6000); //keep me alive
         
+        //purge snap cache when getting a new snap and not on housekeep
+        /*
         if (self.cache.isDirty()) {
             
             //quite violent approach to purge dirty data
@@ -240,6 +248,8 @@ class SnapshotCache : BaseObject  {
             self.purgeDirtyCachedItems();
             
         }
+         */
+        
         return nil;
     
     }
@@ -281,6 +291,15 @@ class SnapshotCache : BaseObject  {
         dataQueue.sync (){
             
             self.cache.append( snap: snap)
+            
+            if (self.cache.isDirty()) {
+                
+                //quite violent approach to purge dirty data
+                //maybe do purging on mapViewJunction, purge depending on power saving mode etc
+                self.cache.deleteDirtySnaps();
+                
+            }
+            
             
         }
         

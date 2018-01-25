@@ -443,11 +443,11 @@ class Scheduler {
         o.scheduler = self  //weak reference to scheduler for future access fun! can be nil!
         o.messageQueue = self.messageQueue //copy reference to mqueue here, leave storage out of mqueue
         
-        //schedulerQueue.sync {
+        schedulerQueue.sync {
             self.storage.addObject(label: oID, object: o) //objects[oID]=o;
             print ("scheduler added \(o.name) ")
             debuMess(text: "scheduler added \(o.name) ")
-        //}
+        }
         
         return true
     }

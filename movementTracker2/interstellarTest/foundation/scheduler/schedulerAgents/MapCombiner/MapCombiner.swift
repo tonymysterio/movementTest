@@ -14,7 +14,10 @@ import MapKit
 class MapCombiner : BaseObject  {
     
     let pullQueue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .utility)
-    let runQueue = DispatchQueue(label: "runQueueManipulation", qos: .utility)
+    //put run manipulation to background in case it takes too long
+    //at least we get a warning about why ios killed our app, too much cpu usage
+    
+    let runQueue = DispatchQueue(label: "runQueueManipulation", qos: .background)
     let path = "Library/Application support/" //runData"
     //dont store runs here
     var runs = Runs()
@@ -125,9 +128,9 @@ class MapCombiner : BaseObject  {
             //lessen processing load
             
             if self.isProcessing { return }
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.addRun( run : run )
-            }
+            //}
         }
         
         //hoodoRunStreamListener pages us when it reads a run from stream etc
@@ -135,9 +138,9 @@ class MapCombiner : BaseObject  {
             { run in
                 
                 if self.isProcessing { return }
-                DispatchQueue.global(qos: .utility).async {
+                //DispatchQueue.global(qos: .utility).async {
                     self.addRun( run : run )
-                }
+                //}
         }
         
         if hadCachedData {
@@ -159,6 +162,7 @@ class MapCombiner : BaseObject  {
             if self.runs.o.count>0 && self.newDataForSnap {
                 if self.hasTimeoutExpired (timestamp : lastInsertTimestamp , timeoutInMs : 1){
                     //eager waiters of snapshots get candy
+                    print("housekeep extend \(self.name) creating snap with timeout")
                     self.createSnapshot()
                 }
             }
@@ -196,42 +200,48 @@ class MapCombiner : BaseObject  {
     
     func addRun ( run : Run ) {
         
-        //is this run in our visibilitee? if not, filter out
-        //filter with geohash distance, dont reserve memory for stuff 1000km away
-        var lat : CLLocationDegrees = 0
-        var lon : CLLocationDegrees = 0
         
-        if let loca = Geohash.decode(run.geoHash) {
-            
-            lat = loca.latitude
-            lon = loca.longitude
-            
-            let location1 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
-            let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
-            
-            let d = location1.distance(from: location2)
-            if d == 0 { return  }
-            if d > self.getWithinArea {
-                return;
-            }
-            
-            //print(d);
-        }
-                
+        
+        /*if self.isProcessing {
+            return;
+        }*/
+        
         if !run.isValid {
-            return }  //this wont happen
+            
+            return
+            
+        }  //this might happen
         
-        if !run.isClosed() {
-            return;     //dont bother with non closed runs
-        }
-        
-        self.pullQueue.sync { [weak self] in
+        pullQueue.sync { [weak self] in
+            
+            var lat : CLLocationDegrees = 0
+            var lon : CLLocationDegrees = 0
+            
+            //is this run in our visibilitee? if not, filter out
+            //filter with geohash distance, dont reserve memory for stuff 1000km away
+            
+            if let loca = Geohash.decode(run.geoHash) {
+                
+                lat = loca.latitude
+                lon = loca.longitude
+                
+                let location1 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
+                let location2 = CLLocation(latitude: initialLocation.lat, longitude: initialLocation.lon)
+                
+                let d = location1.distance(from: location2)
+                if d == 0 { return  }
+                if d > (self?.getWithinArea)! {
+                    return;
+                }
+                
+                //print(d);
+            }
             
             if let ok = self?.runs.append( run : run ) {
                 
                 //process when time has passed
-                lastInsertTimestamp = Date().timeIntervalSince1970
-                newDataForSnap = true;  //flag we have new shit on the block
+                self?.lastInsertTimestamp = Date().timeIntervalSince1970
+                self?.newDataForSnap = true;  //flag we have new shit on the block
                 //print("mapcombiner added run ")
                 self?._pulse(pulseBySeconds: 10)
                 
@@ -242,7 +252,14 @@ class MapCombiner : BaseObject  {
                 
             }
             
-        }
+            
+        }   //end of pullQueue sync
+        
+        
+        /*if !run.isClosed() {
+            return;     //dont bother with non closed runs
+        }*/
+        
         
     }   //end addRun
     
@@ -265,8 +282,8 @@ class MapCombiner : BaseObject  {
             
         }
         
-        print ("createSnapshot called with \(currentRunsCount)")
-        self._pulse(pulseBySeconds: 5)    //give secs for the job
+        print ("createSnapshot \(self.name) called with \(currentRunsCount)")
+        self._pulse(pulseBySeconds: 35)    //give secs for the job
         
         //ignore further additions
         self.startProcessing()
@@ -316,7 +333,7 @@ class MapCombiner : BaseObject  {
         //its all there, put it into a stack
         
         
-        print ("createSnapshotFromRunsForWorld called with distance filtered \(runs.o.count)")
+        print ("createSnapshotFromRunsForWorld \(self.name) called with distance filtered \(runs.o.count)")
         
         self._pulse(pulseBySeconds: 5)    //give secs for the job
         
