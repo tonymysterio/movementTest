@@ -19,10 +19,13 @@ struct RunLoader {
     let filename : String
     typealias Fsuccess = ( _ run : Run) -> Void
     typealias Ferror = ()  -> Void
+    //let queue = DispatchQueue(label: "runLoaderQueue", qos: .background)
     
     func load( success: Fsuccess , error : Ferror )  {
         
         let falename = "runData/"+filename+".json";
+        //queue.sync {
+            
         
         if let data = try? Disk.retrieve(falename, from: .applicationSupport, as: Data.self) {
             
@@ -44,6 +47,7 @@ struct RunLoader {
             error();
         }
         
+        //}
         
     }   //end load
     
@@ -115,7 +119,10 @@ class PullRunsFromDisk: BaseObject  {
             filesPulling = true;
             // Remove last item
             //let lastItem = a.removeLast()
-            getPulling();
+            queue.async {
+                self.getPulling();
+            }
+            
         }
         
         
