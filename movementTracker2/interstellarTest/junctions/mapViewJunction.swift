@@ -48,6 +48,7 @@ class mapViewJunction {
     //weak var myPedometer : Pedometer?
     var getWithinArea : Double = 1500; //zoomLevelInMeters
     let junctionQueue = DispatchQueue(label: "MapJunctionQueue", qos: .utility)
+    var mapDataProviderInitialized = false; //HACK not to run pullRunsFromDisk again
     
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
     
@@ -160,7 +161,7 @@ class mapViewJunction {
         
             //detect a clean install without snapcaches
             //if no snaps on disk, fire pullruns from disk to give our run cache some data
-            self.addMapDataProvider ( locMessage : self.initialLocation );
+            //self.addMapDataProvider ( locMessage : self.initialLocation );
         
         //}
         
@@ -311,6 +312,9 @@ class mapViewJunction {
     
     func addMapDataProvider ( locMessage : locationMessage ){
         
+        //HACK not to start pullRuns again
+        if mapDataProviderInitialized == true { return }
+        
         //requestForMapDataProvider
         if let runcache = storage.getObject(oID: "PullRunsFromDisk") as! PullRunsFromDisk?  {
             
@@ -340,7 +344,9 @@ class mapViewJunction {
         
             mc._initialize();
             scheduler.addObject(oID: mc.myID, o: mc);
-        
+            
+            mapDataProviderInitialized = true;
+            
             mc.scanForRuns()
         
         }

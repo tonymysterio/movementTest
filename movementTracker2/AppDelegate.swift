@@ -63,7 +63,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         serviceStatus.initialize(); //config screen shows running services
         playerRoster.initialize();
         //add own user
-        playerRoster.addPlayerWithCompute(name:"samui",email:"samui@hastur.com",clan: "camphastur")
+        _ = playerRoster.addPlayerWithCompute(name:"samui",email:"samui@hastur.com",clan: "CAMPHASTUR")
         
 
         return true

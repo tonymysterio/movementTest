@@ -14,6 +14,40 @@ import MapKit
 var runReceivedObservable = Observable<Run>()
 
 
+struct RunLoader {
+    
+    let filename : String
+    typealias Fsuccess = ( _ run : Run) -> Void
+    typealias Ferror = ()  -> Void
+    
+    func load( success: Fsuccess , error : Ferror )  {
+        
+        let falename = "runData/"+filename+".json";
+        
+        if let data = try? Disk.retrieve(falename, from: .applicationSupport, as: Data.self) {
+            
+            if let j = String(data:data, encoding:.utf8) {
+                let decoder = JSONDecoder()
+                if let run = try? decoder.decode(Run?.self, from: j.data(using: .utf8)!) {
+                    
+                    //print(run);
+                    let t = 1;
+                    success(run!);
+                
+                } else {
+                    
+                    error();
+                }
+            }
+        } else {
+            
+            error();
+        }
+        
+        
+    }   //end load
+    
+}
 
 class PullRunsFromDisk: BaseObject  {
 
@@ -26,7 +60,9 @@ class PullRunsFromDisk: BaseObject  {
     var myExhangedHashes = exchangedHashes()
     var initialPull = false;
     var ignoredCachedHashes = Set<String>();
-    
+    var files = [RunLoader]();
+    var filesPrimed = false;
+    var filesPulling = false;
     //pull from disk
     //send with runReceivedObservable¥
 
@@ -69,13 +105,180 @@ class PullRunsFromDisk: BaseObject  {
         
     }
     
+    override func _housekeep_extend() -> DROPcategoryTypes? {
+        
+        //maybe give a list of hits and misses in saving
+        
+        //what is schedulers strategy towards failed file puts?
+        if filesPrimed && !filesPulling {
+            
+            filesPulling = true;
+            // Remove last item
+            //let lastItem = a.removeLast()
+            getPulling();
+        }
+        
+        
+        return nil
+        
+    }
+    
+    func getPulling () {
+        
+        
+        var storedError: NSError?
+        let downloadGroup = DispatchGroup()
+        
+        self.startProcessing();
+        
+        for hash in self.files {
+            
+            if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+                
+                if let rit = cache.getRun(hash: hash.filename){
+                    continue;
+                }
+            }
+            
+            downloadGroup.enter()
+            let r = hash.load(success: { (run) in
+                
+                    if (run.isValid || run.isClosed() ) {
+                    
+                    
+                        self.myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
+                        self.initialPull = true;
+                    
+                        self._pulse(pulseBySeconds: 2)
+                        runReceivedObservable.update(run)
+                    
+                        print("run pulled \(run.hash) at \(run.geoHash) ")
+                        
+                    }
+                
+                    downloadGroup.leave()
+                }, error: {
+                    
+                    downloadGroup.leave()
+                })
+                            //PhotoManager.sharedManager.addPhoto(photo)
+        }
+        
+        /*downloadGroup.notify(queue: DispatchQueue.main) { // 2
+            completion?(storedError)
+        }*/
+        
+    }
+    
+    func pullRunx ( filename : String ) {
+        
+        let filename = "runData/currentRun.json";
+        //this will crash
+        //readQueue.sync (){
+        
+        if let data = try? Disk.retrieve(filename, from: .applicationSupport, as: Data.self) {
+            
+            if let j = String(data:data, encoding:.utf8) {
+                let decoder = JSONDecoder()
+                if let run = try? decoder.decode(Run?.self, from: j.data(using: .utf8)!) {
+                    
+                }
+            }
+        }
+        
+        
+    }
     
     func scanForRuns () {
+        
+        //let path =  String(describing: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first);
+        
+        //let fileManager = FileManager.default;
+        self.startProcessing()
+        
+        var hadCachedData = false;
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            if let cachedHashes = cache.cachedHashes() {
+                self.ignoredCachedHashes = cachedHashes;
+                
+                if let cuha = cache.cachedUserHashes() {
+                    
+                    for i in cuha {
+                        
+                        self.myExhangedHashes.insertForUser(user: i[0], hash: i[1])
+                        
+                    }
+                    //tell peer data provider what we got
+                    peerDataProviderExistingHashesObserver.update(self.myExhangedHashes);
+                }
+                
+            }
+            
+        }
+        
+        queue.async (){
+        // Get contents in directory: '.' (current one)
+        let fileManager = FileManager.default
+        let documentsURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0];
+        let luss : String = documentsURL.path + "/runData/";
+        
+        if let urlEncoded = luss.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+            let url = URL(string: urlEncoded);
+            
+            do {
+                let fileURLs = try fileManager.contentsOfDirectory(at: url! , includingPropertiesForKeys: nil)
+                for i in fileURLs {
+                    
+                    let last4 = i.path.suffix(5);
+                    if last4 == ".json" {
+                        
+                        let lim = i.path.split(separator: "/")
+                        if let lam  = lim.last?.split(separator: ".") {
+                            //print (lam[0]);
+                            let luxor = String(lam[0]);
+                            
+                            if !self.ignoredCachedHashes.contains(luxor) {
+                                let rloader = RunLoader(filename: luxor);
+                                self.files.append(rloader) //just the filename part for Disk to read
+                            }
+                        }
+                        
+                        
+                    }
+                    
+                }
+                
+                if self.files.count == 0 {
+                    print("diskreader no new data found")
+                    
+                    self.finishProcessing();
+                    self._teardown();
+                }
+                
+                self.filesPrimed = true;
+                self._pulse(pulseBySeconds: 60);
+                self.finishProcessing();
+                //print (fileURLs);
+                // process files
+            } catch {
+                //print("Error while enumerating files \(destinationFolder.path): \(error.localizedDescription)")
+                print("diskreader no data found - bailing out")
+                self.finishProcessing();
+                self._teardown();
+            }
+            
+        }
+        
+        //let url = URL(string: luss)
+        }   //end async
+        
+        return;
+        
         
         
         self.startProcessing()
         
-        var hadCachedData = false;
+        //var hadCachedData = false;
         if let cache = storage.getObject(oID: "runCache") as! RunCache? {
             if let cachedHashes = cache.cachedHashes() {
                 self.ignoredCachedHashes = cachedHashes;
