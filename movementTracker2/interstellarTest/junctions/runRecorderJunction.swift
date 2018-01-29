@@ -413,32 +413,32 @@ class runRecorderJunction {
     init () {
         
         runRecoderToggleObserver.subscribe { toggle in
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.main.async {
                 self.recordStatusChange( toggle : toggle)
-            }
+            //}
         }
         
         runAreaCompletedObserver.subscribe { run in
             //liveRunStreamListener deducts if something is complete or not
             //DO NOT put this logic elsewhere
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.recordCompleted(run : run)
-            }
+            //}
         }
         
         LocationLoggerMessageObserver.subscribe
             { locationMessage in
-                DispatchQueue.global(qos: .utility).async {
+                //DispatchQueue.global(qos: .utility).async {
                     self.locationMessageGotFromLocationLogger(locationMessage : locationMessage)
-                }
+                //}
         }
         
         runAreaProgressObserver.subscribe { run in
             
             //coordinate or event added on the run
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.runAreaProgress( run : run )
-            }
+            //}
             
         }
         
