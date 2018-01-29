@@ -70,7 +70,7 @@ class runRecorderJunction {
         
         //get run disk recorder up and running
         
-        getCurrentRunDataIO()
+        getCurrentRunDataIO();
         
         
         
@@ -87,6 +87,9 @@ class runRecorderJunction {
         
         //my subclass told me
         //maybe pulling a current run triggered this
+        
+        
+        
         if let rsr = getRunStreamRecorder(){
             
             //set closetime and proper geohash
@@ -117,6 +120,10 @@ class runRecorderJunction {
             return;
         }*/
         
+        if run.isReadyForTemporarySave() == false {
+            return;
+        }
+        
         if let rsr = getRunStreamRecorder(){
             
             rsr.storeCurrentRun(run: run)
@@ -144,6 +151,10 @@ class runRecorderJunction {
         }
         
         //the runStreamRecorder will be purged automatically in due course
+        /*if let mlt = storage.getObject(oID: "locationLogger") as! MotionLogger? {
+            mlt.reset();    //stop mozion updates
+        }
+        */
         
         //dont kill location logger here? because something else might be using it?
         
@@ -263,9 +274,9 @@ class runRecorderJunction {
         }
         
         var rdIO = CurrentRunDataIO( messageQueue : nil );
-        /*rdIO.myID = "currentRunDataIO";
+        rdIO.myID = "currentRunDataIO";
         rdIO.name = "currentRunDataIO";
-        rdIO.myCategory = objectCategoryTypes.generic */
+        rdIO.myCategory = objectCategoryTypes.generic;
         rdIO._pulse(pulseBySeconds: 10);
         //rdIO.initialLocation = locMessage;   //make it look at the right place
         //rdIO.getWithinArea = self.getWithinArea //
@@ -303,6 +314,9 @@ class runRecorderJunction {
         }
             
             let rsr = RunStreamRecorder(messageQueue: messageQueue)
+            rsr.myID = "runStreamRecorder";
+            rsr.name = "runStreamRecorder";
+            rsr.myCategory = objectCategoryTypes.generic;
             rsr._pulse(pulseBySeconds: 60);
             rsr._initialize()
             rsr.houseKeepingRole = houseKeepingRoles.slave;
@@ -401,6 +415,7 @@ class runRecorderJunction {
             
             DispatchQueue.main.async {
                 let myLocationTracker = LocationLogger( messageQueue : messageQueue )
+                
                 myLocationTracker._initialize()
                 scheduler.addObject(oID: myLocationTracker.myID, o: myLocationTracker)
                 //myLocationTracker.addListener(oCAT: worryAunt.myCategory, oID: worryAunt.myID, name: worryAunt.name)
@@ -415,7 +430,7 @@ class runRecorderJunction {
         runRecoderToggleObserver.subscribe { toggle in
             //DispatchQueue.main.async {
                 self.recordStatusChange( toggle : toggle)
-            //}
+            //h}
         }
         
         runAreaCompletedObserver.subscribe { run in
@@ -434,11 +449,11 @@ class runRecorderJunction {
         }
         
         runAreaProgressObserver.subscribe { run in
-            
+            //comes from runstreamlistener, queue .userInteraction
             //coordinate or event added on the run
-            //DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.global(qos: .utility).async {
                 self.runAreaProgress( run : run )
-            //}
+            }
             
         }
         

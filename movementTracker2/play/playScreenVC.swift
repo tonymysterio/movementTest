@@ -97,7 +97,7 @@ class playScreenVC: UIViewController {
         
     runAreaProgressObserver.subscribe { currentRun in
         
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.main.async {
             
         //update screen
         let coordAm = String(currentRun.coordinates.count)
@@ -140,6 +140,41 @@ class playScreenVC: UIViewController {
         }   //end dispaaaaatch
     }
     
+        runAreaCompletedObserver.subscribe { run in
+            
+            DispatchQueue.main.async {
+                
+                //update screen
+                let coordAm = String(run.coordinates.count)
+                let tt = run.totalTime
+                let dis = String(run.totalDistance())
+                
+                let time = Int(tt)
+                let hours = time / 3600
+                let minutes = (time / 60) % 60
+                let seconds = time % 60
+                let guko = String(format: "%0.2d:%0.2d:%0.2d", hours, minutes, seconds)
+                
+                /*let hour = calendar.component(.hour, from: date as Date)
+                 let minutes = calendar.component(.minute, from: date as Date)
+                 let seconds = calendar.component(.second, from: date as Date)
+                 print("\(hour):\(minutes):\(seconds)")*/
+                
+                //self.runRecordTime.text = guko
+                //self.runRecordDistance.text = dis
+                //self.runRecordPoints.text = coordAm
+                self.totalCoordinates.text = coordAm;
+                self.totalDistance.text = dis;
+                self.recordingStarted.text = "completed";
+                self.currentRunIsClosed.text = "completed"
+                //notify user
+                
+                
+            }   //end dispaaaaatch
+            
+ 
+        }
+ 
     pedometerMessageObserver.subscribe { pedoMessage in
     
         //pedo meter is talking

@@ -20,7 +20,7 @@ class liveRunStreamListener : BaseObject  {
     var totalParsedObjects = 0 ;
     var maxBuffers = 10;
     
-    let queue = DispatchQueue(label: "liveRunStreamListener", qos: .utility)
+    let queue = DispatchQueue(label: "liveRunStreamListener", qos: .userInitiated)
     var currentRun : Run?
     
     func _initialize () -> DROPcategoryTypes? {
@@ -108,18 +108,21 @@ class liveRunStreamListener : BaseObject  {
     
     func addRunCoordinate ( timestamp : Double , lat : CLLocationDegrees , lon : CLLocationDegrees) -> DROPcategoryTypes? {
         
-        if currentRun == nil {
-            if let pl = playerRoster.getPlayer(name: "samui@hastur.com") {
-                prime(user : pl )
+        queue.sync {
+            
+        
+        if self.currentRun == nil {
+            if let pl = playerRoster.getPlayer(name: "samui") {
+                self.prime(user : pl )
                 
             }
         }
         
-        guard let inse = currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
-            return DROPcategoryTypes.duplicate
+        guard let inse = self.currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
+            return //DROPcategoryTypes.duplicate
         }
         
-        _pulse(pulseBySeconds: 16000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
+        self._pulse(pulseBySeconds: 16000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
         
         
         //maybe the map is listening to display my run
@@ -127,17 +130,19 @@ class liveRunStreamListener : BaseObject  {
         
         //runAreaProgressObserver.update(currentRun!)     //
         
-        if !(currentRun?.isClosed())! {
+        if !(self.currentRun?.isClosed())! {
             
             runAreaProgressObserver.update(currentRun!)
-            return nil
+            return;
         }
         
         //we have a closed run, tell somebody to save the daattum
         
         //somebody might be observing this. ui, runRecorderJunction
         
-        runAreaCompletedObserver.update(currentRun!)
+            runAreaCompletedObserver.update(currentRun!)
+        
+        }
         
         return nil
     }

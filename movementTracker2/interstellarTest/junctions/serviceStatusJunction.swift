@@ -35,7 +35,7 @@ class serviceStatusJunction {
     weak var myLiveRunStreamListener : liveRunStreamListener?
     weak var myPedometer : Pedometer?
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
-    let services = ["mapCombiner","PullRunsFromDisk","runCache","snapshotCache","servusMeshnetProvider","PeerDataProvider","PeerDataRequester","jsonStreamReader","runStreamRecorder","hoodoRunStreamListener"];
+    let services = ["mapCombiner","PullRunsFromDisk","runCache","snapshotCache","servusMeshnetProvider","PeerDataProvider","PeerDataRequester","jsonStreamReader","runStreamRecorder","hoodoRunStreamListener","locationLogger","liveRunStreamListener","runStreamRecorder"];
     
         
     func initialize () {

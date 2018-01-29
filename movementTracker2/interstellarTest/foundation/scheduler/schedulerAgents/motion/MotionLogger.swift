@@ -196,6 +196,30 @@ class MotionLogger : BaseObject {
         
     }
     
+    func reset () {
+        
+        // runrecorderjunction reset calls this
+        
+        CM?.stopGyroUpdates()   //stop gyro too
+        
+        CM?.stopDeviceMotionUpdates()   //dont ask for updates anymore
+        
+    }
+    
+    func restart () {
+        
+        CM?.startDeviceMotionUpdates(to: OperationQueue.main) { motion, error in
+            
+            self.queue1.update(motion!)  //shove it down into the observable queue to be merged later
+           /* motion?.userAcceleration
+            motion?.gravity
+            motion?.attitude
+            
+            print(motion ?? "nil" ) */
+        }
+        
+    }
+    
     override func _finalize () -> DROPcategoryTypes? {
         
         if (self.terminated) { return DROPcategoryTypes.terminating; }

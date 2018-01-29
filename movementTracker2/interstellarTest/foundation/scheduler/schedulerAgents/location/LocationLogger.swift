@@ -117,7 +117,8 @@ class LocationLogger : BaseObject {
         
        
         
-        CL?.desiredAccuracy = kCLLocationAccuracyBest
+        CL?.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //kCLLocationAccuracyBest
+        
         //kCLLocationAccuracyHundredMeters
         
         

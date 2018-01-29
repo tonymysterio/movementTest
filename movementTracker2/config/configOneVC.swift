@@ -213,10 +213,28 @@ class configOneVC: UIViewController {
             } else {
                 self.serviceItemDisable(key: 8)
             }
+        
+        case "locationLogger":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 9)
+            } else {
+                self.serviceItemDisable(key: 9)
+            }
+            
+        case "liveRunStreamListener":
+            
+            if (s.active){
+                self.serviceItemEnable(key: 10)
+            } else {
+                self.serviceItemDisable(key: 10)
+            }
         default:
             return;
             
         }
+        //"locationLogger","liveRunStreamListener","runStreamRecorder"
+        
         
         
     }   //updateServiceStatusItem

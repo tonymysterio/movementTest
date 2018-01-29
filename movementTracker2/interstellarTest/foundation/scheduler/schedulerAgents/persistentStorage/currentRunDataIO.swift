@@ -181,7 +181,7 @@ class CurrentRunDataIO: BaseObject  {
             return
             
         }
-        self.startProcessing()
+        _ = self.startProcessing()
        
         let filename = self.path + "/currentRun.json";
         //this will crash
@@ -199,8 +199,10 @@ class CurrentRunDataIO: BaseObject  {
                         if !run!.isValid {
                             
                             //runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
-                            borkedRunReceivedObserver.update(run!)
+                            print(#function + "borked current run received")
                             
+                            borkedRunReceivedObserver.update(run!)
+                            _ = self._teardown();   //not needed anymore
                             
                             return;
                             

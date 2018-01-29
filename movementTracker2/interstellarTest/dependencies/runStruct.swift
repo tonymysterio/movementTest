@@ -291,6 +291,17 @@ struct Run : Codable {
         
     }
     
+    func isReadyForTemporarySave () -> Bool {
+        
+        //disk writer wants to save this. ignore if the run is not long enough
+        if self.totalDistance() < 100 {
+            
+            return false;
+        }
+        
+        
+        return true;
+    }
     func totalDistance () -> Double {
         
         guard let pp = spikeFilteredCoordinates() else {
@@ -365,13 +376,13 @@ struct Run : Codable {
         
         let d = location1.distance(from: location2) as Double;
         
-        if totalDistance() < 250 {
+        if totalDistance() < 350 {
             
             return false
             
         }
         
-        if d > 500 {
+        if d > 50 {
             
             return false
             
