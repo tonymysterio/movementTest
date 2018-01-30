@@ -318,6 +318,13 @@ class SnapshotCache : BaseObject  {
         
     }
     
+    func purgeFromAroundCurrentLocation ( lat : CLLocationDegrees, lon : CLLocationDegrees  ) {
+        
+        //we made a significant location change on our map view user initiated move to current location
+        //TODO: purge snapshots that are not around this area
+        
+        
+    }
     func getApplicableSnapshot ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double) -> mapSnapshot? {
         
         

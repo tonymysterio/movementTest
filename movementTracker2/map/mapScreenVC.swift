@@ -260,13 +260,7 @@ class mapScreenVC: UIViewController {
             significantLocationChange = true;
         }
         
-        if significantLocationChange {
-            
-            //stop all other mapcombining
-            stopAllMapCombinersObserver.update(1);
-            print("SIGnificant area change \(d)m. ask for disk data");
-            requestForMapDataProvider.update(loc);
-        }
+        
         
         //tapping the button sets primelocation to false
         if !self.primeLocation {
@@ -274,11 +268,35 @@ class mapScreenVC: UIViewController {
             self.initialLocation = loc
             self.centerMap(lat: loc.lat, lon: loc.lon)
             //get the map combiners to werx
+            
+            //this will not trigger a drag event so we have to pull a snap or start a mapDataProvider
             self.browsedToLocation(lat :loc.lat, lon: loc.lon);
+            
+            if significantLocationChange {
+                
+                //stop all other mapcombining
+                stopAllMapCombinersObserver.update(1);
+                print("SIGnificant area change \(d)m. ask for disk data");
+                
+                if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+                    
+                    //try to get a snap to display immeziately
+                    if let snip = snapcache.getApplicableSnapshot(lat: loc.lat, lon: loc.lon, getWithinArea: self.regionRadius ) {
+                        self.mapSnapshotReceived(mapSnap: snip);
+                        return;
+                    }
+                    
+                    //tell snapcache to start purging shit we are not looking at anymore
+                    snapcache.purgeFromAroundCurrentLocation ( lat: loc.lat ,lon: loc.lon );
+                    //snapcache
+                }
+                
+                requestForMapDataProvider.update(loc);
+                
+            }
+            
             self.primeLocation = true;
             
-            
-         
          }
         
     }
@@ -359,6 +377,7 @@ class mapScreenVC: UIViewController {
         
         if (self.lastDisplayedSnapshotID == mapSnap.id) {
             print ("dup mapsnap")
+            print (mapSnap);
             return;
         }
         
@@ -401,6 +420,8 @@ class mapScreenVC: UIViewController {
                 self.refreshingMapPolygons = false;
                 break;
             }
+            print (#function);
+            print (i.count);
             polylines.append( MKPolyline(coordinates: i, count: i.count))
             let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
             //self.mapRenderQueue.sync{
@@ -411,7 +432,7 @@ class mapScreenVC: UIViewController {
                     self.mapView.delegate = self
                     self.mapView.add(pol) //polyline
                     lines = lines - 1;
-                    //print("mapSnapshotReceived drew \(lines) polygons");
+                    print("mapSnapshotReceived drew \(lines) polygons");
                     if (lines<1) {
                         self.refreshingMapPolygons = false;
                         self.refreshingMapPolygonsBreak = false;
