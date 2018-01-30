@@ -23,6 +23,7 @@ class RunStreamRecorder : BaseObject  {
     var totalSuccessfullBuffers = 0;
     var totalParsedObjects = 0 ;
     var maxBuffers = 10;
+    var previousSavedHash = "";
     
     let queue = DispatchQueue(label: "runStreamRecorderQueue", qos: .utility)
     let path = "runData"
@@ -65,8 +66,15 @@ class RunStreamRecorder : BaseObject  {
         //hash a list of transactions, how much da
         if self.terminated { return }
         
-        let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
+        //let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
+        let hash = run.getHash();
         
+        if previousSavedHash == hash {
+            //ignore duplicate save
+            //this might not work if runs are coming from multiple sources, meshnet, json stream pull..
+            
+            return;
+        }
         //var run2 = run;
         //run.hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue);
         
@@ -77,6 +85,8 @@ class RunStreamRecorder : BaseObject  {
             //try Disk.save(run, to: .caches, as: fname)
             try Disk.save(run, to: .applicationSupport, as: fname)
             print("storing captured run to app support \(fname) ")
+            
+            previousSavedHash = hash;
             
             peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
             

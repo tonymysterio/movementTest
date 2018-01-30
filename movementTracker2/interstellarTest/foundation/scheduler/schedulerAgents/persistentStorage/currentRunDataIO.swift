@@ -55,12 +55,14 @@ class CurrentRunDataIO: BaseObject  {
         //im listening to updates from
         //if I exist, i will commit no questions asked
         
-        runAreaProgressObserver.subscribe { run in
+        //let junction to do this so logic keeps in one place
+        
+        /*runAreaProgressObserver.subscribe { run in
             
             DispatchQueue.global(qos: .utility).async {
                 self.CommitOfCurrentRun( run : run )
             }
-        }
+        }*/
         
         
         return nil

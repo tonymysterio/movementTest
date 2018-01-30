@@ -123,7 +123,16 @@ class mapScreenVC: UIViewController {
             
         }
         
-        LocationLoggerMessageObserver.subscribe
+        currentLocationMessageObserver.subscribe { locationMessage in
+            
+            //in response to requesting current location via a button
+            self.currentLocationMessage(loc : locationMessage);
+            
+        }
+        
+        
+        
+        /*LocationLoggerMessageObserver.subscribe
             { locationMessage in
                 //DispatchQueue.global(qos: .utility).sync {
                     self.locationLoggerMessageReceived( loc : locationMessage)
@@ -139,7 +148,7 @@ class mapScreenVC: UIViewController {
                     self.locationMessageReceived( loc : locationMessage)
                 //}
                
-            }
+            } */
         
         //we are appearing. screen moving will call this again but ignore from the mapJunction
         
@@ -239,6 +248,41 @@ class mapScreenVC: UIViewController {
         
     }
     
+    func currentLocationMessage ( loc : locationMessage ) {
+        
+        //we requested for current location via a control
+        
+        var significantLocationChange = false;
+        let l1 = CLLocation(latitude: loc.lat, longitude: loc.lon);
+        let l2 = CLLocation(latitude: self.initialLocation.lat, longitude: self.initialLocation.lon);
+        let d = l1.distance(from: l2) as Double;
+        if (d > 150000) {
+            significantLocationChange = true;
+        }
+        
+        if significantLocationChange {
+            
+            //stop all other mapcombining
+            stopAllMapCombinersObserver.update(1);
+            print("SIGnificant area change \(d)m. ask for disk data");
+            requestForMapDataProvider.update(loc);
+        }
+        
+        //tapping the button sets primelocation to false
+        if !self.primeLocation {
+         
+            self.initialLocation = loc
+            self.centerMap(lat: loc.lat, lon: loc.lon)
+            //get the map combiners to werx
+            self.browsedToLocation(lat :loc.lat, lon: loc.lon);
+            self.primeLocation = true;
+            
+            
+         
+         }
+        
+    }
+    
     func browsedToLocation ( lat : CLLocationDegrees , lon: CLLocationDegrees ) {
     
         //the user wants to see surroundingusu
@@ -282,7 +326,7 @@ class mapScreenVC: UIViewController {
                 }
             }
         
-        requestForMapCombiner.update(targetLocation)
+            requestForMapCombiner.update(targetLocation)
             
         if significantLocationChange {
             
@@ -392,10 +436,19 @@ class mapScreenVC: UIViewController {
         //_ = getRunStreamRecorderStatus();
         //these messages coming means we are recording
         
+        
+        
         if !self.getRunStreamRecorderStatus() {
                     
             //let the user to mess with the map and dont worry about location updates
             //in case the user wants to scroll around to see areas of interdust
+            if !primeLocation {
+                
+                
+                //request for current loc
+                
+            }
+            
             return;
         }
         
@@ -429,13 +482,14 @@ class mapScreenVC: UIViewController {
         //refresh the view accordingly
         dataOperationQueue.sync {
             
-            if !self.primeLocation {
+            //use the separaet currentLocationMessageObserver to anwer to user initiated map targeting
+            /*if !self.primeLocation {
             
                 self.initialLocation = loc
                 self.centerMap(lat: loc.lat, lon: loc.lon)
                 self.primeLocation = true;
             
-            }
+            }*/
         
             if self.getRunStreamRecorderStatus() {
             

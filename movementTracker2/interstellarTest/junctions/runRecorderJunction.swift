@@ -15,6 +15,9 @@ var runAreaProgressObserver = Observable<Run>()
 var runRecorderAbortObserver = Observable<Bool>()
 var locationMessageObserver = Observable<locationMessage>()
 
+//for map, where are we now
+//requested with currentlocation request
+
 var requestCurrentLocationObserver = Observable<Bool>()
 var requestCommitOfCurrentRunObserver = Observable<Bool>()
 var requestReadOfCurrentRunObserver = Observable<Bool>()
@@ -88,21 +91,27 @@ class runRecorderJunction {
         //my subclass told me
         //maybe pulling a current run triggered this
         
+        DispatchQueue.main.async {
+            //runStreamRecorder is bad news because it will save whatever is thrown at it
+            //liverunstreamlistener will page us a few times from its housekeep after the
+            //recording is finished and runStreamRecorder is still alive
+            //no new coordinates get added. make runStreamRecorder ignore if the previous saved has is sent over again
+            //TODO:
+            
+            if let rsr = self.getRunStreamRecorder() {
+            
+                //set closetime and proper geohash
+                var r2 = run;
+                r2.finalizeRun();
+                rsr.storeRun(run: r2)
+            
+            } else {
+            
+                print("runrecorder junction: dailed to getRunStreamRecorder!");
+            
+            }
         
-        
-        if let rsr = getRunStreamRecorder(){
-            
-            //set closetime and proper geohash
-            var r2 = run;
-            r2.finalizeRun();
-            rsr.storeRun(run: r2)
-            
-        } else {
-            
-            print("runrecorder junction: dailed to getRunStreamRecorder!");
-            
         }
-        
         //todo: destroy processes for recording a run
         
     }
@@ -124,12 +133,25 @@ class runRecorderJunction {
             return;
         }
         
-        if let rsr = getRunStreamRecorder(){
+        DispatchQueue.main.async {
             
-            rsr.storeCurrentRun(run: run)
+            //run stream recorder is born when we are recording a run and that run has enough daatta
             
-        }
+            if let mlt = storage.getObject(oID: "currentRunDataIO") as! CurrentRunDataIO? {
+                
+                mlt.CommitOfCurrentRun(run: run)
+                
+            }
+            
+            
+            /*if let rsr = self.getRunStreamRecorder(){
+            
+                rsr.storeCurrentRun(run: run)
+            
+            }*/
+            
         
+        }
         
         
     }
@@ -161,15 +183,25 @@ class runRecorderJunction {
     }
     func requestCurrentLocation () {
         
-        
+        //answer for map screen button tap
         
         //map view is requesting for location probably
-        if (self.myLocationTracker == nil) {
-            initLocationServices()
+        if let mlt = storage.getObject(oID: "locationLogger") as! LocationLogger? {
+            
+            //myLocationTracker = mlt
+            mlt._pulse(pulseBySeconds: 600000)
+            
+            //will talk thru observable
+            //map screen listens to this
+            currentLocationMessageObserver.update (mlt.requestCurrentLocation());
+            //LocationLoggerMessageObserver.update (mlt.requestCurrentLocation());
+            
+            //if this exists, we could pry the current location now
+            
             
         } else {
             
-            
+            initLocationServices()
             
         }
         
@@ -451,9 +483,9 @@ class runRecorderJunction {
         runAreaProgressObserver.subscribe { run in
             //comes from runstreamlistener, queue .userInteraction
             //coordinate or event added on the run
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.runAreaProgress( run : run )
-            }
+            //}
             
         }
         
@@ -461,10 +493,10 @@ class runRecorderJunction {
             
             //this has to be main because it might start a location manager that has to be in
             //the main queue
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
             
                 self.requestCurrentLocation()
-            }
+            //}
         }
         
         requestCommitOfCurrentRunObserver.subscribe { toggle in

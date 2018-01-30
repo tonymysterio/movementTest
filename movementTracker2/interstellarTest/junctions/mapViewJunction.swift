@@ -121,7 +121,7 @@ class mapViewJunction {
         
         mapViewJunctionSignificantViewChange.subscribe {locationMessage in
             //when user jumps to current location far away from tornio
-            
+            let m = 1;
             
         }
         
@@ -313,7 +313,10 @@ class mapViewJunction {
     func addMapDataProvider ( locMessage : locationMessage ){
         
         //HACK not to start pullRuns again
-        if mapDataProviderInitialized == true { return }
+        if mapDataProviderInitialized == true {
+            return
+            
+        }
         
         //requestForMapDataProvider
         if let runcache = storage.getObject(oID: "PullRunsFromDisk") as! PullRunsFromDisk?  {
@@ -322,9 +325,10 @@ class mapViewJunction {
             return;
         }
         
-        junctionQueue.sync {
-            
         
+        //junctionQueue.sync {
+        DispatchQueue.main.async {
+            
             var gwa : Double = 2500;
             if locMessage.timestamp > 2000 && locMessage.timestamp < 50000 {
                 //sneaking view radius through timestamp, naughty
@@ -345,7 +349,7 @@ class mapViewJunction {
             mc._initialize();
             scheduler.addObject(oID: mc.myID, o: mc);
             
-            mapDataProviderInitialized = true;
+            self.mapDataProviderInitialized = true;
             
             mc.scanForRuns()
         

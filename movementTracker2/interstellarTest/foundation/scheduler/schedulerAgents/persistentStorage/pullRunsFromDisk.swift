@@ -17,6 +17,8 @@ var runReceivedObservable = Observable<Run>()
 struct RunLoader {
     
     let filename : String
+    let queue = DispatchQueue(label: "PullRunQueue", qos: .background)
+    
     typealias Fsuccess = ( _ run : Run) -> Void
     typealias Ferror = ()  -> Void
     //let queue = DispatchQueue(label: "runLoaderQueue", qos: .background)
@@ -27,9 +29,9 @@ struct RunLoader {
         //queue.sync {
             
         
-        if let data = try? Disk.retrieve(falename, from: .applicationSupport, as: Data.self) {
+        if let run = try? Disk.retrieve(falename, from: .applicationSupport, as: Run.self) {
             
-            if let j = String(data:data, encoding:.utf8) {
+            /*if let j = String(data:data, encoding:.utf8) {
                 let decoder = JSONDecoder()
                 if let run = try? decoder.decode(Run?.self, from: j.data(using: .utf8)!) {
                     
@@ -41,7 +43,10 @@ struct RunLoader {
                     
                     error();
                 }
-            }
+            }*/
+            
+            success(run)
+            
         } else {
             
             error();
@@ -55,7 +60,7 @@ struct RunLoader {
 
 class PullRunsFromDisk: BaseObject  {
 
-    let queue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .background)
+    let queue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .userInitiated)
     let path = "runData"
     //filter runs by area eventually
     var initialLocation = locationMessage( timestamp : 0 , lat : 65.822299, lon: 24.2002689 )
@@ -150,6 +155,8 @@ class PullRunsFromDisk: BaseObject  {
             downloadGroup.enter()
             let r = hash.load(success: { (run) in
                 
+                let ran = run;
+                //poprint(ran);
                     if (run.isValid || run.isClosed() ) {
                     
                     
@@ -160,6 +167,8 @@ class PullRunsFromDisk: BaseObject  {
                         runReceivedObservable.update(run)
                     
                         print("run pulled \(run.hash) at \(run.geoHash) ")
+                        print (run.totalDistance());
+                        //print("tit");
                         
                     }
                 
@@ -198,8 +207,9 @@ class PullRunsFromDisk: BaseObject  {
     
     func scanForRuns () {
         
+        if filesPrimed { return }
         //let path =  String(describing: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first);
-        
+        //doing this from main queue
         //let fileManager = FileManager.default;
         self.startProcessing()
         
@@ -265,7 +275,7 @@ class PullRunsFromDisk: BaseObject  {
                 self.filesPrimed = true;
                 self._pulse(pulseBySeconds: 60);
                 self.finishProcessing();
-                //print (fileURLs);
+                print (fileURLs);
                 // process files
             } catch {
                 //print("Error while enumerating files \(destinationFolder.path): \(error.localizedDescription)")

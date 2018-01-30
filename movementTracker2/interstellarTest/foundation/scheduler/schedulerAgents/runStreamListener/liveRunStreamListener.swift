@@ -22,6 +22,8 @@ class liveRunStreamListener : BaseObject  {
     
     let queue = DispatchQueue(label: "liveRunStreamListener", qos: .userInitiated)
     var currentRun : Run?
+    var recording = false;
+    var recordingCompleted = false;
     
     func _initialize () -> DROPcategoryTypes? {
         
@@ -41,6 +43,8 @@ class liveRunStreamListener : BaseObject  {
                 self.locationMessageGotFromLocationLogger(lm : locationMessage)
                 
         }
+        
+        self.recording = true;
         
         return nil
         
@@ -108,9 +112,12 @@ class liveRunStreamListener : BaseObject  {
     
     func addRunCoordinate ( timestamp : Double , lat : CLLocationDegrees , lon : CLLocationDegrees) -> DROPcategoryTypes? {
         
+        if !self.recording { return nil }
+        
         queue.sync {
             
-        
+        self.startProcessing()
+            
         if self.currentRun == nil {
             if let pl = playerRoster.getPlayer(name: "samui") {
                 self.prime(user : pl )
@@ -119,6 +126,8 @@ class liveRunStreamListener : BaseObject  {
         }
         
         guard let inse = self.currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
+            
+            self.finishProcessing()
             return //DROPcategoryTypes.duplicate
         }
         
@@ -133,15 +142,20 @@ class liveRunStreamListener : BaseObject  {
         if !(self.currentRun?.isClosed())! {
             
             runAreaProgressObserver.update(currentRun!)
+            self.finishProcessing()
             return;
         }
         
         //we have a closed run, tell somebody to save the daattum
         
         //somebody might be observing this. ui, runRecorderJunction
-        
+            
+            self.recording = false;
+            self.recordingCompleted = true;
             runAreaCompletedObserver.update(currentRun!)
-        
+            self._pulse(pulseBySeconds: 10) //keep alive for a few housekeeps, ping run stream recorder to save the run
+            self.finishProcessing()
+            
         }
         
         return nil
@@ -177,6 +191,17 @@ class liveRunStreamListener : BaseObject  {
     
     override func _housekeep_extend() -> DROPcategoryTypes? {
         
+        if !self.processing && self.recordingCompleted {
+            
+            //runrecorder junction will get this and try to start a runStreamRecorder
+            //runstreamRecorder will ignore previously saved hashes so its safe to page it again in case
+            //write failed
+            //this guy will TTL and die in 10s after the end of recording
+            runAreaCompletedObserver.update(currentRun!)
+            
+        }
+        
+        
         
         
         return nil
@@ -187,7 +212,15 @@ class liveRunStreamListener : BaseObject  {
     override func _hibernate_extend () -> DROPcategoryTypes? {
         
         if self.terminated { return DROPcategoryTypes.terminating }
-        self._pulse(pulseBySeconds: 1000000)    //keep me going
+        
+        //if recoding has finished, the run is probably already saved
+        
+        if self.recording {
+            
+            self._pulse(pulseBySeconds: 1000000)    //keep me going
+            
+        }
+        
         
         return DROPcategoryTypes.persisting
     }

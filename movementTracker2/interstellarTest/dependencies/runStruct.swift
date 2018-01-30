@@ -191,6 +191,11 @@ struct Run : Codable {
     }
     
     //adding rounding of coordinates here would distort the run
+    func getHash () -> String {
+        
+        return String(closeTime.hashValue ^ user.hashValue ^ geoHash.hashValue)
+        
+    }
     
     mutating func addCoordinate (coord : coordinate ) -> Bool {
         
