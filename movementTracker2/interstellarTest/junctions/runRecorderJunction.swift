@@ -567,6 +567,25 @@ class runRecorderJunction {
             //}
         }
         
+        runRecorderSavedFinishedRun.subscribe { run in
+            
+            //run was completed and saved, put it to caches, drty snaps
+            //mapViewJunction might want to display the map now
+            
+            if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
+                runcache.addRun(run: run);
+                
+                //throw it in the cache
+                if let snapcache = storage.getObject(oID: "snapshotCache") as! SnapshotCache?  {
+                
+                    //try to get a snap to display immeziately
+                    snapcache.addRun(run: run);
+                
+                }
+            
+            }
+            
+        }
         LocationLoggerMessageObserver.subscribe
             { locationMessage in
                 //DispatchQueue.global(qos: .utility).async {

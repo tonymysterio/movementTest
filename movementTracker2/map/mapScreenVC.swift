@@ -23,7 +23,7 @@ class mapScreenVC: UIViewController {
     @IBOutlet var mapView: MKMapView!
     
     var regionRadius: CLLocationDistance = 10000
-    let mapRenderQueue = DispatchQueue(label: "mapRenderQueue", qos: .utility)
+    let mapRenderQueue = DispatchQueue(label: "mapRenderQueue", qos: .userInitiated)
     let dataOperationQueue = DispatchQueue(label: "dataOperationQueue", qos: .utility)
     
     var primeLocation = false;
@@ -116,7 +116,11 @@ class mapScreenVC: UIViewController {
             //quickly throw it in the queue and get out of observer handler
             //self.mapRenderQueue.sync{
             if self.isVisible {
-                self.mapSnapshotReceived( mapSnap : mapSnap )
+                //self.mapRenderQueue.sync{
+                    
+                    self.mapSnapshotReceived( mapSnap : mapSnap )
+                    
+                //}
             }
             //}
             
@@ -365,6 +369,51 @@ class mapScreenVC: UIViewController {
     
     func mapSnapshotReceived( mapSnap : mapSnapshot ) {
         
+        if (self.lastDisplayedSnapshotID == mapSnap.id) {
+            print ("dup mapsnap")
+            print (mapSnap);
+            //return;
+        }
+        self.lastDisplayedSnapshotID = mapSnap.id;
+        self.mapView.delegate = self
+        
+        var mav = self.mapView;
+        mav?.delegate = self;
+        
+        var polylines = [MKPolyline]();
+        var lines = mapSnap.coordinates.count;
+        
+        
+        for i in mapSnap.coordinates {
+            //print (#function);
+            print (i.count);
+            polylines.append( MKPolyline(coordinates: i, count: i.count))
+            let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
+            mapView.delegate = self
+            mapView.add(pol);
+        }
+        
+        //let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
+        //self.mapRenderQueue.sync{
+        //DispatchQueue.main.async {
+            
+            
+            
+            for i in polylines {
+                DispatchQueue.main.async {
+                    //let luss = self.mapView.delegate = self
+                    mav?.add(i) //polyline
+                    let im = 2;
+                }
+            }
+        
+        //}
+        
+    }
+    
+    
+    func mapSnapshotReceivedDEPRE( mapSnap : mapSnapshot ) {
+        
         //MapCombiner gives us a new snap for some reason
         
         /*
@@ -380,6 +429,11 @@ class mapScreenVC: UIViewController {
             print (mapSnap);
             return;
         }
+        
+        /*DispatchQueue.main.async {
+            let overlays = self.mapView.overlays
+            self.mapView.removeOverlays(overlays)
+        }*/
         
         self.mapRenderQueue.sync{
         
@@ -402,10 +456,7 @@ class mapScreenVC: UIViewController {
         self.refreshingMapPolygons = true;
         
         //check if the snapshot applies to the current viev before purging
-        DispatchQueue.main.async {
-            let overlays = self.mapView.overlays
-            self.mapView.removeOverlays(overlays)
-        }
+        
         
         //self.mapView.setCenter(center, animated: true)
         //self.mapView.setRegion(region, animated: true)
@@ -425,7 +476,7 @@ class mapScreenVC: UIViewController {
             polylines.append( MKPolyline(coordinates: i, count: i.count))
             let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
             //self.mapRenderQueue.sync{
-            DispatchQueue.main.sync {
+            DispatchQueue.main.async {
                 
                 if (!self.refreshingMapPolygonsBreak){
                 
