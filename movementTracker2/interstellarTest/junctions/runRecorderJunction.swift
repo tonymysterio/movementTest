@@ -313,10 +313,13 @@ class runRecorderJunction {
         
         //ghetto way to start the recording circus
         
-        guard let locationTracker = getLocationLogger() else {
-            print ("locationTracker could not be initialized. deadness");
-            return;
+        if !pushFakeData {
+            guard let locationTracker = getLocationLogger() else {
+                print ("locationTracker could not be initialized. deadness");
+                return;
+            }
         }
+        
         if let mstl = getLiveRunStreamListener() {
             
             if pushFakeData {
@@ -324,6 +327,8 @@ class runRecorderJunction {
                 //dont worry about the read run being garbage
                 print(#function)
                 print(run.coordinates.count);
+                print(run.distanceBetweenStartAndEndSpikeFiltered());
+                print(run.totalDistance());
                 sendstoredCurrentRunCoordinateOneByOneForLiveRunStreamListener(run:run,coordinate: 0);
                 
             } else {
@@ -356,7 +361,14 @@ class runRecorderJunction {
     
     func sendstoredCurrentRunCoordinateOneByOneForLiveRunStreamListener ( run : Run, coordinate : Int ) {
         
-        if  let coor = run.coordinates[coordinate] as coordinate?  {
+        let coc = run.coordinates.count;
+        print (coordinate)
+        print (coc);
+        if coordinate > run.coordinates.count - 1 {
+            return;
+        }
+        
+        if let coor = run.coordinates[coordinate] as coordinate?  {
             
             //fake as regular locationloggeer message
             LocationLoggerMessageObserver.update(locationMessage(timestamp: coor.timestamp , lat: coor.lat, lon: coor.lon ))

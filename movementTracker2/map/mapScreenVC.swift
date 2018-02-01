@@ -425,7 +425,7 @@ class mapScreenVC: UIViewController {
             polylines.append( MKPolyline(coordinates: i, count: i.count))
             let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
             //self.mapRenderQueue.sync{
-            DispatchQueue.main.async {
+            DispatchQueue.main.sync {
                 
                 if (!self.refreshingMapPolygonsBreak){
                 

@@ -139,7 +139,17 @@ class playScreenVC: UIViewController {
         
         }   //end dispaaaaatch
     }
-    
+        
+        runRecorderSavedFinishedRun.subscribe { run in
+            
+            DispatchQueue.main.async {
+                
+                self.currentRunIsClosed.text = "saved"
+                
+            }
+            
+        }
+        
         runAreaCompletedObserver.subscribe { run in
             
             DispatchQueue.main.async {

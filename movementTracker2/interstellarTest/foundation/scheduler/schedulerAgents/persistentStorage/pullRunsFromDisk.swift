@@ -155,11 +155,18 @@ class PullRunsFromDisk: BaseObject  {
             downloadGroup.enter()
             let r = hash.load(success: { (run) in
                 
-                let ran = run;
+                //let ran = run;
                 //poprint(ran);
-                    if (run.isValid || run.isClosed() ) {
+                //let rvalid = run.isValid;
+                //let rClosed = run.isClosed();
+                    if (run.isValid && run.isClosed() ) {
                     
-                    
+                        print(#function);
+                        print(run.coordinates.count);
+                        print(run.spikeFilteredCoordinates()?.count);
+                        print(run.totalDistance());
+                        print(run.distanceBetweenStartAndEndSpikeFiltered());
+                        
                         self.myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
                         self.initialPull = true;
                     
