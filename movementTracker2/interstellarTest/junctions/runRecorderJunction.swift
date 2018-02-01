@@ -29,8 +29,12 @@ var borkedRunReceivedObserver = Observable<Run>()
 
 var currentRunReceivedObserver = Observable<Run>()
 
+var runRecorderSavedRun = Observable<Run>();
+var runRecorderSavedFinishedRun = Observable<Run>();
+
 class runRecorderJunction {
     
+    var pushFakeData = true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
     var recording = false;
     var myRecorderObjectID = "";
     weak var myLocationTracker : LocationLogger?
@@ -55,6 +59,12 @@ class runRecorderJunction {
         
         //locationtracker is unique, should exist
         //this service should not kill the existing tracker, somebody else might be interested
+        if pushFakeData {
+            
+            
+            
+        }
+        
         
         guard let locationTracker = getLocationLogger() else {
             return
@@ -102,12 +112,16 @@ class runRecorderJunction {
             
                 //set closetime and proper geohash
                 var r2 = run;
+                
                 r2.finalizeRun();
-                rsr.storeRun(run: r2)
-            
+                rsr.storeFinishedRun(run: r2)
+                //pings with runRecorderSavedFinalizedRun
+                
+                
+                
             } else {
             
-                print("runrecorder junction: dailed to getRunStreamRecorder!");
+                print("runrecorder junction: failed to getRunStreamRecorder!");
             
             }
         
@@ -128,6 +142,11 @@ class runRecorderJunction {
             //dont bother with non closed runs
             return;
         }*/
+        
+        if pushFakeData {
+            //dont resave faked data as currentRun
+            return;
+        }
         
         if run.isReadyForTemporarySave() == false {
             return;
@@ -236,11 +255,31 @@ class runRecorderJunction {
             return;
         }
         
+        if let mstl = getLiveRunStreamListener() {
+            
+            if let run = mstl.currentRun {
+                
+                if let rdIO = getCurrentRunDataIO() {
+                    rdIO.CommitOfCurrentRun(run: run);
+                    
+                }
+            }
+            
+        }
+        
+        return;
+        
         //do we have a run writer?
         if let rdIO = getCurrentRunDataIO() {
             
             //CurrentRunDataIO gets its data thru observer runAreaProgressObserver
-            
+            if pushFakeData {
+                //this means we are on a real run.
+                pushFakeData = false;
+                
+                
+                
+            }
             
         }
         
@@ -280,13 +319,27 @@ class runRecorderJunction {
         }
         if let mstl = getLiveRunStreamListener() {
             
-            if !mstl.primeWithRun( run: run ) {
-                
-                
+            if pushFakeData {
+                //dish run coords one by one
+                //dont worry about the read run being garbage
+                print(#function)
+                print(run.coordinates.count);
+                sendstoredCurrentRunCoordinateOneByOneForLiveRunStreamListener(run:run,coordinate: 0);
                 
             } else {
-                //the run was garbage, timeouted, whatever, probably got messed up on disk write
                 
+                
+                
+         
+            
+                if !mstl.primeWithRun( run: run ) {
+                
+                
+                
+                } else {
+                    //the run was garbage, timeouted, whatever, probably got messed up on disk write
+                
+                }
             }
             
         }
@@ -294,8 +347,37 @@ class runRecorderJunction {
         let pedo = getPedometer()
         let IO = getCurrentRunDataIO()
         
-        runAreaProgressObserver.update(run)
+        if !pushFakeData { runAreaProgressObserver.update(run) }
         recording = true;
+        
+    }
+    
+    let storedCurrentRunCoordinate = 0;
+    
+    func sendstoredCurrentRunCoordinateOneByOneForLiveRunStreamListener ( run : Run, coordinate : Int ) {
+        
+        if  let coor = run.coordinates[coordinate] as coordinate?  {
+            
+            //fake as regular locationloggeer message
+            LocationLoggerMessageObserver.update(locationMessage(timestamp: coor.timestamp , lat: coor.lat, lon: coor.lon ))
+            let nextCoo = coordinate + 1;
+            
+            let deadlineTime = DispatchTime.now() + .seconds(1)
+            //push next coord sfter a second
+            DispatchQueue.main.asyncAfter(deadline: deadlineTime, execute: {
+                self.sendstoredCurrentRunCoordinateOneByOneForLiveRunStreamListener(run:run,coordinate: nextCoo)
+            })
+            
+    
+    
+        } else {
+            
+            print (#function)
+            print ("all coordinates sent to LocationLoggerMessageObserver")
+            
+        }
+    
+        
         
     }
     
@@ -524,6 +606,7 @@ class runRecorderJunction {
             DispatchQueue.main.async {
                 self.currentRunReceived( run : run )
             }
+            
             
         }
         

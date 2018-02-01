@@ -86,6 +86,8 @@ class RunStreamRecorder : BaseObject  {
             try Disk.save(run, to: .applicationSupport, as: fname)
             print("storing captured run to app support \(fname) ")
             
+            runRecorderSavedRun.update(run);
+            
             previousSavedHash = hash;
             
             peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
@@ -105,6 +107,60 @@ class RunStreamRecorder : BaseObject  {
         
     }   //storeRun
     
+    func storeFinishedRun (run : Run ) {
+        
+        //store finished captured run
+        
+        //store all the runs on all the clients?// hash for runs?
+        
+        //replicating runs:
+        //filter by locality, exchange hashes
+        //proof of stake = amount of runs done, exchanged, bandwidth given
+        
+        //hash a list of transactions, how much da
+        if self.terminated { return }
+        
+        //let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
+        let hash = run.getHash();
+        
+        if previousSavedHash == hash {
+            //ignore duplicate save
+            //this might not work if runs are coming from multiple sources, meshnet, json stream pull..
+            
+            return;
+        }
+        //var run2 = run;
+        //run.hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue);
+        
+        self.startProcessing()
+        
+        do {
+            let fname = path + "/" + hash + ".json"
+            //try Disk.save(run, to: .caches, as: fname)
+            try Disk.save(run, to: .applicationSupport, as: fname)
+            print("storing captured run to app support \(fname) ")
+            
+            
+            runRecorderSavedFinishedRun.update(run);
+            
+            previousSavedHash = hash;
+            
+            peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
+            
+            //on successfull storage
+            self._pulse(pulseBySeconds: 120)    //expect next write in a few mins
+            self.finishProcessing()
+            
+        } catch {
+            
+            //maybe page run recorder junction
+            self._pulse(pulseBySeconds: 120)
+            self.finishProcessing()
+        }
+        
+        
+        
+    }   //storeFinishedRun
     
     func storeCurrentRun (run : Run ) {
     

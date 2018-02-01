@@ -221,6 +221,24 @@ struct Run : Codable {
         return true
     }
     
+    /*func spikeFilteredCoordinates () -> [coordinate]? {
+        
+        let lastCoord = coordinates.last;
+        let loc2D = CLLocationCoordinate2D(latitude: lastCoord?.lat as! CLLocationDegrees, longitude: lastCoord?.lat as! CLLocationDegrees);
+        
+        let initLoc = CLLocation(coordinate: loc2D, altitude: 0, horizontalAccuracy: 0, verticalAccuracy: 0, course: 0, speed: 0, timestamp: 0);
+        
+        let hcKalmanFilter = HCKalmanAlgorithm(initialLocation: initLoc);
+        
+        for f in coordinates {
+            
+            
+        }
+        
+        
+    }*/
+    
+    
     func spikeFilteredCoordinates () -> [coordinate]? {
         
         if self.coordinates.isEmpty {
