@@ -66,9 +66,10 @@
 		26C43F7C1FF0D5EC005B7296 /* Servus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F7B1FF0D5EC005B7296 /* Servus.framework */; };
 		26C43F7E1FF0D611005B7296 /* Servus.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F7D1FF0D611005B7296 /* Servus.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26C43F801FF0DF0D005B7296 /* Toaster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F7F1FF0DF0C005B7296 /* Toaster.framework */; };
-		26C43F821FF0DFE1005B7296 /* Toaster.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F811FF0DFE1005B7296 /* Toaster.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26C43F841FF0EA91005B7296 /* Swifter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F831FF0EA90005B7296 /* Swifter.framework */; };
-		26C43F861FF0EDD9005B7296 /* Swifter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26C43F851FF0EDD9005B7296 /* Swifter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		26DD1F902022DECA0043ECB5 /* Surge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26DD1F8F2022DEC90043ECB5 /* Surge.framework */; };
+		26DD1F912022DEED0043ECB5 /* Surge.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26DD1F8F2022DEC90043ECB5 /* Surge.framework */; };
+		26DD1F922022DEED0043ECB5 /* Surge.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26DD1F8F2022DEC90043ECB5 /* Surge.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26E44BE81FAB15AD00E63007 /* locationDataStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E44BE71FAB15AD00E63007 /* locationDataStorage.swift */; };
 		26E44BED1FAFF15600E63007 /* locationDataRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E44BEC1FAFF15600E63007 /* locationDataRouter.swift */; };
 		26E44BF01FAFF6FB00E63007 /* externalData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26E44BEF1FAFF6FB00E63007 /* externalData.swift */; };
@@ -105,11 +106,10 @@
 				26ED33DA1FE38AD600F4D353 /* Alamofire.framework in Embed Frameworks */,
 				26ED33DB1FE38AD600F4D353 /* Disk.framework in Embed Frameworks */,
 				26ED33DC1FE38AD600F4D353 /* geos.framework in Embed Frameworks */,
+				26DD1F922022DEED0043ECB5 /* Surge.framework in Embed Frameworks */,
 				26ED33DD1FE38AD600F4D353 /* Interstellar.framework in Embed Frameworks */,
-				26C43F821FF0DFE1005B7296 /* Toaster.framework in Embed Frameworks */,
 				26ED33DE1FE38AD600F4D353 /* Reachability.framework in Embed Frameworks */,
 				26ED33DF1FE38AD600F4D353 /* Siesta.framework in Embed Frameworks */,
-				26C43F861FF0EDD9005B7296 /* Swifter.framework in Embed Frameworks */,
 				26C43F7E1FF0D611005B7296 /* Servus.framework in Embed Frameworks */,
 				26ED33E01FE38AD600F4D353 /* SiestaUI.framework in Embed Frameworks */,
 			);
@@ -197,9 +197,8 @@
 		26C43F7B1FF0D5EC005B7296 /* Servus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Servus.framework; path = Carthage/Build/iOS/Servus.framework; sourceTree = "<group>"; };
 		26C43F7D1FF0D611005B7296 /* Servus.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Servus.framework; path = Carthage/Build/iOS/Servus.framework; sourceTree = "<group>"; };
 		26C43F7F1FF0DF0C005B7296 /* Toaster.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Toaster.framework; path = Carthage/Build/iOS/Toaster.framework; sourceTree = "<group>"; };
-		26C43F811FF0DFE1005B7296 /* Toaster.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Toaster.framework; path = Carthage/Build/iOS/Toaster.framework; sourceTree = "<group>"; };
 		26C43F831FF0EA90005B7296 /* Swifter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Swifter.framework; path = Carthage/Build/iOS/Swifter.framework; sourceTree = "<group>"; };
-		26C43F851FF0EDD9005B7296 /* Swifter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Swifter.framework; path = Carthage/Build/iOS/Swifter.framework; sourceTree = "<group>"; };
+		26DD1F8F2022DEC90043ECB5 /* Surge.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Surge.framework; path = Carthage/Build/iOS/Surge.framework; sourceTree = "<group>"; };
 		26E44BE71FAB15AD00E63007 /* locationDataStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = locationDataStorage.swift; sourceTree = "<group>"; };
 		26E44BEC1FAFF15600E63007 /* locationDataRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = locationDataRouter.swift; sourceTree = "<group>"; };
 		26E44BEF1FAFF6FB00E63007 /* externalData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = externalData.swift; sourceTree = "<group>"; };
@@ -222,11 +221,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				26ED33D11FE38AB200F4D353 /* Disk.framework in Frameworks */,
+				26DD1F902022DECA0043ECB5 /* Surge.framework in Frameworks */,
 				26ED33D41FE38AB200F4D353 /* Reachability.framework in Frameworks */,
 				26C43F7C1FF0D5EC005B7296 /* Servus.framework in Frameworks */,
 				26C43F801FF0DF0D005B7296 /* Toaster.framework in Frameworks */,
 				26ED33D81FE38ABE00F4D353 /* SwiftyJSON.framework in Frameworks */,
 				26ED33D01FE38AB200F4D353 /* geos.framework in Frameworks */,
+				26DD1F912022DEED0043ECB5 /* Surge.framework in Frameworks */,
 				26ED33D51FE38AB200F4D353 /* Siesta.framework in Frameworks */,
 				26ED33D31FE38AB200F4D353 /* Interstellar.framework in Frameworks */,
 				26ED33D61FE38AB200F4D353 /* SiestaUI.framework in Frameworks */,
@@ -405,8 +406,6 @@
 		2652ACF61FAAD0DB00AF3CE5 = {
 			isa = PBXGroup;
 			children = (
-				26C43F851FF0EDD9005B7296 /* Swifter.framework */,
-				26C43F811FF0DFE1005B7296 /* Toaster.framework */,
 				2652AD011FAAD0DC00AF3CE5 /* movementTracker2 */,
 				2652AD001FAAD0DC00AF3CE5 /* Products */,
 				26E44C031FB0023000E63007 /* Frameworks */,
@@ -544,6 +543,7 @@
 		26E44C031FB0023000E63007 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				26DD1F8F2022DEC90043ECB5 /* Surge.framework */,
 				26C43F831FF0EA90005B7296 /* Swifter.framework */,
 				26C43F7F1FF0DF0C005B7296 /* Toaster.framework */,
 				26C43F7B1FF0D5EC005B7296 /* Servus.framework */,
