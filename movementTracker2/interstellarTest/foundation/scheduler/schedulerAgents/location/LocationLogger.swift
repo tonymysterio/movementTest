@@ -32,6 +32,7 @@ class LocationLogger : BaseObject {
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
     var isInitialized = false //
+    var debugGPSaccuracy = true;
     
     var previousLat : CLLocationDegrees = 0.0
     var previousLon : CLLocationDegrees = 0.0
@@ -69,12 +70,17 @@ class LocationLogger : BaseObject {
             CL = CLLocationManager();
         }
         let zuu = CLLocationManager.locationServicesEnabled()
-        CL?.allowsBackgroundLocationUpdates = true;
+        
+        
         if (zuu == false ) {
             
             _teardown()
             return DROPcategoryTypes.serviceNotAvailable
         }
+        
+        CL?.allowsBackgroundLocationUpdates = false;    //when we are looking at screen, down allow background updates
+        //when going hibernating (background mode), see if we got a run going, set background mode if yes
+        
         
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
@@ -95,7 +101,7 @@ class LocationLogger : BaseObject {
             break;
             
             case .authorizedWhenInUse :
-                isAuthorized=false  //significan change needs this
+                isAuthorized=true  //significan change needs this
             
             break;
             
@@ -115,10 +121,17 @@ class LocationLogger : BaseObject {
             
         }
         
-       
+        if debugGPSaccuracy {
+            CL?.desiredAccuracy = kCLLocationAccuracyBest
+            //CL?.distanceFilter = 20;
+            
+        } else {
+            
+            CL?.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //kCLLocationAccuracyBest
+            CL?.distanceFilter = 20;
+        }
         
-        CL?.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //kCLLocationAccuracyBest
-        CL?.distanceFilter = 20;
+        
         //kCLLocationAccuracyHundredMeters
         
         
@@ -129,6 +142,7 @@ class LocationLogger : BaseObject {
         DispatchQueue.main.async() {
 
             self.CL?.startUpdatingLocation()
+            self.isLogging = true;
             
             //self.CL?.startMonitoringSignificantLocationChanges()
 
@@ -176,6 +190,47 @@ class LocationLogger : BaseObject {
         */
         
         return nil
+    }
+    
+    func setBackgroundModeDependingOnActiveRunState ( toggle : Bool ) {
+        
+        //dont allow bg updates if we are not on a run.
+        //examine this status when going to background and coming back
+        
+        CL?.allowsBackgroundLocationUpdates = toggle;
+        
+        /*if toggle {
+            
+            //if isLogging
+            
+            self.CL?.startUpdatingLocation()
+            self.isLogging = true;
+            
+        } else {
+            
+            self.CL?.stopUpdatingLocation();
+            self.isLogging = false;
+        }*/
+        
+    }
+    
+    func setLocationUpdateStatus ( toggle : Bool ) {
+        
+        if toggle {
+         
+            //if isLogging
+            print (#function + " starting loc updaates")
+            self.CL?.startUpdatingLocation()
+            self.isLogging = true;
+         
+         } else {
+         
+            self.CL?.stopUpdatingLocation();
+            print (#function + " stopped loc updaates")
+            self.isLogging = false;
+         
+        }
+        
     }
     
     func requestCurrentLocation () -> locationMessage {
@@ -243,15 +298,9 @@ class LocationLogger : BaseObject {
         
         //finalize is called if this guy has to save data or something
         //stop locationManager updates
+        self.CL?.stopUpdatingLocation()
         
-        DispatchQueue.main.async() {
-            
-            
-            //should stop also significant loc updates
-            self.CL?.stopUpdatingLocation()
-            
-            
-        }
+        //when terminating, it will ignore queues
         
         
         //finalize ends in teardown

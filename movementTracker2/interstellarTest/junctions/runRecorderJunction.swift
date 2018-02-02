@@ -551,6 +551,54 @@ class runRecorderJunction {
         }
         
     }
+    
+    func applicationDidBecomeActive () {
+        
+        //coming out from backgraound
+        //if we are not on a run, start gps services
+        if let loloc = storage.getObject(oID: "locationLogger") as! LocationLogger? {
+            
+            //loc logger is on
+            if let lslistener = storage.getObject(oID: "liveRunStreamListener") as! liveRunStreamListener? {
+                
+                loloc.setBackgroundModeDependingOnActiveRunState(toggle: true)
+                loloc.setLocationUpdateStatus(toggle: true)
+                
+                } else {
+                
+                loloc.setBackgroundModeDependingOnActiveRunState(toggle: false)
+                loloc.setLocationUpdateStatus(toggle: true)
+                
+            }
+        
+        }
+        
+        
+        
+    }
+    
+    func applicationWillResignActive () {
+        
+        //sms came, phone call came, different app activated
+        //if we are not on a run, stop gps services
+        if let loloc = storage.getObject(oID: "locationLogger") as! LocationLogger? {
+            
+            //loc logger is on
+            if let lslistener = storage.getObject(oID: "liveRunStreamListener") as! liveRunStreamListener? {
+                
+                loloc.setBackgroundModeDependingOnActiveRunState(toggle: true)
+                loloc.setLocationUpdateStatus(toggle: true)
+                
+            } else {
+                
+                loloc.setBackgroundModeDependingOnActiveRunState(toggle: false)
+                loloc.setLocationUpdateStatus(toggle: false)    //no need of loc updates while we are on background
+            }
+            
+        }
+        
+    }
+    
     init () {
         
         runRecoderToggleObserver.subscribe { toggle in
