@@ -32,7 +32,7 @@ class LocationLogger : BaseObject {
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
     var isInitialized = false //
-    var debugGPSaccuracy = true;
+    var debugGPSaccuracy = false;
     
     var previousLat : CLLocationDegrees = 0.0
     var previousLon : CLLocationDegrees = 0.0

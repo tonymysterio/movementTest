@@ -17,6 +17,7 @@ class jsonStreamReader : BaseObject {
     var jsBuffScanner = jsonBufferScanner()
     var urlString = "http://192.168.11.54:5000/"
     let queue = DispatchQueue(label: "streamAnalyzerQueue", qos: .userInitiated)
+    let dataFeederQueue = DispatchQueue(label: "dataFeedstreamAnalyzerQueue", qos: .userInitiated)
     
     func _initialize () -> DROPcategoryTypes? {
     
@@ -95,22 +96,24 @@ class jsonStreamReader : BaseObject {
             //self.startProcessing();
             
             //print("makeAndParseArequest:: data got");
+            self.dataFeederQueue.sync {
+               
+                
+                if let j = String(data:data, encoding:.utf8) {
+                
+                    //let jss = j.unescaped; //convert to string
+                    //let intext = jss.replacingOccurrences(of: "\\", with: "")
+                    print("$$jsb")
+                    //jsonBufferScanner.
+                    self.jsBuffScanner.addObject(text: j)
+                    //_ = self.finishProcessing()
+                
+                    self._pulse(pulseBySeconds: 3500 )
+                    //print("pulsed")
             
-                
-            if let j = String(data:data, encoding:.utf8) {
-                
-                //let jss = j.unescaped; //convert to string
-                //let intext = jss.replacingOccurrences(of: "\\", with: "")
-                print("$$jsb")
-                //jsonBufferScanner.
-                self.jsBuffScanner.addObject(text: j)
-                //_ = self.finishProcessing()
-                
-                self._pulse(pulseBySeconds: 3500 )
-                //print("pulsed")
+                }
             
             }
-            
             //if we need to close the stream do it here
         
         }   ///end request stream closure
@@ -170,7 +173,7 @@ class jsonStreamReader : BaseObject {
         //copy data
         self.jsBuffScanner.shiftInpipe();
         
-        queue.sync {
+        queue.async {
             
             
             

@@ -257,20 +257,30 @@ struct Run : Codable {
             let loc = CLLocation(coordinate: zloc2D, altitude: 0, horizontalAccuracy: 0, verticalAccuracy: 0, course: 0, speed: 0, timestamp: zdate);
             
             
-            let kalmanLocation = hcKalmanFilter.processState(currentLocation: loc);
-            
-            let ll = kalmanLocation.coordinate  //kal filtered coordo
-            
-            let org = CLLocation(latitude: (f.lat), longitude: (f.lon));
-            let fixed = CLLocation(latitude: (ll.latitude), longitude: (ll.longitude));
-            let d = org.distance(from: fixed) as Double;
-            print(d);
-            if d < 80 {
+            if let kalmanLocation : CLLocation? = hcKalmanFilter.processState(currentLocation: loc){
                 
-                let nc : coordinate = coordinate(timestamp :f.timestamp ,lat:ll.latitude,lon:ll.longitude)
-                kalCoords.append(nc)
+                if let ll = kalmanLocation?.coordinate { //kal filtered coordo
+                
+                    let org = CLLocation(latitude: (f.lat), longitude: (f.lon));
+                    let fixed = CLLocation(latitude: (ll.latitude), longitude: (ll.longitude));
+                    if let d = org.distance(from: fixed) as Double? {
+                    
+                        print(d);
+                        if d < 80 {
+                        
+                            let nc : coordinate = coordinate(timestamp :f.timestamp ,lat:ll.latitude,lon:ll.longitude)
+                            kalCoords.append(nc)
+                        }
+                    
+                    }
+                }   //getting a kalmann coord are we
             }
+            
+            
+            
         }
+        if kalCoords.count < 3 { return nil; }
+        
         let dif = self.coordinates.count - kalCoords.count
         print (dif);
         
@@ -437,14 +447,18 @@ struct Run : Codable {
         let location2 = CLLocation(latitude: (pp.last?.lat)!, longitude: (pp.last?.lon)!)
         
         let d = location1.distance(from: location2) as Double;
-        
-        if totalDistance() < 350 {
+        let totDist = totalDistance();
+        if  totDist < 350 {
             
             return false
             
         }
         
-        if d > 50 {
+        //1km gives 100m extra, 5km would be 500 closing radius
+        
+        let gap = 50 + ((totDist / 1000)*100);
+        
+        if d > gap {
             
             return false
             
@@ -877,7 +891,8 @@ class jsonBufferScanner : BufferConsumer {
         }
     
     func createRunObject (jsonString : String ) -> Run? {
-     
+        
+        print (jsonString);
         do {
             if let dataFromString = jsonString.data(using: .utf8, allowLossyConversion: false) {
                 let json = try JSON(data: dataFromString)

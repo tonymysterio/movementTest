@@ -38,7 +38,10 @@ class runDataIOJunction {
             return
         }
         
-        if myJsonStreamReader == nil {
+        if let mlt = storage.getObject(oID: "jsonStreamReader") as! jsonStreamReader? {
+            
+            
+        } else {
             
             let myJsonStreamReader = jsonStreamReader( messageQueue : messageQueue );
             myJsonStreamReader.houseKeepingRole = houseKeepingRoles.slave;
@@ -129,23 +132,23 @@ class runDataIOJunction {
     init () {
         
         runStreamReaderObserver.subscribe { toggle in
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.streamPullStatusChange( toggle : toggle)
-            }
+            //}
         }
         
         runStreamReaderDataArrivedObserver.subscribe { run in
             //run data picked from stream. save it
-            DispatchQueue.global(qos: .utility).async {
+            //DispatchQueue.global(qos: .utility).async {
                 self.runStreamReaderDataArrived(run : run)
-            }
+            //}
         }
         
         peerDataRequesterRunArrivedSavedObserver.subscribe { run in
             //runstream recorder has saved the run
-            DispatchQueue.global(qos: .utility).async {
+           // DispatchQueue.global(qos: .utility).async {
                 self.peerDataRequesterRunArrivedSaved()
-            }
+            //}
         }
     }
     
