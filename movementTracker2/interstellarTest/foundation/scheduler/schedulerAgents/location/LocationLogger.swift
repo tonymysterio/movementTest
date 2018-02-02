@@ -189,7 +189,7 @@ class LocationLogger : BaseObject {
         //let t = CM.sta
         */
         
-        return nil
+        
     }
     
     func setBackgroundModeDependingOnActiveRunState ( toggle : Bool ) {

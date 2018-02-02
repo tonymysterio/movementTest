@@ -221,25 +221,64 @@ struct Run : Codable {
         return true
     }
     
-    /*func spikeFilteredCoordinates () -> [coordinate]? {
+    func spikeFilteredCoordinates () -> [coordinate]? {
+        
+        if self.coordinates.isEmpty {
+            return nil
+        }
+        
+        if self.coordinates.count < 10 {
+            return nil
+        }
         
         let lastCoord = coordinates.last;
-        let loc2D = CLLocationCoordinate2D(latitude: lastCoord?.lat as! CLLocationDegrees, longitude: lastCoord?.lat as! CLLocationDegrees);
+        let loc2D = CLLocationCoordinate2D(latitude: lastCoord?.lat as! CLLocationDegrees, longitude: lastCoord?.lon as! CLLocationDegrees);
         
-        let initLoc = CLLocation(coordinate: loc2D, altitude: 0, horizontalAccuracy: 0, verticalAccuracy: 0, course: 0, speed: 0, timestamp: 0);
+        let date = Date(timeIntervalSince1970: 0)
+        
+        let initLoc = CLLocation(coordinate: loc2D, altitude: 1, horizontalAccuracy: 1, verticalAccuracy: 1, course: 0, speed: 0, timestamp: date);
+        
+        
         
         let hcKalmanFilter = HCKalmanAlgorithm(initialLocation: initLoc);
         
-        for f in coordinates {
+        let rcoord = self.coordinates.reversed()
+        
+        var kalCoords = [coordinate]();
+        var ff : Double = 1;
+        
+        for f in rcoord {
+            
+            let zloc2D = CLLocationCoordinate2D(latitude: f.lat as! CLLocationDegrees, longitude: f.lon as! CLLocationDegrees);
+            
+            let zdate = Date(timeIntervalSince1970: ff)
+            ff = ff + 1 ;
+            
+            let loc = CLLocation(coordinate: zloc2D, altitude: 0, horizontalAccuracy: 0, verticalAccuracy: 0, course: 0, speed: 0, timestamp: zdate);
             
             
+            let kalmanLocation = hcKalmanFilter.processState(currentLocation: loc);
+            
+            let ll = kalmanLocation.coordinate  //kal filtered coordo
+            
+            let org = CLLocation(latitude: (f.lat), longitude: (f.lon));
+            let fixed = CLLocation(latitude: (ll.latitude), longitude: (ll.longitude));
+            let d = org.distance(from: fixed) as Double;
+            print(d);
+            if d < 80 {
+                
+                let nc : coordinate = coordinate(timestamp :f.timestamp ,lat:ll.latitude,lon:ll.longitude)
+                kalCoords.append(nc)
+            }
         }
+        let dif = self.coordinates.count - kalCoords.count
+        print (dif);
         
-        
-    }*/
+        return kalCoords;
+    }
     
     
-    func spikeFilteredCoordinates () -> [coordinate]? {
+    func spikeFilteredCoordinatesGNIB () -> [coordinate]? {
         
         if self.coordinates.isEmpty {
             return nil
