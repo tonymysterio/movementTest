@@ -221,7 +221,7 @@ struct Run : Codable {
         return true
     }
     
-    func spikeFilteredCoordinates () -> [coordinate]? {
+    func spikeFilteredCoordinatesKALMANbroken () -> [coordinate]? {
         
         if self.coordinates.isEmpty {
             return nil
@@ -288,7 +288,7 @@ struct Run : Codable {
     }
     
     
-    func spikeFilteredCoordinatesGNIB () -> [coordinate]? {
+    func spikeFilteredCoordinates () -> [coordinate]? {
         
         if self.coordinates.isEmpty {
             return nil
@@ -338,8 +338,8 @@ struct Run : Codable {
             
             
         }
-        //print (rcoord.count)
-        //print (validCoords.count)
+        print (rcoord.count)
+        print (validCoords.count)
         let avgBaseSpeed = baseSpeed / Double(rcoord.count)
         let accavgBaseSpeed = acceptedBaseSpeed / Double(validCoords.count)
         
@@ -541,9 +541,9 @@ class jsonBufferScanner : BufferConsumer {
         
     }
     
-    func processBuffers () -> [Run?]? {
+    func processBuffers () -> [Run]? {
     
-        var validStuff = [Run?]()
+        var validStuff = [Run]()
         
         var found = false;
         
@@ -685,11 +685,27 @@ class jsonBufferScanner : BufferConsumer {
         //let tit = a
         var lookingAt = "";
         
+        if prefill {
+            
+            //too much data on a buffer to screen, wipe it out
+            
+            if buffer.count > 100000 {
+                buffer = "";
+            }
+            prefill = false;
+        }
+        
         if !prefill {
             
             if let idp = findIDpiece(txt: tit) {
-                
+                //print(idp);
                 lookingAt = idp
+                
+                if let co = findCompleteJSONobject(zut: idp) {
+                    
+                    print(co);
+                    let tu=1;
+                }
                 
             } else {
                 
@@ -701,7 +717,10 @@ class jsonBufferScanner : BufferConsumer {
             
         } else {
             
+            
+            
             //dump this me on top of watever came before
+            //this buffer grows insanely big
             buffer = buffer + tit
             
             //look for beginning clues
@@ -728,18 +747,34 @@ class jsonBufferScanner : BufferConsumer {
             
             //index 0 where to start looking, index1 where we end
             let ma = 1
+            
+            
             let indexS = lookingAt.index(lookingAt.startIndex, offsetBy: co[0])
             let indexE = lookingAt.index(lookingAt.startIndex, offsetBy: co[1])
+            
             let xjss = lookingAt[indexS..<indexE]
             
             let indexS2 = lookingAt.index(lookingAt.startIndex, offsetBy: co[1])
+            
+            
             let xjss2 = lookingAt[indexS2..<lookingAt.endIndex]
+            let xjmaa = String(xjss2);
+            if xjmaa.count < 100000 {
             
-            buffer = String(xjss2); //store for the future
-            prefill = true
+                buffer = xjmaa;
+                prefill = true
+                
+            } else {
+                //dont allow tons of crap on the buffer
+                buffer = "";
+                prefill = false;
+            }
             
+            //buffer = String(xjss2); //store for the future
             
-            if let ro = createRunObject(jsonString: String(xjss)){
+            let xjS = String(xjss);
+            
+            if let ro = createRunObject(jsonString: String(xjS)){
             //if testForValidJson(jsonString: xjss) {
                 
                 //print("legit json")
@@ -758,6 +793,7 @@ class jsonBufferScanner : BufferConsumer {
             //print ("skip incomplete json but added to buffer")
             //buffer = buffer + lookingAt
             //prefill = false;
+            buffer = "";    //clear buffer, it was full of crap anyway
             
         }
         
@@ -774,7 +810,7 @@ class jsonBufferScanner : BufferConsumer {
         var startI = 0;
         var endI = 0;
 
-        //print ("zut length \(zl) " )
+        print ("zut length \(zl) " )
         for m in zut {
             
             i = i + 1
@@ -818,6 +854,7 @@ class jsonBufferScanner : BufferConsumer {
                 }
                 
                
+                //return [startI,i]
                 return [startI,i+1]
             }
             
@@ -835,6 +872,7 @@ class jsonBufferScanner : BufferConsumer {
         
         var unsco = 0;
         var unscoFound = false;
+        var cutoff = 0;
         
         for f in ni {
             
@@ -844,17 +882,27 @@ class jsonBufferScanner : BufferConsumer {
                 unscoFound = true;
                 break
             }
+            cutoff = cutoff + f.count;
             unsco = unsco + 1;
         }
         
+        //we did not find _id
         if !unscoFound { return nil }
-        let na = txt.split(separator: "}");
+        
+        let indexS = txt.index(txt.startIndex, offsetBy: cutoff)
+        let indexE = txt.index(txt.endIndex, offsetBy : 0);
+        let jss = txt[indexS..<indexE]
+        
+        return String(jss);
+        
+        let na = jss.split(separator: "}");
         
         var rest = "{";
+        
         var openings = 0
-        while unsco < ni.count {
-            
-            rest = rest + ni[unsco] + "{";
+        while unsco < na.count {
+        //while unsco < ni.count {
+            rest = rest + na[unsco] + "{";
             unsco = unsco + 1
             
         }
@@ -892,7 +940,7 @@ class jsonBufferScanner : BufferConsumer {
     
     func createRunObject (jsonString : String ) -> Run? {
         
-        print (jsonString);
+        //print (jsonString);
         do {
             if let dataFromString = jsonString.data(using: .utf8, allowLossyConversion: false) {
                 let json = try JSON(data: dataFromString)
@@ -915,20 +963,6 @@ class jsonBufferScanner : BufferConsumer {
                  
                  print ("bobek")
                  } */
-                
-                var runCoords = [coordinate]();
-                for (key,subJson):(String, JSON) in json["coordinates"] {
-                    // Do something you want
-                    //print (key)
-                    //print  (subJson)
-                    let times = subJson["timestamp"].doubleValue
-                    let lat = subJson["x"].doubleValue
-                    let lon = subJson["y"].doubleValue
-                    
-                    let rc = coordinate(timestamp: times , lat: lat , lon: lon )
-                    runCoords.append(rc)
-                }
-                
                 //let rco = json["coordinates"].dictionary
                 let mid = json["closeTime"].doubleValue
                 let st = json["startTime"].doubleValue
@@ -944,7 +978,27 @@ class jsonBufferScanner : BufferConsumer {
                 
                 let hash = String(mid.hashValue ^ user.hashValue ^ geoh.hashValue)
                 
-                let run = Run(missionID: mid, user: user, clan: clan, geoHash: geoh, version : version , hash : hash , startTime: st, closeTime: ct, coordinates: runCoords)
+                var run = Run(missionID: mid, user: user, clan: clan, geoHash: geoh, version : version , hash : hash , startTime: st, closeTime: ct, coordinates: [])
+                
+                
+                
+                var runCoords = [coordinate]();
+                for (key,subJson):(String, JSON) in json["coordinates"] {
+                    // Do something you want
+                    //print (key)
+                    //print  (subJson)
+                    let times = subJson["timestamp"].doubleValue
+                    let lat = subJson["x"].doubleValue
+                    let lon = subJson["y"].doubleValue
+                    let lala = CLLocationDegrees(lat);
+                    let lolo = CLLocationDegrees(lon);
+                    let rc = coordinate(timestamp: times , lat: lala , lon: lolo )
+                    //runCoords.append(rc)
+                    run.addCoordinate(coord: rc);
+                    
+                }
+                
+                
                 
                 return run
             }

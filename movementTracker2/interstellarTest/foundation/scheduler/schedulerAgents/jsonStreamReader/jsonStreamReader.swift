@@ -171,10 +171,11 @@ class jsonStreamReader : BaseObject {
         self.startProcessing()
         
         //copy data
-        self.jsBuffScanner.shiftInpipe();
         
-        queue.async {
-            
+        //https://stackoverflow.com/questions/28523069/fatal-error-subscript-subrange-extends-past-string-end-xcode
+        //queue.async {
+        queue.sync {
+            self.jsBuffScanner.shiftInpipe();
             
             
             if let gnuk = self.jsBuffScanner.processBuffers() {
@@ -190,9 +191,9 @@ class jsonStreamReader : BaseObject {
                     */
                     
                     //pipe straigt to RunDataIO to be saved or..
-                    if f!.isValid && f!.isClosed(){
+                    if f.isValid && f.isClosed(){
                         
-                        runStreamReaderDataArrivedObserver.update(f!)
+                        runStreamReaderDataArrivedObserver.update(f)
                         
                     } else {
                         
@@ -205,6 +206,9 @@ class jsonStreamReader : BaseObject {
                 
                 
             }
+            
+            //empty my buffer. json parser keeps stuff from last time around
+            jsBuffScanner.data = "";
             
             _ = self.finishProcessing()
         }

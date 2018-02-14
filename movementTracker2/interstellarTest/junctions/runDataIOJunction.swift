@@ -79,6 +79,8 @@ class runDataIOJunction {
     
     func runStreamReaderDataArrived ( run : Run ) {
         
+        //reading a html string of runs
+        
         //we need our guy myRunStreamRecorder for da job
         //myRunStreamRecorder?.storeRun(run: run)
         if let mlt = storage.getObject(oID: "runStreamRecorder") as! RunStreamRecorder? {
@@ -87,7 +89,12 @@ class runDataIOJunction {
             print("storing captured run")
         }
         
-        
+        //throw this into cache too
+        if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
+            
+            runcache.addRun(run: run);
+            //
+        }
         
     }
     
