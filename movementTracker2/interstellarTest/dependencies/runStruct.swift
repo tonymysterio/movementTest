@@ -197,6 +197,22 @@ struct Run : Codable {
         
     }
     
+    func computeGeoHash () -> String {
+        
+        if coordinates.isEmpty {
+            
+            return "invalidGeoHash";
+            
+        }
+        
+        let lat = coordinates.last!.lat as Double;
+        let lon = coordinates.last!.lon as Double;
+        
+        let gh = Geohash.encode(latitude: lat, longitude: lon)
+        return gh;
+        
+    }
+    
     mutating func addCoordinate (coord : coordinate ) -> Bool {
         
         if coordinates.isEmpty {
@@ -409,8 +425,10 @@ struct Run : Codable {
     get {
         if coordinates.count < 10 { return false }
         if coordinates.count > 5000 { return false; }
-        if user == "feederbot" { return false }
-        if user == "mapfeeder" { return false }
+        if user == "feederbot@hastur.org" {
+            return false }
+        if user == "mapfeeder@hastur.org" {
+            return false }
         if startTime < 125000000 { return false; }
         if closeTime < 125000000 { return false; }
         return true
@@ -524,10 +542,27 @@ class jsonBufferScanner : BufferConsumer {
             */
             self.inpipe = self.inpipe + text;
             
-        }
+            if self.inpipe.count > 150000 {
+                
+                if let validData = self.preProcessInpipe(data:self.inpipe) {
+                    
+                    self.data = validData;
+                    self.inpipe = "" ;
+                    
+                } else {
+                    
+                    self.data = "";
+                    self.inpipe = "" ;
+                    
+                }
+                
+            }   //pipe full enough?
+            
+        }   //end queue sync
+        
     }
     
-    func shiftInpipe () {
+    func shiftInpipeDEPRE () {
         
         if self.processing {
             return;
@@ -541,13 +576,64 @@ class jsonBufferScanner : BufferConsumer {
         
     }
     
-    func processBuffers () -> [Run]? {
+    func preProcessInpipe ( data : String ) -> String? {
+        
+        //just look for valid json strings
+        let jss = data.unescaped; //convert to string
+        let tit = jss.replacingOccurrences(of: "\\", with: "")
+        
+        guard let idp = self.findIDpiece(txt : tit) else {
+            
+            return nil;
+        
+        }
+        
+        //so ipd contains {"_ and onwards
+        return idp;
+        
+    }
+    
+    
+    
+    
+    func processBuffers (data : String ) -> [Run]? {
     
         var validStuff = [Run]()
         
         var found = false;
         
-        if let gn = self.searchJson(a: self.data) {
+        
+        if let validStrings = self.searchJson(data: data) {
+            
+            
+            for f in validStrings {
+                
+                
+                
+                
+                if let ro = createRunObject(jsonString: f){
+                    
+                    validStuff.append(ro);
+                    found = true
+                    
+                }
+                
+                
+            }
+            
+            
+            totalSuccessfullBuffers = totalSuccessfullBuffers + 1
+            
+            print(validStrings);
+            let mum = 1;
+            
+        } else {
+            
+            var tum = 1;
+            
+        }
+        
+        /*if let gn = self.searchJson(data: self.data) {
             found = true
             totalSuccessfullBuffers = totalSuccessfullBuffers + 1
         
@@ -557,7 +643,7 @@ class jsonBufferScanner : BufferConsumer {
     
             var tum = 1;
     
-        }
+        }*/
         
         if !found { return nil }
         
@@ -565,65 +651,10 @@ class jsonBufferScanner : BufferConsumer {
         
     }
     
-    /*
-    func processBuffersxx () -> [Run?]? {
-        
-        if objects.count == 0 {
-            return nil
-            
-        }
-        
-    
-        
-        if processing == true {
-            return nil //DROPcategoryTypes.busyProcessesing
-            
-        }
-        
-        
-    
-        
-        let poB = self.objects
-        
-        //queue.async {
-            
-            //if this is taking loo long because insanely long string parses, trouble
-            
-            self.processing = true;
-            print("async harvest for data")
-            
-            //print(poB.count)
-            
-            
-            self.lastProcessedBuffer = poB.count;
-            
-            //look tru all buffers that have come
-        if let runs = self.searchFromMultipleEntries(entries: poB) {
-            
-                self.objects = [ String ]();    //empty array
-            
-                print("VICTORIOUS async harvest for prcfal")
-                self.processing = false;
-                return runs;
-            
-            }
-        
-        
-            //self.objects = nil
-            //self.objects = [ String ]();    //empty array
-            
-            //print("async harvest for prcfal")
-            self.processing = false;
-        //}
-        
-        return nil
-        
-    }   //end process buffers
-    
-    */
     
     var brb = false;
     
+    /*
     func searchFromMultipleEntries (entries : [String]) -> [Run?]? {
     
         var validStuff = [Run?]()
@@ -646,7 +677,7 @@ class jsonBufferScanner : BufferConsumer {
                 return nil
                 
             }
-            if let gn = self.searchJson(a: fxfx) {
+            if let gn = self.searchJson(data: fxfx) {
                 found = true
                 totalSuccessfullBuffers = totalSuccessfullBuffers + 1
                 
@@ -676,9 +707,69 @@ class jsonBufferScanner : BufferConsumer {
         
         return validStuff
     
+    }   */
+    
+    func searchJson ( data : String )  -> [String]? {
+        
+        var jsons = [String]();
+        //any leftovers from last round. preprocess will cut leftovers tho
+        //the leftovers are used when calling this recursively
+        //let lookingAt = buffer + data;
+        let lookingAt =  data;
+        
+        //print(lookingAt);
+        //our stuff is already unescaped in preProcess
+        //our stuff starts with {
+        if let co = findCompleteJSONobject(zut: data) {
+            
+            //index 0 where to start looking, index1 where we end
+            let ma = 1
+            
+            
+            let indexS = lookingAt.index(lookingAt.startIndex, offsetBy: co[0])
+            let indexE = lookingAt.index(lookingAt.startIndex, offsetBy: co[1])
+            
+            let xjss = lookingAt[indexS..<indexE]
+            
+            let indexS2 = lookingAt.index(lookingAt.startIndex, offsetBy: co[1])
+            
+            
+            let xjss2 = lookingAt[indexS2..<lookingAt.endIndex]
+            let remainders = String(xjss2);
+            
+            //let cleaned = String(xjss).unescaped; //convert to string
+            //let tit = cleaned.replacingOccurrences(of: "\\", with: "")
+            
+            jsons.append(String(xjss));
+            
+            if remainders.count < 30000 {
+                return jsons;
+            }
+            
+            if let ca = self.searchJson(data: remainders) {
+                
+                //append result to
+                print (ca.count);
+                jsons.append(ca.first!)  // will give one entry
+                //print(jsons);
+                return jsons;
+                
+            } else {
+                
+                return jsons;
+                
+            }
+            
+        } else {
+            
+            return nil;
+        }
+        
     }
     
-    func searchJson ( a : String )  -> Run? {
+    //func splitToIndividualJsons ( data : String)
+    
+    func searchJsonDEPRE ( a : String )  -> Run? {
         //print(a);
         let jss = a.unescaped; //convert to string
         let tit = jss.replacingOccurrences(of: "\\", with: "")
@@ -811,6 +902,7 @@ class jsonBufferScanner : BufferConsumer {
         var endI = 0;
 
         print ("zut length \(zl) " )
+        //print (zut);
         for m in zut {
             
             i = i + 1
@@ -841,7 +933,7 @@ class jsonBufferScanner : BufferConsumer {
             
             
             //get closer to full objects
-            if m == "}"  {
+            if m == "}" && firstOpen {
                 
                 openBrackets=openBrackets-1
                 
@@ -853,7 +945,11 @@ class jsonBufferScanner : BufferConsumer {
                     continue;
                 }
                 
-               
+                if (startI == 0 && i == 0) {
+                //bug catch
+                    _ = findCompleteJSONobject(zut: zut)
+                    
+                }
                 //return [startI,i]
                 return [startI,i+1]
             }
@@ -990,8 +1086,8 @@ class jsonBufferScanner : BufferConsumer {
                     let times = subJson["timestamp"].doubleValue
                     let lat = subJson["x"].doubleValue
                     let lon = subJson["y"].doubleValue
-                    let lala = CLLocationDegrees(lat);
-                    let lolo = CLLocationDegrees(lon);
+                    let lala = CLLocationDegrees(lon);
+                    let lolo = CLLocationDegrees(lat);
                     let rc = coordinate(timestamp: times , lat: lala , lon: lolo )
                     //runCoords.append(rc)
                     run.addCoordinate(coord: rc);

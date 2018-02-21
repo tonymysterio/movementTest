@@ -209,7 +209,7 @@ class PeerDataRequester : BaseObject  {
                     return
                     
                 }
-                
+                //TODO add some checking if this run is valid
                 //parsed this clients hashlist
                 self.orderedHashRequestSuccess ( run : run )
         }
@@ -279,7 +279,8 @@ class PeerDataRequester : BaseObject  {
         
         //see if i have received my own hashlist
         if myExhangedHashes.isEmpty() {
-            return;
+            //if no data, conjure some
+            myExhangedHashes.addMockItemToGetPullingFromTarget();
         }
         queue.sync {
             let myHlist = myExhangedHashes.getAll();

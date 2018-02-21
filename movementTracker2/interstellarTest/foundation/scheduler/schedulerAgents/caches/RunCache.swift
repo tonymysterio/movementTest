@@ -70,6 +70,8 @@ struct RunCacheDisk : Codable {
                 let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
             
                 let d = location1.distance(from: location2) as Double;
+                
+                print("runsInRegion geohash \(i.value.geoHash) dist: \(d) ");
                 if d < 1 { continue; }
                 if d > getWithinArea {
                     continue;

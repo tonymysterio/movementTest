@@ -155,6 +155,9 @@ class PullRunsFromDisk: BaseObject  {
             downloadGroup.enter()
             let r = hash.load(success: { (run) in
                 
+                
+                
+                
                 //let ran = run;
                 //poprint(ran);
                 //let rvalid = run.isValid;
@@ -162,10 +165,12 @@ class PullRunsFromDisk: BaseObject  {
                     if (run.isValid && run.isClosed() ) {
                     
                         print(#function);
-                        print(run.coordinates.count);
-                        print(run.spikeFilteredCoordinates()?.count);
-                        print(run.totalDistance());
-                        print(run.distanceBetweenStartAndEndSpikeFiltered());
+                        print("run.coordinates.count = \(run.coordinates.count)");
+                        print("run.spikeFilteredCoordinates = \(run.spikeFilteredCoordinates()?.count)");
+                        print("run.totalDistance = \(run.totalDistance())");
+                        print("run.distanceBetweenStartAndEndSpikeFiltered = \(run.distanceBetweenStartAndEndSpikeFiltered())")
+                        print("run.geohash = \(run.geoHash)");
+                        print("run.computeGeoHash = \(run.computeGeoHash())");
                         
                         self.myExhangedHashes.insertForUser(user: run.user, hash: run.hash)
                         self.initialPull = true;
@@ -174,6 +179,7 @@ class PullRunsFromDisk: BaseObject  {
                         runReceivedObservable.update(run)
                     
                         print("run pulled \(run.hash) at \(run.geoHash) ")
+                        
                         print (run.totalDistance());
                         //print("tit");
                         

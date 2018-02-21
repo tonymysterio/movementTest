@@ -47,9 +47,12 @@ class PacketExchangeJunction {
         
         packetExchangeRequestObserver.subscribe { toggle in
             
-            DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.main.async{
                 self.initiateMeshnet();
             }
+            /*DispatchQueue.global(qos: .utility).async {
+                self.initiateMeshnet();
+            }*/
         }
         
         peerExplorerDidSpotPeerObserver.subscribe { toggle in

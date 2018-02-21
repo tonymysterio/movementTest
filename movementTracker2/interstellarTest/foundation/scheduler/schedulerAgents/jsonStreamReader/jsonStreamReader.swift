@@ -162,7 +162,8 @@ class jsonStreamReader : BaseObject {
          
          }
         
-        if jsBuffScanner.inpipe.count == 0 {
+        //data contains something if theres something to process.
+        if jsBuffScanner.data.count == 0 {
             return nil
             
         }
@@ -175,10 +176,10 @@ class jsonStreamReader : BaseObject {
         //https://stackoverflow.com/questions/28523069/fatal-error-subscript-subrange-extends-past-string-end-xcode
         //queue.async {
         queue.sync {
-            self.jsBuffScanner.shiftInpipe();
+            //self.jsBuffScanner.shiftInpipe();
             
             
-            if let gnuk = self.jsBuffScanner.processBuffers() {
+            if let gnuk = self.jsBuffScanner.processBuffers(data: self.jsBuffScanner.data ) {
                 
                 for f in gnuk {
                     

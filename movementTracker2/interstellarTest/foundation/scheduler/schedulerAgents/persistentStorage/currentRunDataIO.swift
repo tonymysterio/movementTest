@@ -232,7 +232,7 @@ class CurrentRunDataIO: BaseObject  {
                 self.finishProcessing();
                 
                 if !self.isProcessing {
-                    
+                    //print(@func +" could not open \(filename) .exit " );
                     //get rid of me. runrecorderjunction will wake me up sometime
                 }
                 

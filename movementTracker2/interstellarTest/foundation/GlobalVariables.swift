@@ -108,6 +108,13 @@ struct exchangedHashes {
         }
         
     }
+    
+    mutating func addMockItemToGetPullingFromTarget (){
+        
+        self.insertForUser(user: "mock", hash:"mock")
+        
+    }
+    
     mutating func insertForUser ( user : String , hash : String ) -> Bool {
         
         if list[user] == nil {

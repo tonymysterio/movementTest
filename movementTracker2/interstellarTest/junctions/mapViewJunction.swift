@@ -234,10 +234,12 @@ class mapViewJunction {
     }
     
     
+    
+    
     func getLocalMapCombiners (locMessage : locationMessage) -> Bool {
         
         //check if we have somebody working on this
-        
+        //let mapZoom = mapZoomLevels(target: locMessage.timestamp)
         
         //returns array of ID's
         if let mcs = scheduler.getCategoryObjects(oCAT: .mapCombiner ) {
@@ -287,16 +289,26 @@ class mapViewJunction {
             //calculate simplification level in mapcombiner
             gwa = locMessage.timestamp;
         }
-        let name = "mapCombiner_"+Geohash.encode(latitude: locMessage.lat, longitude: locMessage.lon) + "_" + String(locMessage.timestamp);
+            
+            
+            
+        
         
         
         let mapCombiner = MapCombiner( messageQueue : nil );
+        
+        //should be a global funktion
+        let area = mapCombiner.mapZoomLevels(target: locMessage.timestamp);
+            
+        let name = "mapCombiner_"+Geohash.encode(latitude: locMessage.lat, longitude: locMessage.lon) + "_" + String(area);
+            
         mapCombiner.myID = name; //"mapCombiner";
         mapCombiner.name = name //"mapCombiner";
         mapCombiner.myCategory = objectCategoryTypes.mapCombiner
         mapCombiner._pulse(pulseBySeconds: 600);
-        mapCombiner.initialLocation = locMessage;   //make it look at the right place
-        mapCombiner.getWithinArea = gwa //
+        mapCombiner.setInitialLocation(loc: locMessage);
+        //mapCombiner.initialLocation = locMessage;   //make it look at the right place
+        //mapCombiner.getWithinArea = gwa //
         let rep = mapCombiner._initialize()
         
         scheduler.addObject(oID: mapCombiner.myID, o: mapCombiner)

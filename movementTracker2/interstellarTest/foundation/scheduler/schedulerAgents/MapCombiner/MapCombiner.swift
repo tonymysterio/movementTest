@@ -53,6 +53,27 @@ class MapCombiner : BaseObject  {
     
     //if we get a mapFilteringModeToggleObserver on mapViewJunction, junction calls my
     
+    func mapZoomLevels (target : Double) -> Double {
+        
+        if target > 50000 { return 50000 }
+        if target > 25000 { return 25000 }
+        if target > 15000 { return 15000 }
+        if target > 10000 { return 10000 }
+        if target > 7000 { return 7000 }
+        if target > 4999 { return 5000 }
+        if target > 2999 { return 3000 }
+        
+        return 1500;
+        
+    }
+    
+    func setInitialLocation (loc : locationMessage) {
+        
+        let area = mapZoomLevels(target: self.getWithinArea);
+        self.initialLocation = locationMessage(timestamp: area, lat: loc.lat, lon: loc.lon);
+        
+        
+    }
     func _initialize () -> DROPcategoryTypes? {
         
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
@@ -83,10 +104,11 @@ class MapCombiner : BaseObject  {
                 //returns a set of hashes
                 hadCachedData = true;
                 //self.pullQueue.sync { [weak self] in
+                let area = mapZoomLevels(target: self.getWithinArea);
                 
                 if cachedRunHashesWithinArea.count > 400 {
                     
-                    let sirdalud = cache.runsInRegion(lat: initialLocation.lat, lon: initialLocation.lon, getWithinArea: self.getWithinArea) ;
+                    let sirdalud = cache.runsInRegion(lat: initialLocation.lat, lon: initialLocation.lon, getWithinArea: area) ;
                 }
                 
                     var hits = 0;
@@ -301,6 +323,7 @@ class MapCombiner : BaseObject  {
                 return
             }
             
+            
             if let currentRuns = strongSelf.runs.getWithinArea(lat: strongSelf.initialLocation.lat,lon: strongSelf.initialLocation.lon,distanceInMeters: strongSelf.getWithinArea) {
                 
                 //pushes the snap output thru an observer if one gets produced
@@ -376,8 +399,10 @@ class MapCombiner : BaseObject  {
             
         }
         
+        let area = mapZoomLevels(target: self.getWithinArea);
+        
         //do this in background queue
-        let newSnap = mapSnapshot( coordinates : mapPolylineSet , filteringMode : self.filteringMode , lat : lat , lon: lon , getWithinArea : getWithinArea , hashes : runHashes , dirty : false,id :"msna"+String(Date().timeIntervalSince1970))
+        let newSnap = mapSnapshot( coordinates : mapPolylineSet , filteringMode : self.filteringMode , lat : lat , lon: lon , getWithinArea : area , hashes : runHashes , dirty : false,id :"msna"+String(Date().timeIntervalSince1970))
         
         /*let o : [MKPolyline]
         let filteringMode : mapFilteringMode //throw everything in as default
