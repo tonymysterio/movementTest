@@ -64,19 +64,21 @@ struct RunCacheDisk : Codable {
         let location1 = CLLocation(latitude: lat, longitude: lon)
         
         for i in list {
-        
-            if let loca = Geohash.decode(i.value.geoHash) {
+            
+            //if reported geohash is fucked, this will catch it
+            let calGeoHash = i.value.computeGeoHash();
+            if let loca = Geohash.decode(calGeoHash) {
             
                 let location2 = CLLocation(latitude: loca.latitude, longitude: loca.longitude)
             
                 let d = location1.distance(from: location2) as Double;
                 
-                print("runsInRegion geohash \(i.value.geoHash) dist: \(d) ");
+                
                 if d < 1 { continue; }
                 if d > getWithinArea {
                     continue;
                 }
-            
+                print("runsInRegion \(i.value.hash) geohash \(i.value.geoHash) dist: \(d) area \(getWithinArea) ");
                 c.insert(i.value.hash)
             }
             
@@ -164,6 +166,7 @@ class RunCache : BaseObject  {
         runReceivedObservable.subscribe{ run in
             
             //disk reader vibes with this
+            //json stream reader tells this too
             
             self.addRun( run : run )
             

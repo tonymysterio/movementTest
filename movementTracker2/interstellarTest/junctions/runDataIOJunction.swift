@@ -10,6 +10,7 @@ import Foundation
 import Interstellar
 
 var runStreamReaderObserver = Observable<Bool>()
+var runJSONStreamReaderObserver = Observable<Bool>()
 var runStreamReaderDataArrivedObserver = Observable<Run>()
 var runStreamReaderRawDataArrivedObserver = Observable<Run>()
 
@@ -55,14 +56,14 @@ class runDataIOJunction {
             
         }
         
-        if myRunStreamRecorder == nil {
+        /*if myRunStreamRecorder == nil {
             
             let myRunStreamRecorder = RunStreamRecorder(messageQueue : messageQueue );
             myRunStreamRecorder._initialize()
             myRunStreamRecorder._pulse(pulseBySeconds: 60)
             _ = scheduler.addObject(oID: myRunStreamRecorder.myID , o: myRunStreamRecorder )
             
-        }
+        }*/
         
         //force record to disk
         
@@ -83,7 +84,7 @@ class runDataIOJunction {
         
         //we need our guy myRunStreamRecorder for da job
         //myRunStreamRecorder?.storeRun(run: run)
-        if let mlt = storage.getObject(oID: "runStreamRecorder") as! RunStreamRecorder? {
+        if let mlt = addRunStreamRecorder() as! RunStreamRecorder? {
             mlt.storeRun(run: run)
             
             print("storing captured run")
@@ -97,6 +98,34 @@ class runDataIOJunction {
         }
         
     }
+    
+    //copied from packetExchange
+    func addRunStreamRecorder () -> RunStreamRecorder? {
+        
+        //this will listen and act as a general storage
+        
+        if let mlt = storage.getObject(oID: "runStreamRecorder") as! RunStreamRecorder? {
+            
+            mlt._pulse(pulseBySeconds: 120)
+            return mlt
+            
+        }
+        
+        //create new, assume that old one is terminaattod
+        let myRunStreamRecorder = RunStreamRecorder(messageQueue: messageQueue);
+        myRunStreamRecorder._initialize()
+        myRunStreamRecorder._pulse(pulseBySeconds: 120);
+        
+        if scheduler.addObject(oID: myRunStreamRecorder.myID, o: myRunStreamRecorder ){
+            //myLocationTracker?.addListener(oCAT: myLiveRunStreamListener.myCategory, oID: myLiveRunStreamListener.myID, name: myLiveRunStreamListener.name)
+            
+            return myRunStreamRecorder
+        }
+        
+        return nil
+        
+    }
+    
     
     func reset () {
         
@@ -138,6 +167,14 @@ class runDataIOJunction {
     
     init () {
         
+        runJSONStreamReaderObserver.subscribe { toggle in
+            //DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.main.async {
+                self.streamPullStatusChange( toggle : toggle)
+            }
+            //}
+        }
+        
         runStreamReaderObserver.subscribe { toggle in
             //DispatchQueue.global(qos: .utility).async {
                 self.streamPullStatusChange( toggle : toggle)
@@ -145,10 +182,13 @@ class runDataIOJunction {
         }
         
         runStreamReaderDataArrivedObserver.subscribe { run in
-            //run data picked from stream. save it
+            //run data picked from json stream. save it
             //DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.main.async {
+                
+                //creates disk writers and shit maybe
                 self.runStreamReaderDataArrived(run : run)
-            //}
+            }
         }
         
         peerDataRequesterRunArrivedSavedObserver.subscribe { run in

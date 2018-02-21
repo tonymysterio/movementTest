@@ -49,7 +49,7 @@ class configOneVC: UIViewController {
         
         let vx = sender.isOn
         
-        runStreamReaderObserver.update(vx)
+        runJSONStreamReaderObserver.update(vx)
         
     }
     

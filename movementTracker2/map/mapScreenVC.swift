@@ -50,8 +50,11 @@ class mapScreenVC: UIViewController {
         
         //see if we have a live run recorder
         //do this on screen init
+        //liveRunStreamListener
         
-        let s = runRecorderJunct.getRunStreamRecorderStatus();
+        
+        let s = runRecorderJunct.getLiveRunStreamListenerStatus();
+        //let s = runRecorderJunct.getRunStreamRecorderStatus();
         self.recordingRun = s;
             
         return s;
@@ -371,43 +374,46 @@ class mapScreenVC: UIViewController {
         
         if (self.lastDisplayedSnapshotID == mapSnap.id) {
             print ("dup mapsnap")
-            print (mapSnap);
+            //print (mapSnap);
             //return;
         }
         self.lastDisplayedSnapshotID = mapSnap.id;
-        self.mapView.delegate = self
+        //self.mapView.delegate = self
         
-        var mav = self.mapView;
-        mav?.delegate = self;
-        
+       // self.mapRenderQueue.sync{
+            DispatchQueue.main.async{
+                
         var polylines = [MKPolyline]();
         var lines = mapSnap.coordinates.count;
         
-        
-        for i in mapSnap.coordinates {
-            //print (#function);
-            print (i.count);
-            polylines.append( MKPolyline(coordinates: i, count: i.count))
-            let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
-            mapView.delegate = self
-            mapView.add(pol);
-        }
+        //DispatchQueue.main.sync {
+            
+            
+            
+                //let luss = self.mapView.delegate = self
+                
+                for i in mapSnap.coordinates {
+                    //print (#function);
+                    print (i.count);
+                    //polylines.append( MKPolyline(coordinates: i, count: i.count))
+            
+                    let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
+                    self.mapView.delegate = self;
+                    self.mapView.add(pol);
+                }
+                
+            
+        //}
         
         //let pol : MKPolyline = MKPolyline(coordinates: i, count: i.count)
         //self.mapRenderQueue.sync{
         //DispatchQueue.main.async {
-            
-            
-            
-            for i in polylines {
-                DispatchQueue.main.async {
-                    //let luss = self.mapView.delegate = self
-                    mav?.add(i) //polyline
-                    let im = 2;
-                }
-            }
+        }
         
-        //}
+        return;
+        
+        
+        
         
     }
     
@@ -651,7 +657,10 @@ extension mapScreenVC : MKMapViewDelegate {
     }
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         mapRegionTimer?.invalidate()
-        if (isBrowsingMap && !recordingRun) {
+        //update run recording
+        
+        
+        if (isBrowsingMap && !getRunStreamRecorderStatus()) {
             
             //the user wants to see something outside his sphere
             self.browsedToLocation(lat: browsedCoordinate.latitude, lon: browsedCoordinate.longitude)

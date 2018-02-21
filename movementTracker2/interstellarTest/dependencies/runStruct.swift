@@ -322,6 +322,53 @@ struct Run : Codable {
         var prevTimestamp : Double = 0;
         var acceptedBaseSpeed : Double = 0;
         
+        var lowestSpeed = 999999.0;
+        var minDist = 50.0;
+        var maxDist = 0.0;
+        var totDist = 0.0;
+        
+        for i in rcoord {
+            
+            if baseSpeed == 0 {
+                prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                prevTimestamp = i.timestamp
+                baseSpeed = 1;
+                continue
+                
+            }
+            
+            let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            let timDif = prevTimestamp - i.timestamp
+            let d = cur.distance(from: prevLocation) as Double;
+            let timVar = d / timDif
+            
+            if timVar < lowestSpeed {
+                if (timVar > 0.001 ) && (d>10) {
+                    lowestSpeed =  timVar*2.2
+                }
+            }
+            
+            if d < minDist && d > 5 {
+                minDist = d*1.8;
+            }
+            
+            if d > maxDist {
+                maxDist = d;
+            }
+            
+            totDist = totDist + d;
+            
+            
+        }   //prefilter
+        
+        let le = Double(rcoord.count);
+        
+        let medianDist = totDist / le ;
+        
+        print("spikeFilteredCoordinates mindist \(minDist) maxDist \(maxDist) lowestSpeed \(lowestSpeed) medianDist \(medianDist)")
+        
+        baseSpeed = 0;
+        
         for i in rcoord {
             
             if baseSpeed == 0 {
@@ -336,24 +383,36 @@ struct Run : Codable {
             }
             
             let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
-            let timDif = prevTimestamp - i.timestamp
-            let d = cur.distance(from: prevLocation) as Double;
-            let timVar = d / timDif
+            let timDif2 = prevTimestamp - i.timestamp
+            let d2 = cur.distance(from: prevLocation) as Double;
+            let timVar2 = d2 / timDif2
             
-            baseSpeed = baseSpeed + timVar;
+           
+            baseSpeed = baseSpeed + timVar2;
             //print (d)
             //print (timVar)
-            if timVar < 40 && d < 95 {
+            /*if timVar < 40 && d < 95 {
                 //if baseSpeed == 1 {
                     validCoords.append(i)
                     acceptedBaseSpeed = acceptedBaseSpeed + timVar
                     prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
                 //}
                 continue;
-            }
+            }*/
+            
+            if (timVar2 < lowestSpeed ) && (d2 < minDist ) {
+             //if baseSpeed == 1 {
+             validCoords.append(i)
+             acceptedBaseSpeed = acceptedBaseSpeed + timVar2
+             prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+             //}
+             continue;
+             }
             
             
         }
+        
+        
         print (rcoord.count)
         print (validCoords.count)
         let avgBaseSpeed = baseSpeed / Double(rcoord.count)
@@ -502,7 +561,7 @@ struct Run : Codable {
         for co in coordinates {
             
             //points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(round(co.lon,toDecimalPlaces: 5)), longitude: CLLocationDegrees(round(co.lat,toDecimalPlaces: 5)) ))
-            points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(co.lon), longitude: CLLocationDegrees(co.lat) ))
+            points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(co.lat), longitude: CLLocationDegrees(co.lon) ))
             
         }
         

@@ -229,7 +229,7 @@ class MapCombiner : BaseObject  {
     func addRun ( run : Run ) {
         
         
-        
+        //TODO: if compiling a map, dont add this
         /*if self.isProcessing {
             return;
         }*/
@@ -247,8 +247,9 @@ class MapCombiner : BaseObject  {
             
             //is this run in our visibilitee? if not, filter out
             //filter with geohash distance, dont reserve memory for stuff 1000km away
-            
-            if let loca = Geohash.decode(run.geoHash) {
+            let comGeoHash = run.computeGeoHash();
+            //runStreamReaderDataArrivedObserver
+            if let loca = Geohash.decode(comGeoHash) {
                 
                 lat = loca.latitude
                 lon = loca.longitude
@@ -366,14 +367,18 @@ class MapCombiner : BaseObject  {
         
         self._pulse(pulseBySeconds: 5)    //give secs for the job
         
-        let r = runs.allSorted()
+        guard let r = runs.allSorted() else {
+            
+            //got nothing
+            return;
+        }
         var mapPolylineSet = [[CLLocationCoordinate2D]]()
         
         var simplifyTolerance = self.calculateSimplifyToleranceForView(getWithinArea: getWithinArea)
         var runHashes = Set<String>();
         
         //older areas on the background
-        for i in r!.o {
+        for i in r.o {
             
             //let myPolyline = MKPolyline(coordinates: coords, count: coords.count)
             //make polylines

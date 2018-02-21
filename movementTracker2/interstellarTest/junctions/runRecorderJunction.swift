@@ -419,10 +419,24 @@ class runRecorderJunction {
     }
     
     func getRunStreamRecorderStatus () -> Bool {
-        
+        //sort of deprecated
         if let runStreamRecorder = storage.getObject(oID: "runStreamRecorder") as? RunStreamRecorder {
             
             if runStreamRecorder.terminated { return false; }
+            
+            return true;
+        }
+        
+        return false;
+        
+    }
+    
+    func getLiveRunStreamListenerStatus () -> Bool {
+        
+        //this guy is ON if we are recording run coords
+        if let liveRunStreamListener = storage.getObject(oID: "liveRunStreamListener") as? liveRunStreamListener {
+            
+            if liveRunStreamListener.terminated { return false; }
             
             return true;
         }

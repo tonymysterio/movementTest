@@ -138,7 +138,7 @@ class RunStreamRecorder : BaseObject  {
             let fname = path + "/" + hash + ".json"
             //try Disk.save(run, to: .caches, as: fname)
             try Disk.save(run, to: .applicationSupport, as: fname)
-            print("storing captured run to app support \(fname) ")
+            print("storing finished run to app support \(fname) ")
             
             
             runRecorderSavedFinishedRun.update(run);

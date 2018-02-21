@@ -239,6 +239,7 @@ class SnapshotCache : BaseObject  {
         runStreamReaderDataArrivedObserver.subscribe{ run in
         
             //this is via meshnet pull
+            //or pulling from jsonstream
             DispatchQueue.global(qos: .utility).async {
                 self.addRun( run : run )
             }
