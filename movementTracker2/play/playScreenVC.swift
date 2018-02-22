@@ -95,7 +95,7 @@ class playScreenVC: UIViewController {
         }
         
         
-    runAreaProgressObserver.subscribe { currentRun in
+    liveRunAreaProgressObserver.subscribe { currentRun in
         
         DispatchQueue.main.async {
             
@@ -150,7 +150,7 @@ class playScreenVC: UIViewController {
             
         }
         
-        runAreaCompletedObserver.subscribe { run in
+        liveRunAreaCompletedObserver.subscribe { run in
             
             DispatchQueue.main.async {
                 

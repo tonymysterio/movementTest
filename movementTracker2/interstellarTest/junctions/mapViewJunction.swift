@@ -143,8 +143,7 @@ class mapViewJunction {
                 
         }
         
-        runAreaProgressObserver.subscribe { run in
-            self.runAreaProgress( run : run )
+        
             
         }*/
         

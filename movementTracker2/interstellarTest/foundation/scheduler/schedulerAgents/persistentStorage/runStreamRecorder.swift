@@ -107,7 +107,10 @@ class RunStreamRecorder : BaseObject  {
         
     }   //storeRun
     
-    func storeFinishedRun (run : Run ) {
+    typealias storeFinishedRunSuccess = ( _ run : Run , _ filename : String ) -> Void;
+    typealias storeFinishedRunError = ( DROPcategoryTypes ) -> Void;
+    
+    func storeFinishedRun (run : Run , success :storeFinishedRunSuccess , Cerror : storeFinishedRunError ) {
         
         //store finished captured run
         
@@ -118,7 +121,13 @@ class RunStreamRecorder : BaseObject  {
         //proof of stake = amount of runs done, exchanged, bandwidth given
         
         //hash a list of transactions, how much da
-        if self.terminated { return }
+        if self.terminated {
+            
+            Cerror(DROPcategoryTypes.terminating);
+            
+            return
+            
+        }
         
         //let hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue)
         let hash = run.getHash();
@@ -126,8 +135,9 @@ class RunStreamRecorder : BaseObject  {
         if previousSavedHash == hash {
             //ignore duplicate save
             //this might not work if runs are coming from multiple sources, meshnet, json stream pull..
-            
+            Cerror(DROPcategoryTypes.duplicateSavedData);
             return;
+            
         }
         //var run2 = run;
         //run.hash = String(run.closeTime.hashValue ^ run.user.hashValue ^ run.geoHash.hashValue);
@@ -141,21 +151,28 @@ class RunStreamRecorder : BaseObject  {
             print("storing finished run to app support \(fname) ")
             
             
-            runRecorderSavedFinishedRun.update(run);
+            
             
             previousSavedHash = hash;
             
-            peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
+            //dont do these here but in callback closure
+            //runRecorderSavedFinishedRun.update(run);
+            //peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
             
             //on successfull storage
             self._pulse(pulseBySeconds: 120)    //expect next write in a few mins
             self.finishProcessing()
+            
+            success( run, fname );
+            
             
         } catch {
             
             //maybe page run recorder junction
             self._pulse(pulseBySeconds: 120)
             self.finishProcessing()
+            Cerror(DROPcategoryTypes.fileWriteFailed)
+            
         }
         
         

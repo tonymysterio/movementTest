@@ -69,12 +69,16 @@ class CurrentRunDataIO: BaseObject  {
         
     }
     
-    func CommitOfCurrentRun ( run: Run ) {
-        
+    typealias CommitOfCurrentRunSuccess = (String)  -> Void
+    typealias CommitOfCurrentRunError = (DROPcategoryTypes)  -> Void
+    
+    func CommitOfCurrentRun ( run: Run, success : CommitOfCurrentRunSuccess , Cerror : CommitOfCurrentRunError ) {
+    
         //save current run
         if self.isProcessing {
             
-            return
+            Cerror(DROPcategoryTypes.busyProcessesing);
+            return;
             
         }
         
@@ -109,6 +113,7 @@ class CurrentRunDataIO: BaseObject  {
                     //_pulse(pulseBySeconds: 1)  //get rid of this item as its done its job
                     
                 }*/
+                success(filename);
                 
                 self.finishProcessing()
                 
@@ -118,6 +123,7 @@ class CurrentRunDataIO: BaseObject  {
                 
                 self.finishProcessing()
                 _pulse(pulseBySeconds: 600)
+                Cerror(DROPcategoryTypes.fileWriteFailed);
                 
             }
             
@@ -126,12 +132,17 @@ class CurrentRunDataIO: BaseObject  {
         
     }   //commit of current run
     
-    func CommitOfCurrentBorkedRun ( run: Run ) {
+    typealias CommitOfCurrentBorkedSuccess = (String)  -> Void
+    typealias CommitOfCurrentBorkedError = (DROPcategoryTypes)  -> Void
+    
+    func CommitOfCurrentBorkedRun ( run: Run, success : CommitOfCurrentBorkedSuccess , Cerror : CommitOfCurrentBorkedError ) {
         
         //save current run
         if self.isProcessing {
             
-            return
+            Cerror(DROPcategoryTypes.busyProcessesing);
+            
+            return;
             
         }
         
@@ -150,14 +161,18 @@ class CurrentRunDataIO: BaseObject  {
                 
                 self.lastInsertTimestamp = Date().timeIntervalSince1970
                 
+                success(filename);  //return saved filename to closure
+                
                 self.finishProcessing()
                 
             } catch {
                 // ...
                 //cannot write for some reason
-                
                 self.finishProcessing()
-                _pulse(pulseBySeconds: 600)
+                _pulse(pulseBySeconds: 600);
+                
+                //return error to closure
+                Cerror(DROPcategoryTypes.serviceNotAvailable);
                 
             }
             
@@ -174,8 +189,10 @@ class CurrentRunDataIO: BaseObject  {
         
         return DROPcategoryTypes.persisting
     }
+    typealias Fsuccess = ( _ run : Run) -> Void
+    typealias Ferror = ()  -> Void
     
-    func ReadOfCurrentRun() {
+    func ReadOfCurrentRun( success: Fsuccess , error : Ferror ) {
         
         //fish out current run
         if self.isProcessing {
@@ -198,6 +215,8 @@ class CurrentRunDataIO: BaseObject  {
                         print (run!.coordinates.count)
                         print("ReadOfCurrentRun: finished scanning files")
                         
+                        return success(run!);
+                        
                         if !run!.isValid {
                             
                             //runrecoder junction notify of illegal run objects when pulling from disk,meshnetting
@@ -210,7 +229,8 @@ class CurrentRunDataIO: BaseObject  {
                             
                         }
                         
-                        currentRunReceivedObserver.update(run!)
+                        
+                        //currentRunReceivedObserver.update(run!)
                     }
                 }
                         
@@ -243,7 +263,8 @@ class CurrentRunDataIO: BaseObject  {
             } else {
                 
                 self.finishProcessing();
-                return
+                error();
+                //return
                 
             }
             

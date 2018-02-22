@@ -141,7 +141,7 @@ class liveRunStreamListener : BaseObject  {
         
         if !(self.currentRun?.isClosed())! {
             
-            runAreaProgressObserver.update(currentRun!)
+            liveRunAreaProgressObserver.update(currentRun!)
             self.finishProcessing()
             return;
         }
@@ -152,7 +152,7 @@ class liveRunStreamListener : BaseObject  {
             
             self.recording = false;
             self.recordingCompleted = true;
-            runAreaCompletedObserver.update(currentRun!)
+            liveRunAreaCompletedObserver.update(currentRun!)
             self._pulse(pulseBySeconds: 10) //keep alive for a few housekeeps, ping run stream recorder to save the run
             self.finishProcessing()
             
@@ -197,7 +197,7 @@ class liveRunStreamListener : BaseObject  {
             //runstreamRecorder will ignore previously saved hashes so its safe to page it again in case
             //write failed
             //this guy will TTL and die in 10s after the end of recording
-            runAreaCompletedObserver.update(currentRun!)
+            liveRunAreaCompletedObserver.update(currentRun!)
             
         }
         

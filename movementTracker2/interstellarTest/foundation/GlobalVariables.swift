@@ -290,6 +290,10 @@ enum DROPcategoryTypes {
     case hibernating
     case wokeUpFromHibernation
     case readyImmediately   //something that relies on the cache is ready to its thing
+    //file access related
+    case fileNotFound
+    case fileWriteFailed
+    case duplicateSavedData  //trying to save same data twice
     
 }
 

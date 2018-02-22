@@ -10,8 +10,8 @@ import Foundation
 import Interstellar
 
 var runRecoderToggleObserver = Observable<Bool>()
-var runAreaCompletedObserver = Observable<Run>()
-var runAreaProgressObserver = Observable<Run>()
+var liveRunAreaCompletedObserver = Observable<Run>()
+var liveRunAreaProgressObserver = Observable<Run>()
 var runRecorderAbortObserver = Observable<Bool>()
 var locationMessageObserver = Observable<locationMessage>()
 
@@ -34,7 +34,7 @@ var runRecorderSavedFinishedRun = Observable<Run>();
 
 class runRecorderJunction {
     
-    var pushFakeData = true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
+    var pushFakeData = false;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
     var recording = false;
     var myRecorderObjectID = "";
     weak var myLocationTracker : LocationLogger?
@@ -96,7 +96,7 @@ class runRecorderJunction {
         self.initialLocation = locationMessage
         
     }
-    func recordCompleted( run : Run ) {
+    func liveRunRecordCompleted( run : Run ) {
         
         //my subclass told me
         //maybe pulling a current run triggered this
@@ -114,7 +114,23 @@ class runRecorderJunction {
                 var r2 = run;
                 
                 r2.finalizeRun();
-                rsr.storeFinishedRun(run: r2)
+                rsr.storeFinishedRun(run: r2, success: {
+                    (run, filename) in
+                    print("liveRunRecordCompleted storeFinishedRun success \(filename)");
+                    
+                    
+                    
+                    ////runRecorderSavedFinishedRun.update(run);
+                    //peerDataRequesterRunArrivedSavedObserver.update(hash)   //ping packetExchage about a run saved
+                    
+                    
+                },Cerror: {
+                    (errorType) in
+                    
+                    print("liveRunRecordCompleted storeFinishedRun error \(errorType)");
+                    
+                });
+                
                 //pings with runRecorderSavedFinalizedRun
                 
                 
@@ -130,7 +146,7 @@ class runRecorderJunction {
         
     }
     
-    func runAreaProgress (run : Run) {
+    func liveRunAreaProgress (run : Run) {
         
         //more data came in, lets store it to local storage
         //this would better belong to file access junction
@@ -158,7 +174,17 @@ class runRecorderJunction {
             
             if let mlt = storage.getObject(oID: "currentRunDataIO") as! CurrentRunDataIO? {
                 
-                mlt.CommitOfCurrentRun(run: run)
+                mlt.CommitOfCurrentRun(run: run,success: { (filename) in
+                    
+                    print("liveRunAreaProgress CommitOfCurrentRun success \(filename) " );
+                    
+                },Cerror: { (errorCode) in
+                    
+                    
+                    print("liveRunAreaProgress CommitOfCurrentRun fail \(errorCode) " )
+
+                    
+                })
                 
             }
             
@@ -243,7 +269,34 @@ class runRecorderJunction {
         if let rdIO = getCurrentRunDataIO() {
             
             //ask for current run
-            rdIO.ReadOfCurrentRun()
+            rdIO.ReadOfCurrentRun (success: { (run) in
+                
+                //let ran = run;
+                //poprint(ran);
+                //let rvalid = run.isValid;
+                //let rClosed = run.isClosed();
+                //if (run.isValid && run.isClosed() ) {
+                    
+                    print(#function);
+                    print("run.coordinates.count = \(run.coordinates.count)");
+                    print("run.spikeFilteredCoordinates = \(run.spikeFilteredCoordinates()?.count)");
+                    print("run.totalDistance = \(run.totalDistance())");
+                    print("run.distanceBetweenStartAndEndSpikeFiltered = \(run.distanceBetweenStartAndEndSpikeFiltered())")
+                    print("run.geohash = \(run.geoHash)");
+                    print("run.computeGeoHash = \(run.computeGeoHash())");
+                    
+                    print("run pulled \(run.hash) at \(run.geoHash) ")
+                    
+                    print (run.totalDistance());
+                    //print("tit");
+                    
+                //}
+                
+            }, error: {
+                
+                print ("ReadOfCurrentRun failed");
+            })
+            
         }
         
     }
@@ -260,7 +313,16 @@ class runRecorderJunction {
             if let run = mstl.currentRun {
                 
                 if let rdIO = getCurrentRunDataIO() {
-                    rdIO.CommitOfCurrentRun(run: run);
+                    rdIO.CommitOfCurrentRun(run: run , success: {
+                        (filename) in
+                        print("CommitOfCurrentRun success \(filename)");
+                        
+                    },Cerror: {
+                        (errorType) in
+                        
+                        print("CommitOfCurrentRun success \(errorType)");
+                        
+                    });
                     
                 }
             }
@@ -295,7 +357,16 @@ class runRecorderJunction {
             if let run = mstl.currentRun {
                 
                 if let rdIO = getCurrentRunDataIO() {
-                    rdIO.CommitOfCurrentBorkedRun(run: run);
+                    
+                    rdIO.CommitOfCurrentBorkedRun ( run: run, success : { filename in
+                        
+                        print ("CommitOfCurrentBorkedRun ok \(filename)" )
+                        
+                    },Cerror : { dropCode in
+                        
+                        print ("CommitOfCurrentBorkedRun error \(dropCode)" )
+                        
+                    });
                 }
             }
             
@@ -352,7 +423,7 @@ class runRecorderJunction {
         let pedo = getPedometer()
         let IO = getCurrentRunDataIO()
         
-        if !pushFakeData { runAreaProgressObserver.update(run) }
+        if !pushFakeData { liveRunAreaProgressObserver.update(run) }
         recording = true;
         
     }
@@ -621,11 +692,11 @@ class runRecorderJunction {
             //h}
         }
         
-        runAreaCompletedObserver.subscribe { run in
+        liveRunAreaCompletedObserver.subscribe { run in
             //liveRunStreamListener deducts if something is complete or not
             //DO NOT put this logic elsewhere
             //DispatchQueue.global(qos: .utility).async {
-                self.recordCompleted(run : run)
+                self.liveRunRecordCompleted(run : run)
             //}
         }
         
@@ -655,11 +726,11 @@ class runRecorderJunction {
                 //}
         }
         
-        runAreaProgressObserver.subscribe { run in
+        liveRunAreaProgressObserver.subscribe { run in
             //comes from runstreamlistener, queue .userInteraction
             //coordinate or event added on the run
             //DispatchQueue.global(qos: .utility).async {
-                self.runAreaProgress( run : run )
+                self.liveRunAreaProgress( run : run )
             //}
             
         }
