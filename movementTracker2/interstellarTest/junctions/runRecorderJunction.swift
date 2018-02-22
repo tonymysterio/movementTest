@@ -34,7 +34,7 @@ var runRecorderSavedFinishedRun = Observable<Run>();
 
 class runRecorderJunction {
     
-    var pushFakeData = false;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
+    var pushFakeData = false; //true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
     var recording = false;
     var myRecorderObjectID = "";
     weak var myLocationTracker : LocationLogger?
@@ -168,6 +168,10 @@ class runRecorderJunction {
             return;
         }
         
+        //calculate live run distances for display here
+        
+        
+        
         DispatchQueue.main.async {
             
             //run stream recorder is born when we are recording a run and that run has enough daatta
@@ -205,17 +209,19 @@ class runRecorderJunction {
         
         recording = false;
         //drop the reference to recording object
-        if let mlt = storage.getObject(oID: "liveRunStreamListener") as! liveRunStreamListener? {
-            mlt._finalize()
-        }
+        DispatchQueue.main.async {
+            
+            if let mlt = storage.getObject(oID: "liveRunStreamListener") as! liveRunStreamListener? {
+                mlt._finalize()
+            }
         
-        if let mlt = storage.getObject(oID: "pedometer") as! Pedometer? {
-            mlt._finalize()
-        }
+            if let mlt = storage.getObject(oID: "pedometer") as! Pedometer? {
+                mlt._finalize()
+            }
         
-        if let mlt = storage.getObject(oID: "currentRunDataIO") as! CurrentRunDataIO? {
-            mlt._finalize()
-        }
+            if let mlt = storage.getObject(oID: "currentRunDataIO") as! CurrentRunDataIO? {
+                mlt._finalize()
+            }
         
         //the runStreamRecorder will be purged automatically in due course
         /*if let mlt = storage.getObject(oID: "locationLogger") as! MotionLogger? {
@@ -224,7 +230,7 @@ class runRecorderJunction {
         */
         
         //dont kill location logger here? because something else might be using it?
-        
+        }
     }
     func requestCurrentLocation () {
         
@@ -269,7 +275,7 @@ class runRecorderJunction {
         if let rdIO = getCurrentRunDataIO() {
             
             //ask for current run
-            rdIO.ReadOfCurrentRun (success: { (run) in
+            rdIO.ReadOfCurrentRun (success: { [weak self] (run) in
                 
                 //let ran = run;
                 //poprint(ran);
@@ -289,7 +295,8 @@ class runRecorderJunction {
                     
                     print (run.totalDistance());
                     //print("tit");
-                    
+                    //start fakepushing coords
+                    self?.currentRunReceived(run: run);
                 //}
                 
             }, error: {

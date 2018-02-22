@@ -224,7 +224,8 @@ struct Run : Codable {
         let location1 = CLLocation(latitude: (coord.lat), longitude: (coord.lon))
         let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
         let d = location1.distance(from: location2) as Double;
-        if (d<10){ return false }
+        //NOTE: filters incoming coords
+        if (d<5){ return false }
         
         //time based filtering too?
         
@@ -310,7 +311,7 @@ struct Run : Codable {
             return nil
         }
         
-        if self.coordinates.count < 15 {
+        if self.coordinates.count < 5 {
             return nil
         }
         
@@ -327,7 +328,38 @@ struct Run : Codable {
         var maxDist = 0.0;
         var totDist = 0.0;
         
+        var locality = [CLLocation : Int]();
+        
+        var tip = [String:[coordinate]]();
         for i in rcoord {
+            
+            let rlat = i.lat.round(to: 3);
+            let rlon = i.lon.round(to: 3);
+        
+            let rkey = String(rlat)+String(rlon);
+            if tip[rkey]==nil {
+                tip[rkey]=[i];
+                
+            } else {
+                tip[rkey]?.append(i)
+            }
+            
+        }
+        //what has most coords
+        var bgLen = 0;
+        var sel = "";
+        for i in tip {
+            if i.value.count > bgLen {
+                
+                bgLen = i.value.count;
+                sel = i.key;
+            }
+        }
+        
+        for i in tip[sel]!{
+            
+            //let gh = Geohash.encode(latitude: CLLocationDegrees(i.lat), longitude: CLLocationDegrees(i.lon));
+            //let coarseGh = gh.prefix(7);
             
             if baseSpeed == 0 {
                 prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
@@ -341,6 +373,113 @@ struct Run : Codable {
             let timDif = prevTimestamp - i.timestamp
             let d = cur.distance(from: prevLocation) as Double;
             let timVar = d / timDif
+            baseSpeed = baseSpeed + timVar;
+            
+            if timVar < lowestSpeed {
+                if (timVar > 0.001 ) && (d>10) {
+                    lowestSpeed =  timVar*2.2
+                }
+            }
+            
+            if d < minDist && d > 5 {
+                minDist = d*2.3;
+            }
+            
+            if d > maxDist {
+                maxDist = d;
+            }
+            
+            totDist = totDist + d;
+            
+            prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            prevTimestamp = i.timestamp;
+            
+        }
+        
+        //clean stray points off. might be a bad idea
+        
+        var clusterPoints = [coordinate]();
+        
+        
+        for k in tip {
+            
+            if k.value.count > 1 {
+                for kk in k.value {
+                    
+                    clusterPoints.append(kk);
+                }
+                
+                
+            }
+            
+            
+        }
+        let clusterPointsInTime = clusterPoints.sorted {
+            $0.timestamp < $1.timestamp
+        }
+        
+        baseSpeed = 0;
+        for i in clusterPointsInTime {
+            if baseSpeed == 0 {
+                prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                prevTimestamp = i.timestamp
+                baseSpeed = 1;
+                //trust the last coodrina
+                //validCoords.append(i)
+                
+                continue
+                
+            }
+            
+            let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            let timDif2 = i.timestamp - prevTimestamp;
+            let d2 = cur.distance(from: prevLocation) as Double;
+            let timVar2 = d2 / timDif2
+            
+            if (d2 < minDist) {
+                
+                validCoords.append(i);
+                
+            } else {
+                
+                print ("leaper \(d2) outside mindist of \(minDist)")            }
+            
+            prevLocation = cur;
+            prevTimestamp = i.timestamp;
+            
+        }
+        
+        
+        if validCoords.count < 2 {
+            return nil;
+        }
+        
+        return validCoords;
+
+        
+        //var clusterPointInTime = clusterPoints.sorted(by: <#T##(coordinate, coordinate) throws -> Bool#>)
+        
+        //find distances from last valid
+        
+        /*
+        for i in rcoord {
+            
+            //let gh = Geohash.encode(latitude: CLLocationDegrees(i.lat), longitude: CLLocationDegrees(i.lon));
+            //let coarseGh = gh.prefix(7);
+           
+            if baseSpeed == 0 {
+                prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                prevTimestamp = i.timestamp
+                baseSpeed = 1;
+                continue
+                
+            }
+            
+            let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
+            let timDif = prevTimestamp - i.timestamp
+            let d = cur.distance(from: prevLocation) as Double;
+            let timVar = d / timDif
+            baseSpeed = baseSpeed + timVar;
             
             if timVar < lowestSpeed {
                 if (timVar > 0.001 ) && (d>10) {
@@ -358,19 +497,24 @@ struct Run : Codable {
             
             totDist = totDist + d;
             
+            prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+
             
         }   //prefilter
-        
+        */
         let le = Double(rcoord.count);
         
         let medianDist = totDist / le ;
         
         print("spikeFilteredCoordinates mindist \(minDist) maxDist \(maxDist) lowestSpeed \(lowestSpeed) medianDist \(medianDist)")
+        //22 coords with wild spikes of 1800m  259m
+        let avgBaseSpeed = totDist / baseSpeed // Double(rcoord.count)
         
         baseSpeed = 0;
         
-        for i in rcoord {
-            
+        //for i in rcoord {
+        //use just clustered points
+        for i in clusterPointsInTime {
             if baseSpeed == 0 {
                 prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
                 prevTimestamp = i.timestamp
@@ -383,14 +527,13 @@ struct Run : Codable {
             }
             
             let cur = CLLocation(latitude: (i.lat), longitude: (i.lon))
-            let timDif2 = prevTimestamp - i.timestamp
+            let timDif2 = i.timestamp - prevTimestamp;
             let d2 = cur.distance(from: prevLocation) as Double;
             let timVar2 = d2 / timDif2
             
            
             baseSpeed = baseSpeed + timVar2;
-            //print (d)
-            //print (timVar)
+            
             /*if timVar < 40 && d < 95 {
                 //if baseSpeed == 1 {
                     validCoords.append(i)
@@ -401,21 +544,28 @@ struct Run : Codable {
             }*/
             
             if (timVar2 < lowestSpeed ) && (d2 < minDist ) {
+            //if (timVar2 < avgBaseSpeed) {
              //if baseSpeed == 1 {
              validCoords.append(i)
              acceptedBaseSpeed = acceptedBaseSpeed + timVar2
-             prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
+                prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon));
+                prevTimestamp = i.timestamp;
              //}
+                
              continue;
              }
             
+            print("Skipping point");
+            print (d2)
+            print (timVar2)
             
         }
         
         
         print (rcoord.count)
         print (validCoords.count)
-        let avgBaseSpeed = baseSpeed / Double(rcoord.count)
+        //avg speed warts and all
+        //let avgBaseSpeed = totDist / baseSpeed // Double(rcoord.count)
         let accavgBaseSpeed = acceptedBaseSpeed / Double(validCoords.count)
         
         //print ("avg base speed \(avgBaseSpeed ) with \(rcoord.count ) cooridnates, acccepted \(accavgBaseSpeed ) " )
@@ -430,7 +580,7 @@ struct Run : Codable {
             }*/
         
         //the area can be valid with a very few points
-        if validCoords.count < 10 {
+        if validCoords.count < 2 {
             return nil;
         }
         
@@ -497,7 +647,7 @@ struct Run : Codable {
     
     func distanceBetweenStartAndEndSpikeFiltered () -> Double {
         
-        if coordinates.count < 10 { return 999999 }
+        if coordinates.count < 5 { return 999999 }
         
         guard let pp = spikeFilteredCoordinates() else {
             return 999999;
@@ -533,7 +683,7 @@ struct Run : Codable {
         
         //1km gives 100m extra, 5km would be 500 closing radius
         
-        let gap = 50 + ((totDist / 1000)*100);
+        let gap = 50 + ((totDist / 1000)*60);
         
         if d > gap {
             
@@ -1272,6 +1422,14 @@ class jsonBufferScanner : BufferConsumer {
 }   //end jsonBufferScannerDER
 
 
+extension Double {
+    
+    func round(to places: Int) -> Double {
+        let divisor = pow(10.0, Double(places))
+        return Darwin.round(self * divisor) / divisor
+    }
+    
+}
 
 //struct couchDBdoc : Cod
 /*
