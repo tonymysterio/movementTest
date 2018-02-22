@@ -30,6 +30,7 @@ class mapScreenVC: UIViewController {
     var refreshingMapPolygons = false;
     var refreshingMapPolygonsBreak = false;
     var isVisible = false;
+    var startPointAnnotationDrawn = false;
     
     @IBAction func locatorButtonTap(_ sender: Any) {
         
@@ -56,7 +57,9 @@ class mapScreenVC: UIViewController {
         let s = runRecorderJunct.getLiveRunStreamListenerStatus();
         //let s = runRecorderJunct.getRunStreamRecorderStatus();
         self.recordingRun = s;
-            
+        
+        //self.startPointAnnotationDrawn = s;
+        
         return s;
     }
     
@@ -67,6 +70,8 @@ class mapScreenVC: UIViewController {
         
         //see if we are recording
         _ = getRunStreamRecorderStatus();
+        //show yourself on mappu
+        self.mapView.showsUserLocation = true;
         
         self.centerMap(lat: self.initialLocation.lat, lon: self.initialLocation.lon)
         
@@ -137,6 +142,33 @@ class mapScreenVC: UIViewController {
             
         }
         
+        liveRunAreaProgressObserver.subscribe { currentRun in
+            
+            
+            if self.startPointAnnotationDrawn { return }
+            
+            //check if we are recording a run?
+            if let filco = currentRun.spikeFilteredCoordinates() {
+                
+                //first coord is the last now
+                let fico = filco.last;
+                
+                
+                let myAnnotation: MKPointAnnotation = MKPointAnnotation()
+                myAnnotation.coordinate = CLLocationCoordinate2DMake(fico!.lat,fico!.lon);
+                myAnnotation.title = "start point"
+                self.startPointAnnotationDrawn = true;
+                
+                DispatchQueue.main.async {
+                
+                    //self.mapView.setCenter(center,animated: true)
+                    self.mapView.addAnnotation(myAnnotation)
+                    self.mapView?.showsUserLocation = true
+                
+                }
+            
+            }
+        }
         
         
         /*LocationLoggerMessageObserver.subscribe
