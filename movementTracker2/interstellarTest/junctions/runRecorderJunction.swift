@@ -34,7 +34,7 @@ var runRecorderSavedFinishedRun = Observable<Run>();
 
 class runRecorderJunction {
     
-    var pushFakeData = false; //true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
+    var pushFakeData = false;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
     var recording = false;
     var myRecorderObjectID = "";
     weak var myLocationTracker : LocationLogger?
@@ -100,6 +100,8 @@ class runRecorderJunction {
         
         //my subclass told me
         //maybe pulling a current run triggered this
+        let m = notificationMeiwaku(title: "runrecordJunction", subtitle: "liveRunRecordCompleted", body: "finished run. trying to save" )
+        serviceStatusJunctionNotification.update(m);
         
         DispatchQueue.main.async {
             //runStreamRecorder is bad news because it will save whatever is thrown at it
@@ -117,6 +119,8 @@ class runRecorderJunction {
                 rsr.storeFinishedRun(run: r2, success: {
                     (run, filename) in
                     print("liveRunRecordCompleted storeFinishedRun success \(filename)");
+                    let m = notificationMeiwaku(title: "runrecordJunction", subtitle: "liveRunRecordCompleted", body: "getRunStreamRecorder storeFinishedRun success with \(filename)" )
+                    serviceStatusJunctionNotification.update(m);
                     
                     
                     
@@ -128,6 +132,9 @@ class runRecorderJunction {
                     (errorType) in
                     
                     print("liveRunRecordCompleted storeFinishedRun error \(errorType)");
+                    
+                    let m = notificationMeiwaku(title: "runrecordJunction", subtitle: "liveRunRecordCompleted", body: "getRunStreamRecorder storeFinishedRun error \(errorType)" )
+                    serviceStatusJunctionNotification.update(m);
                     
                 });
                 
@@ -229,6 +236,9 @@ class runRecorderJunction {
         }
         */
         
+        let m = notificationMeiwaku(title: "runrecordJunction", subtitle: "reset", body: "resetting liveRunStreamListener,pedometer currentRunDataIO " )
+            serviceStatusJunctionNotification.update(m);
+            
         //dont kill location logger here? because something else might be using it?
         }
     }

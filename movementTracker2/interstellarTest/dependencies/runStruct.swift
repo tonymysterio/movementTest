@@ -455,6 +455,9 @@ struct Run : Codable {
         
         
         if validCoords.count < 2 {
+            if clusterPointsInTime.count > 5 {
+                return clusterPointsInTime;
+            }
             return nil;
         }
         

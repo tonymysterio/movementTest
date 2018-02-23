@@ -188,6 +188,11 @@ class PeerDataProvider : BaseObject  {
     
     override func _finalize() -> DROPcategoryTypes? {
         
+/*self.totalRunItemsImported = totalRunItemsImported + 1;
+ 
+ let m = notificationMeiwaku(title: "meshnet service", subtitle: "orderedHashRequestSuccess", body: self.hostname )
+ serviceStatusJunctionNotification.update(m);
+    */
         //just stop the server
         self.server?.stop()
         return self._teardown()

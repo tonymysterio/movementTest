@@ -121,6 +121,8 @@ class PeerDataRequester : BaseObject  {
                 
                 if self.terminated { return }
                 
+                
+                
                 let decoder = JSONDecoder()
                 guard let ordHashList = try! decoder.decode( orderedHashList?.self, from : response.data as! Data ) else {
                     
@@ -151,6 +153,25 @@ class PeerDataRequester : BaseObject  {
         
         return nil
         
+    }
+    
+    override func _finalize() -> DROPcategoryTypes? {
+        
+        if self.totalRunItemsImported > 0 {
+            
+            let tot = String(self.totalRunItemsImported);
+            
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "shut down", body: "pulled \(tot) runs" )
+            serviceStatusJunctionNotification.update(m);
+            
+        }
+        
+         
+        
+        
+        //just stop the server
+        
+        return self._teardown()
     }
     
     func fetchMissingHash(){
@@ -286,6 +307,8 @@ class PeerDataRequester : BaseObject  {
         
         if self.terminated { return }
         self.finishProcessing()
+        
+        self._pulse(pulseBySeconds: 30);
         
         //see if i have received my own hashlist
         if myExhangedHashes.isEmpty() {
