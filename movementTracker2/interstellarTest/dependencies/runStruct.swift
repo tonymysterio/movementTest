@@ -224,7 +224,7 @@ struct Run : Codable {
         let location1 = CLLocation(latitude: (coord.lat), longitude: (coord.lon))
         let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
         let d = location1.distance(from: location2) as Double;
-        //NOTE: filters incoming coords
+        //NOTE: filters incoming 
         if (d<5){ return false }
         
         //time based filtering too?
@@ -394,6 +394,10 @@ struct Run : Codable {
             prevLocation = CLLocation(latitude: (i.lat), longitude: (i.lon))
             prevTimestamp = i.timestamp;
             
+        }
+        
+        if minDist < 60 {
+            minDist = 60;
         }
         
         //clean stray points off. might be a bad idea
@@ -833,7 +837,7 @@ class jsonBufferScanner : BufferConsumer {
             
             totalSuccessfullBuffers = totalSuccessfullBuffers + 1
             
-            print(validStrings);
+            //print(validStrings);
             let mum = 1;
             
         } else {
@@ -1003,7 +1007,7 @@ class jsonBufferScanner : BufferConsumer {
                 
                 if let co = findCompleteJSONobject(zut: idp) {
                     
-                    print(co);
+                    //print(co);
                     let tu=1;
                 }
                 

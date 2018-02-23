@@ -42,6 +42,32 @@ class ServusMeshnetProvider : BaseObject  {
             
         }
         
+        peerExplorerDidLosePeerObserver.subscribe { peer in
+            
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer lost", body: peer.hostname!)
+            serviceStatusJunctionNotification.update(m)
+            _ = self.startProcessing();
+            _ = self._pulse(pulseBySeconds: 60)
+            _ = self.finishProcessing()
+        }
+        
+        peerExplorerDidDeterminePeerObserver.subscribe { peer in
+            
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer found", body: peer.hostname!)
+            serviceStatusJunctionNotification.update(m);
+            
+            _ = self.startProcessing();
+            _ = self._pulse(pulseBySeconds: 60)
+            _ = self.finishProcessing()
+        }
+        
+        /*peerExplorerDidLosePeerObserver.subscribe{ peer in
+            
+            _ = self.startProcessing();
+            _ = self._pulse(pulseBySeconds: 60)
+            _ = self.finishProcessing()
+        }*/
+        
         return nil
     }
     
@@ -63,6 +89,7 @@ extension ServusMeshnetProvider: ExplorerDelegate {
     func explorer(_ explorer: Explorer, didSpotPeer peer: Peer) {
         
         peerExplorerDidSpotPeerObserver.update(peer)
+        
         print("Spotted \(peer.identifier). Didn't determine its addresses yet")
     }
     

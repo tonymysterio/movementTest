@@ -114,6 +114,8 @@ class PeerDataRequester : BaseObject  {
                     
                     //completion(nil)
                     self.orderedHashListRequestErrorHandler()
+                    
+                    _ = self.finishProcessing();
                     return
                 }
                 
@@ -124,6 +126,7 @@ class PeerDataRequester : BaseObject  {
                     
                     self.orderedHashListRequestErrorHandler()
                     
+                    _ = self.finishProcessing();
                     return
                     
                 }
@@ -195,7 +198,8 @@ class PeerDataRequester : BaseObject  {
                     
                     print("peerdatarequest Error while fetching : \(response.result.error)")
                     //completion(nil)
-                    self.orderedHashRequestErrorHandler()
+                    self.orderedHashRequestErrorHandler();
+                    _ = self.finishProcessing();
                     return
                 }
                 
@@ -205,13 +209,14 @@ class PeerDataRequester : BaseObject  {
                 guard let run = try! decoder.decode( Run?.self, from : response.data as! Data ) else {
                     
                     self.orderedHashRequestErrorHandler()
-                    
+                    _ = self.finishProcessing();
                     return
                     
                 }
                 //TODO add some checking if this run is valid
                 //parsed this clients hashlist
                 self.orderedHashRequestSuccess ( run : run )
+                _ = self.finishProcessing();
         }
         
         
@@ -254,7 +259,12 @@ class PeerDataRequester : BaseObject  {
         
         self.totalRunItemsImported = totalRunItemsImported + 1;
         
+        let m = notificationMeiwaku(title: "meshnet service", subtitle: "orderedHashRequestSuccess", body: self.hostname )
+        serviceStatusJunctionNotification.update(m);
+        
         self.fetchMissingHash()
+        
+        
         
         //if ater ten runs, ask for his hashList in case hes downloading from at different people at the same time
         /*

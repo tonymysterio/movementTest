@@ -304,6 +304,8 @@ class SnapshotCache : BaseObject  {
         
         dataQueue.sync (){
             
+            _ = self.startProcessing();
+            
             self.cache.append( snap: snap)
             
             if (self.cache.isDirty()) {
@@ -314,7 +316,7 @@ class SnapshotCache : BaseObject  {
                 
             }
             
-            
+            _ = self.finishProcessing();
         }
         
     }
@@ -328,6 +330,7 @@ class SnapshotCache : BaseObject  {
     }
     func getApplicableSnapshot ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double) -> mapSnapshot? {
         
+        _ = self.startProcessing();
         
         self.getWithinArea = getWithinArea; //runs incoming need this too
         
@@ -355,9 +358,13 @@ class SnapshotCache : BaseObject  {
                 //TODO: purge dirty snaps
                 return nil;
                 
+                _ = self.finishProcessing();
+                
             }
             
             return gSna.last;   //heh heh, the last one is the best one
+            
+            _ = self.finishProcessing();
             
         }
         
@@ -384,6 +391,14 @@ class SnapshotCache : BaseObject  {
         
         
     }
+    
+    override func serviceStatusDataHook () -> Double {
+        
+        
+        return Double(self.cache.list.count);
+        
+    }
+
 
 }
 

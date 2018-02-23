@@ -141,7 +141,7 @@ class PullRunsFromDisk: BaseObject  {
         var storedError: NSError?
         let downloadGroup = DispatchGroup()
         
-        self.startProcessing();
+        //self.startProcessing();
         
         for hash in self.files {
             
@@ -153,6 +153,8 @@ class PullRunsFromDisk: BaseObject  {
             }
             
             downloadGroup.enter()
+            self.startProcessing();
+            
             let r = hash.load(success: { (run) in
                 
                 
@@ -185,9 +187,12 @@ class PullRunsFromDisk: BaseObject  {
                         
                     }
                 
+                    self.finishProcessing()
+                
                     downloadGroup.leave()
                 }, error: {
                     
+                    self.finishProcessing()
                     downloadGroup.leave()
                 })
                             //PhotoManager.sharedManager.addPhoto(photo)

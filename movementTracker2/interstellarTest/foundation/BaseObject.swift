@@ -498,6 +498,12 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         
         EXIT(exitcode: "teardown", reason: "blaa");
         
+        let ssi = serviceStatusItem(name: self.name, data: 0, ttl: self.TTL, active: true, isProcessing : false );
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            serviceStatusJunctionObserver.update(ssi);
+        }
+        
         return DROPcategoryTypes.terminating    //hello mother, im done terminating, get rid of me
         
     }
@@ -1049,6 +1055,12 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         self.isHibernating = false;
         self._pulse(pulseBySeconds: 30) //give this guy some time to get his shit together
         
+        let ssi = serviceStatusItem(name: self.name, data: 0, ttl: self.TTL, active: true, isProcessing : self.isProcessing );
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            serviceStatusJunctionObserver.update(ssi);
+        }
+        
         return DROPcategoryTypes.wokeUpFromHibernation
     }
     
@@ -1079,6 +1091,20 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         //var maxLatency = 0.0
         //var isProcessing = false;
         
+        //NOTE: using the queue might be bad juju
+        
+        //let service status take care of reading statuses
+        //having observers firing all over the place is bad juju
+        //addition: service statuses are updated on housekeep which is too slow
+        //processing takes a very short time
+        
+        //tell serviceStatusJunctionObserver what im up to
+        let ssi = serviceStatusItem(name: self.name, data: 0, ttl: self.TTL, active: true, isProcessing : true );
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            serviceStatusJunctionObserver.update(ssi);
+        }
+        
         return nil
     }   //end startProcessing
     
@@ -1094,6 +1120,13 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
             maxLatency = t
         }
         isProcessing = false;
+        
+        let ssi = serviceStatusItem(name: self.name, data: 0, ttl: self.TTL, active: true, isProcessing : true );
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            serviceStatusJunctionObserver.update(ssi);
+        }
+        
         return true
     }
     
@@ -1105,6 +1138,12 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         }
         
         return false;
+        
+    }
+    
+    func serviceStatusDataHook () -> Double {
+        
+        return 0;
         
     }
     

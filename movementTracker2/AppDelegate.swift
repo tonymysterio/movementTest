@@ -9,7 +9,7 @@
 import UIKit
 import SwiftLocation
 import Interstellar
-
+import UserNotifications
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -65,7 +65,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //add own user
         _ = playerRoster.addPlayerWithCompute(name:"samui",email:"samui@hastur.com",clan: "CAMPHASTUR")
         
-
+        UNUserNotificationCenter.current().requestAuthorization(options: [.sound, .alert, .badge]) {
+            granted, error in
+            if granted {
+                print("Approval granted to send notifications")
+            } else {
+                print(error)
+            }
+        }
+        
+        UNUserNotificationCenter.current().delegate = self as! UNUserNotificationCenterDelegate
+        
         return true
     }
 
@@ -108,4 +118,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
 }
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler(.alert)
+    }
+}
+
 

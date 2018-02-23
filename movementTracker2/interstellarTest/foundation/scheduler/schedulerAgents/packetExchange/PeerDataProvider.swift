@@ -94,6 +94,8 @@ class PeerDataProvider : BaseObject  {
                 var dux = "empty"
                 if !self.myExhangedHashes.isEmpty() {
                     
+                    _ = self.startProcessing();
+                    
                     //returns orderedHashList
                     let latestFirst = self.myExhangedHashes.orderAllLatestFirst()
                     let encoder = JSONEncoder()
@@ -101,6 +103,7 @@ class PeerDataProvider : BaseObject  {
                     let naz = (String(data: data, encoding: .utf8)!)
                     try w.write([UInt8](naz.utf8))
                     
+                    _ = self.finishProcessing();
                     //print(String(data: data, encoding: .utf8)!)
                     
                     //dux = data;
@@ -116,6 +119,8 @@ class PeerDataProvider : BaseObject  {
                 let key = r.queryParams[0]
                 let path = "runData/" + key.1 + ".json"
                 
+                _ = self.startProcessing();
+                
                 //see if we have this baby in cache
                 if let runcache = storage.getObject(oID: "runCache") as! RunCache?  {
                     
@@ -125,6 +130,9 @@ class PeerDataProvider : BaseObject  {
                         
                         let naz = (String(data: data, encoding: .utf8)!)
                         try w.write([UInt8](naz.utf8));
+                        
+                        _ = self.finishProcessing();
+                        
                         return;
                         
                     }
@@ -139,9 +147,13 @@ class PeerDataProvider : BaseObject  {
                     let naz = (String(data: data, encoding: .utf8)!)
                     try w.write([UInt8](naz.utf8))
                     
+                    _ = self.finishProcessing();
+                    
                 } else {
                     
                     try w.write([UInt8]("NOT_FOUND".utf8))
+                    
+                    _ = self.finishProcessing();
                     
                 }
                 
@@ -185,7 +197,7 @@ class PeerDataProvider : BaseObject  {
         
         //query pullRunsFromDisk for this
         //self.server?.GET
-        
+        _ = self.startProcessing();
         //normally this should not be on cache
         if let cache = storage.getObject(oID: "runCache") as! RunCache? {
             if let cachedHashes = cache.cachedHashes() {
@@ -205,6 +217,7 @@ class PeerDataProvider : BaseObject  {
             
         }
         
+        _ = self.finishProcessing();
     }
     
     func peerDataProviderExistingHashesReceived ( hashes : exchangedHashes ) {
@@ -215,13 +228,15 @@ class PeerDataProvider : BaseObject  {
         queue.sync {
             
             //TODO: this should update not overwrite
-            
+            _ = self.startProcessing();
             //myExhangedHashes = hashes
             myExhangedHashes.merge(hashes: hashes);
             
             let orderAllLatestFirst = hashes.orderAllLatestFirst()
-            
+            _ = self.finishProcessing();
             //print (hashes)
+            
+            
         }
         
         primed = true;

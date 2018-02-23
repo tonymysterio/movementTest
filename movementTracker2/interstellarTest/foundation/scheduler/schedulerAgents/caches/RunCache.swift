@@ -216,6 +216,14 @@ class RunCache : BaseObject  {
         
     }
     
+    override func serviceStatusDataHook () -> Double {
+        
+        return Double(self.cache.list.count);
+        
+    }
+
+    
+    
     func freezedryRunsOutsideRegion ( lat : CLLocationDegrees, lon : CLLocationDegrees , getWithinArea : Double ) {
         
         //having a peerDataProvider active would mean that we are passing runs on
@@ -238,13 +246,15 @@ class RunCache : BaseObject  {
         }
         self.dataQueue.sync { [weak self] in
             
+            _ = self?.startProcessing();
             cache.append(run: run)
-            
+            serviceStatusJunctionTotalCachedRuns.update(cache.list.count);
+            _ = self?.finishProcessing();
         }
         
         //page conf screen about cached runs
         
-        serviceStatusJunctionTotalCachedRuns.update(cache.list.count)
+        
         
     }   //end addRun
     

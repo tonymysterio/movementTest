@@ -443,10 +443,20 @@ class Scheduler {
         o.scheduler = self  //weak reference to scheduler for future access fun! can be nil!
         o.messageQueue = self.messageQueue //copy reference to mqueue here, leave storage out of mqueue
         
+        //NOTE polluting scheduler with observers is BAD JUJU
+        //find a better way
+        
         schedulerQueue.sync {
             self.storage.addObject(label: oID, object: o) //objects[oID]=o;
             print ("scheduler added \(o.name) ")
             debuMess(text: "scheduler added \(o.name) ")
+            
+            let ssi = serviceStatusItem(name: o.name, data: 0, ttl: o.TTL, active: true, isProcessing : false );
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                serviceStatusJunctionObserver.update(ssi);
+            }
+            
         }
         
         return true

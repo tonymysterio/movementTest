@@ -25,6 +25,12 @@ let serviceStatus = serviceStatusJunction()
 let playerRoster = PlayerRoster();
 
 
+struct notificationMeiwaku {
+    
+    let title : String
+    let subtitle : String
+    let body : String
+}
 
 //dont put observers here, put them with each producer
 

@@ -13,8 +13,13 @@ var serviceStatusJunctionObserver = Observable<serviceStatusItem>()
 var serviceStatusJunctionRefresh = Observable<Bool>()
 var serviceStatusJunctionTotalCachedRuns = Observable<Int>()
 var serviceStatusJunctionTotalUserProfiles = Observable<Int>()
+var serviceStatusJunctionNotification = Observable<notificationMeiwaku>()
 
 
+// serviceProcessingStatusChange = [objectCategoryTypes : String : Bool];
+//var serviceStatusJunctionTotalUserProfiles = Observable<Int>()
+
+//baseobject startProcessing sends a serviceStatusItem
 
 struct serviceStatusItem {
     
@@ -22,7 +27,7 @@ struct serviceStatusItem {
     let data : Double ; //amount of runs
     let ttl : Double;
     let active : Bool
-    
+    let isProcessing : Bool;
     
 }
 
@@ -44,6 +49,7 @@ class serviceStatusJunction {
         
         //let scheduler to ping me to keep statuses fresh
         serviceStatusJunctionRefresh.subscribe { b in
+            
             self.getServiceStatuses()
             
         }
@@ -57,20 +63,22 @@ class serviceStatusJunction {
             
             if let mlt = storage.getObject(oID: i)  {
                 //name can be diff
-                respo[i]=serviceStatusItem(name: mlt.myID, data: 0, ttl: mlt.TTL, active: true);
+                respo[i] = serviceStatusItem(name: mlt.myID, data: mlt.serviceStatusDataHook(), ttl: mlt.TTL, active: true , isProcessing : mlt.isProcessing );
                 
             } else {
                 
-                respo[i]=serviceStatusItem(name: i, data: 0, ttl: 0, active: false);
+                respo[i]=serviceStatusItem(name: i, data: 0, ttl: 0, active: false, isProcessing : false );
             }
             
             serviceStatusJunctionObserver.update(respo[i]!); //tell it to the rest of the world
             
-        }
+        }   //
         
         //print(respo);
         
         let lummox=1;
+        
+        print("serviceStatusJunction statuses got")
         
     }
     
