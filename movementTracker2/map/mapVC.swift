@@ -19,6 +19,13 @@ class mapVC: UIViewController {
         view.addSubview(controller.view)
         controller.didMove(toParentViewController: self)
         // Do any additional setup after loading the view.
+        
+        //we got a finished run. show this screen
+        /*runRecorderSavedFinishedRun.subscribe { run in
+            
+            
+        }*/
+        
     }
 
     override func didReceiveMemoryWarning() {

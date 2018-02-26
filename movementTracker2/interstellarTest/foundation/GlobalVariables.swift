@@ -30,6 +30,8 @@ struct notificationMeiwaku {
     let title : String
     let subtitle : String
     let body : String
+    let sound : Bool
+    let vibrate : Bool
 }
 
 //dont put observers here, put them with each producer

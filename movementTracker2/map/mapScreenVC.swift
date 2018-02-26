@@ -170,6 +170,15 @@ class mapScreenVC: UIViewController {
             }
         }
         
+        runRecorderSavedFinishedRun.subscribe { run in
+            
+            //run finished and saved
+            //center map to the area
+            
+            //congrats animazione
+            
+            
+        }
         
         /*LocationLoggerMessageObserver.subscribe
             { locationMessage in

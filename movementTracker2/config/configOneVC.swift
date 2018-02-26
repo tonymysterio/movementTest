@@ -338,6 +338,12 @@ class configOneVC: UIViewController {
         notificationContent.subtitle = notif.subtitle //"It's a notification"
         notificationContent.body = notif.body   //"WHOA COOL"
         
+        /*if notif.sound {
+            notificationContent.sound = UNNotificationSound.
+        }*/
+        
+        
+
         // Create Notification trigger
         // Note that 60 seconds is the smallest repeating interval.
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: inSeconds, repeats: false)

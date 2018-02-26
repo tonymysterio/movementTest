@@ -44,7 +44,7 @@ class ServusMeshnetProvider : BaseObject  {
         
         peerExplorerDidLosePeerObserver.subscribe { peer in
             
-            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer lost", body: "" )//peer.hostname?)
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer lost", body: "" ,sound : false, vibrate : false )//peer.hostname?)
             serviceStatusJunctionNotification.update(m)
             _ = self.startProcessing();
             _ = self._pulse(pulseBySeconds: 60)
@@ -53,7 +53,7 @@ class ServusMeshnetProvider : BaseObject  {
         
         peerExplorerDidDeterminePeerObserver.subscribe { peer in
             
-            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer found", body: peer.hostname!)
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "peer found", body: peer.hostname! ,sound : false, vibrate : false )
             serviceStatusJunctionNotification.update(m);
             
             _ = self.startProcessing();

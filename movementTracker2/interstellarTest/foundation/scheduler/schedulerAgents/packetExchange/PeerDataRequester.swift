@@ -161,7 +161,7 @@ class PeerDataRequester : BaseObject  {
             
             let tot = String(self.totalRunItemsImported);
             
-            let m = notificationMeiwaku(title: "meshnet service", subtitle: "shut down", body: "pulled \(tot) runs" )
+            let m = notificationMeiwaku(title: "meshnet service", subtitle: "shut down", body: "pulled \(tot) runs" ,sound : false, vibrate : false  )
             serviceStatusJunctionNotification.update(m);
             
         }
@@ -280,7 +280,7 @@ class PeerDataRequester : BaseObject  {
         
         self.totalRunItemsImported = totalRunItemsImported + 1;
         
-        let m = notificationMeiwaku(title: "meshnet service", subtitle: "orderedHashRequestSuccess", body: self.hostname )
+        let m = notificationMeiwaku(title: "meshnet service", subtitle: "orderedHashRequestSuccess", body: self.hostname ,sound : false, vibrate : false  )
         serviceStatusJunctionNotification.update(m);
         
         self.fetchMissingHash()
