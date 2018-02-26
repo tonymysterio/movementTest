@@ -414,7 +414,10 @@ class MainStorageForObjects {
         
         if let o = self.objects[oID] {
             
-            if o.terminated { return nil }  //non supervisors dont need to see dead objects
+            if o.terminated {
+                return nil
+                
+            }  //non supervisors dont need to see dead objects
             
             return o
         }

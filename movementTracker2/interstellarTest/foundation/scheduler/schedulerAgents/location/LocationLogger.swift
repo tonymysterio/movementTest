@@ -192,6 +192,27 @@ class LocationLogger : BaseObject {
         
     }
     
+    func enableTracking () {
+        
+        if !isLogging {
+            
+            self.CL?.startUpdatingLocation()
+            isLogging = true;
+        }
+        
+    }
+    
+    func disableTracking() {
+        
+        if isLogging {
+            
+            self.CL?.stopUpdatingLocation()
+            isLogging = false;
+        }
+        
+        
+    }
+    
     func setBackgroundModeDependingOnActiveRunState ( toggle : Bool ) {
         
         //dont allow bg updates if we are not on a run.

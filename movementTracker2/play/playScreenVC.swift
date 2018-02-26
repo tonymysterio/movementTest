@@ -123,7 +123,9 @@ class playScreenVC: UIViewController {
         self.recordingStarted.text = guko;
         
         //notify user
-        
+        let distanceOfEndpoints = currentRun.distanceBetweenStartAndEndSpikeFiltered();
+        self.currentRunIsClosed.text = "end dst: \(distanceOfEndpoints)"
+            
         
         if currentRun.isClosed() {
             
@@ -132,8 +134,7 @@ class playScreenVC: UIViewController {
         
         } else {
             
-            let distanceOfEndpoints = currentRun.distanceBetweenStartAndEndSpikeFiltered();
-            self.currentRunIsClosed.text = "end dst: \(distanceOfEndpoints)"
+            
             
         }
         

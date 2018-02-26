@@ -22,8 +22,10 @@ class liveRunStreamListener : BaseObject  {
     
     let queue = DispatchQueue(label: "liveRunStreamListener", qos: .userInitiated)
     var currentRun : Run?
+    var currentRunInitialized = false;
     var recording = false;
     var recordingCompleted = false;
+    var fakedRun  = false;
     
     func _initialize () -> DROPcategoryTypes? {
         
@@ -38,15 +40,24 @@ class liveRunStreamListener : BaseObject  {
         //disappears
         _pulse(pulseBySeconds: 6000000)
         
-        LocationLoggerMessageObserver.subscribe
+        //let runrecorder junction take care of this
+        //it keeps me alive if im dead
+        
+        /*LocationLoggerMessageObserver.subscribe
             { locationMessage in
                 self.locationMessageGotFromLocationLogger(lm : locationMessage)
                 
-        }
+        }*/
         
         self.recording = true;
         
         return nil
+        
+    }
+    
+    func setFaked() {
+        
+        self.fakedRun = true;
         
     }
     
@@ -74,6 +85,8 @@ class liveRunStreamListener : BaseObject  {
     
     func prime (user : Player) {
         
+        if currentRunInitialized { return; }
+        
         let startTime =  Date().timeIntervalSince1970
         
         let mid = startTime;
@@ -84,11 +97,13 @@ class liveRunStreamListener : BaseObject  {
         let run = Run(missionID: mid, user: user.name, clan: user.clan, geoHash: geoHash, version: ver, hash: "", startTime: startTime, closeTime: 0, coordinates: [])
         
         currentRun = run
-        
+        currentRunInitialized = true;
         
     }
     
     func primeWithRun ( run : Run ) -> Bool {
+        
+        if currentRunInitialized { return false; }
         
         //when pulling a incomplete run, prime 
         //runrecorderjunction currentRunReceived
@@ -96,6 +111,7 @@ class liveRunStreamListener : BaseObject  {
         //check if run is not garbage data
         
         currentRun = run
+        currentRunInitialized = true;
         
         return true;
         
@@ -131,7 +147,7 @@ class liveRunStreamListener : BaseObject  {
             return //DROPcategoryTypes.duplicate
         }
         
-        self._pulse(pulseBySeconds: 16000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
+        self._pulse(pulseBySeconds: 60000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
         
         
         //maybe the map is listening to display my run
