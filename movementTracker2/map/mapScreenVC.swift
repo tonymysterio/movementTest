@@ -176,7 +176,16 @@ class mapScreenVC: UIViewController {
             //center map to the area
             
             //congrats animazione
+            var zl = run.totalDistance() * 1.7;
+            self.regionRadius = CLLocationDistance(zl);
             
+            self.centerMap(lat: (run.coordinates.last?.lat)!, lon: (run.coordinates.last?.lon)!);
+            //set zoom level
+            
+            //start working on a new snapshot
+            //the new run should have dirtied the current one in case there was any data
+            mapViewJunctionSignificantViewChange.update(locationMessage(timestamp: self.regionRadius, lat: (run.coordinates.last?.lat)!, lon: (run.coordinates.last?.lon)!));
+            //start baking a snapshot somewhere
             
         }
         

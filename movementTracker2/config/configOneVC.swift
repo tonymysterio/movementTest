@@ -161,8 +161,14 @@ class configOneVC: UIViewController {
         //📲 💽
        // 📟
         //💾 📔 📓🕸📡 📣
+        //🏂
+        //🎯
         
         DispatchQueue.main.async {
+            
+            if self.statusIc[key] == nil {
+                return
+            }
             
             self.statusIc[key].isHidden = true;
             self.statusIc[key].isSelected = false;
@@ -220,28 +226,28 @@ class configOneVC: UIViewController {
         case "PullRunsFromDisk":
             
             if (s.active){
-                self.serviceItemEnable(key: 2 , sitem : s )
+                self.serviceItemEnable(key: 1 , sitem : s )
             } else {
-                self.serviceItemDisable(key: 2 ,sitem : s )
+                self.serviceItemDisable(key: 1 ,sitem : s )
             }
             
         case "runCache":
             
             if (s.active){
-                self.serviceItemEnable(key: 0 ,sitem : s)
+                self.serviceItemEnable(key: 10 ,sitem : s)
                 DispatchQueue.main.async {
                 self.amountOfCachedRuns.text = String(s.data);
                 }
             } else {
-                self.serviceItemDisable(key: 0 ,sitem : s)
+                self.serviceItemDisable(key: 10 ,sitem : s)
             }
             
         case "snapshotCache":
             
             if (s.active){
-                self.serviceItemEnable(key: 1 ,sitem : s)
+                self.serviceItemEnable(key: 0 ,sitem : s)
             } else {
-                self.serviceItemDisable(key: 1 ,sitem : s)
+                self.serviceItemDisable(key: 0 ,sitem : s)
             }
             
         case "servusMeshnetProvider":

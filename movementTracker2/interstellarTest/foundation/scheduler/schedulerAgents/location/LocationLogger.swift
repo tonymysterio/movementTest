@@ -32,6 +32,8 @@ class LocationLogger : BaseObject {
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
     var isInitialized = false //
+    var inBackgroundMode = false;
+    
     var debugGPSaccuracy = false;
     
     var previousLat : CLLocationDegrees = 0.0
@@ -217,6 +219,7 @@ class LocationLogger : BaseObject {
         
         //dont allow bg updates if we are not on a run.
         //examine this status when going to background and coming back
+        if inBackgroundMode == toggle { return; }
         
         CL?.allowsBackgroundLocationUpdates = toggle;
         
@@ -233,9 +236,14 @@ class LocationLogger : BaseObject {
             self.isLogging = false;
         }*/
         
+        inBackgroundMode = toggle;
     }
     
     func setLocationUpdateStatus ( toggle : Bool ) {
+        
+        if self.isLogging == toggle {
+            return;
+        }
         
         if toggle {
          

@@ -35,7 +35,7 @@ var requestReadOfCurrentRunExplicit = false;    //did we request run reading via
 
 class runRecorderJunction {
     
-    var pushFakeData = true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
+    var pushFakeData = false; //true;    //LocationLoggerMessageObserver affects 290 this file, readOfCurrentRun dishes out one location at a time
     var recording = false;
     var myRecorderObjectID = "";
     weak var myLocationTracker : LocationLogger?
@@ -836,22 +836,30 @@ class runRecorderJunction {
     
     func applicationWillResignActive () {
         
+        
         //sms came, phone call came, different app activated
         //if we are not on a run, stop gps services
         if let loloc = storage.getObject(oID: "locationLogger") as! LocationLogger? {
             
+            //keep alive if we are recording
+            loloc.setBackgroundModeDependingOnActiveRunState(toggle: self.recording )
+            loloc.setLocationUpdateStatus(toggle: self.recording )
+            
             //loc logger is on
             if let lslistener = storage.getObject(oID: "liveRunStreamListener") as! liveRunStreamListener? {
                 
-                loloc.setBackgroundModeDependingOnActiveRunState(toggle: true)
-                loloc.setLocationUpdateStatus(toggle: true)
+                lslistener._pulse(pulseBySeconds: 60000);
                 
-            } else {
+            }  /* else {
                 
                 loloc.setBackgroundModeDependingOnActiveRunState(toggle: false)
                 loloc.setLocationUpdateStatus(toggle: false)    //no need of loc updates while we are on background
-            }
+            } */
             
+        } else {
+            
+            
+            print("runrecorder junction applicationWillResignActive no locationLoggerFound")
         }
         
     }
