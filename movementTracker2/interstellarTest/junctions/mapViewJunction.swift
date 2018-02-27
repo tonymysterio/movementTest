@@ -309,7 +309,8 @@ class mapViewJunction {
         //mapCombiner.initialLocation = locMessage;   //make it look at the right place
         //mapCombiner.getWithinArea = gwa //
         let rep = mapCombiner._initialize()
-        
+        mapCombiner.prime(playerRoster.getLocalPlayer())    //
+            
         scheduler.addObject(oID: mapCombiner.myID, o: mapCombiner)
         
         if rep == DROPcategoryTypes.readyImmediately {

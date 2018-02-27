@@ -173,6 +173,7 @@
 		260C5BA41FE780600020F0AC /* mapVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mapVC.swift; sourceTree = "<group>"; };
 		260C5BAA1FE7848B0020F0AC /* debumess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = debumess.swift; sourceTree = "<group>"; };
 		260C5BAC1FE7BB9F0020F0AC /* ParkMapOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParkMapOverlay.swift; sourceTree = "<group>"; };
+		261742E52044ED550064023E /* startAndEndPoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = startAndEndPoints.swift; sourceTree = "<group>"; };
 		264E20F41FB035C0004CB94E /* SwiftLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftLocation.framework; path = Carthage/Build/iOS/SwiftLocation.framework; sourceTree = "<group>"; };
 		2652ACFF1FAAD0DC00AF3CE5 /* movementTracker2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = movementTracker2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2652AD021FAAD0DC00AF3CE5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -255,6 +256,7 @@
 		260C5B5D1FE396950020F0AC /* scheduler */ = {
 			isa = PBXGroup;
 			children = (
+				261742E42044ED310064023E /* runDataAnalysis */,
 				260C5B5E1FE396950020F0AC /* Scheduler.swift */,
 				260C5B5F1FE396950020F0AC /* schedulerAgents */,
 			);
@@ -264,6 +266,7 @@
 		260C5B5F1FE396950020F0AC /* schedulerAgents */ = {
 			isa = PBXGroup;
 			children = (
+				261742E32044ED260064023E /* New Group */,
 				268C23C81FFEF858009175BF /* caches */,
 				26C43F701FF0859D005B7296 /* packetExchange */,
 				260C5B601FE396950020F0AC /* jsonStreamReader */,
@@ -391,6 +394,21 @@
 				260C5B821FE396980020F0AC /* GeohashBox.swift */,
 			);
 			path = geoHash;
+			sourceTree = "<group>";
+		};
+		261742E32044ED260064023E /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "New Group";
+			sourceTree = "<group>";
+		};
+		261742E42044ED310064023E /* runDataAnalysis */ = {
+			isa = PBXGroup;
+			children = (
+				261742E52044ED550064023E /* startAndEndPoints.swift */,
+			);
+			path = runDataAnalysis;
 			sourceTree = "<group>";
 		};
 		264E211E1FB03E68004CB94E /* interstellarTest */ = {

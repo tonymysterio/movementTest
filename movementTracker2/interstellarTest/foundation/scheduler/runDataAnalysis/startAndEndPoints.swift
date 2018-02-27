@@ -11,7 +11,7 @@ import Interstellar
 //import GEOSwift
 import MapKit
 
-class MapCombiner : BaseObject  {
+class StartAndEndpointsAnalysis : BaseObject  {
     
     let pullQueue = DispatchQueue(label: "PullRunsFromDiskQueue", qos: .utility)
     //put run manipulation to background in case it takes too long
@@ -28,12 +28,10 @@ class MapCombiner : BaseObject  {
     var Lat : CLLocationDegrees = 65.822299
     var Lon : CLLocationDegrees = 24.2002689
     var getWithinArea : Double = 15000; //zoomLevelInMeters
-    //let user = "samui@hastur.org"
     
     var simplifyTolerance : Float = 0.0000591102 //good default, 394 turns into 166 pts
-    var compileSnapshotWithTimeout = true;
-    var newDataForSnap = false;
-    
+    var newDataForAnalysis = false;
+    var analyzeSnapshotWithTimeout = true;
     //the invoker of mapCombiner asks for tolerance for this map view
     
     //pull from disk
@@ -83,12 +81,12 @@ class MapCombiner : BaseObject  {
         
         //map viewcontroller is the only one who needs heaps of run data possibly
         /*if self.isLowPowerModeEnabled() {
-            //dont allow map combining on low power mode
-            //
-            self._teardown();
-            return DROPcategoryTypes.lowBattery;
-            
-        }*/
+         //dont allow map combining on low power mode
+         //
+         self._teardown();
+         return DROPcategoryTypes.lowBattery;
+         
+         }*/
         
         //maybe be selective about combining modes
         
@@ -111,21 +109,21 @@ class MapCombiner : BaseObject  {
                     let sirdalud = cache.runsInRegion(lat: initialLocation.lat, lon: initialLocation.lon, getWithinArea: area) ;
                 }
                 
-                    var hits = 0;
-                    for i in cachedRunHashesWithinArea {
-                        if let run = cache.getRun(hash: i){
-                            //if let ok = self.runs.append( run : run ) {
-                            self.addRun(run: run);
-                                hits = hits + 1;
-                            //}
-                            
-                        }   //found in cache
+                var hits = 0;
+                for i in cachedRunHashesWithinArea {
+                    if let run = cache.getRun(hash: i){
+                        //if let ok = self.runs.append( run : run ) {
+                        self.addRun(run: run);
+                        hits = hits + 1;
+                        //}
                         
-                    }
+                    }   //found in cache
                     
-                    print ("run cache hits \(hits)");
+                }
                 
-                    self.newDataForSnap = true;
+                print ("run cache hits \(hits)");
+                
+                self.newDataForAnalysis = true;
                 //}   //start fetching cached daatta
                 
             }
@@ -157,7 +155,7 @@ class MapCombiner : BaseObject  {
             
             if self.isProcessing { return }
             //DispatchQueue.global(qos: .utility).async {
-                self.addRun( run : run )
+            self.addRun( run : run )
             //}
         }
         
@@ -167,22 +165,16 @@ class MapCombiner : BaseObject  {
                 
                 if self.isProcessing { return }
                 //DispatchQueue.global(qos: .utility).async {
-                    self.addRun( run : run )
+                self.addRun( run : run )
                 //}
         }
         
         if hadCachedData {
             return DROPcategoryTypes.readyImmediately   //map junction could ask me to crunch
-                    //numbers immediately based on the cache data
+            //numbers immediately based on the cache data
         }
         
         return nil
-        
-    }
-    
-    func prime (user : Player ) {
-        
-        self.setUser(user: user);
         
     }
     
@@ -190,16 +182,18 @@ class MapCombiner : BaseObject  {
         
         //let the map comp die. next time we get a transmission of run data, we can start from fresh
         //self._pulse(pulseBySeconds: 60);    //stay alive
-        if (compileSnapshotWithTimeout && !self.isProcessing) {
+        if (analyzeSnapshotWithTimeout && !self.isProcessing) {
             
             //autocompile only when data has changed
-            if self.runs.o.count>0 && self.newDataForSnap {
+            /*if self.runs.o.count>0 && self.newDataToAnalyze {
                 if self.hasTimeoutExpired (timestamp : lastInsertTimestamp , timeoutInMs : 1){
                     //eager waiters of snapshots get candy
                     print("housekeep extend \(self.name) creating snap with timeout")
                     self.createSnapshot()
                 }
-            }
+            }*/
+            
+            
         }
         return nil
     }
@@ -237,8 +231,8 @@ class MapCombiner : BaseObject  {
         
         //TODO: if compiling a map, dont add this
         /*if self.isProcessing {
-            return;
-        }*/
+         return;
+         }*/
         
         if !run.isValid {
             
@@ -275,8 +269,8 @@ class MapCombiner : BaseObject  {
             if let ok = self?.runs.append( run : run ) {
                 
                 //process when time has passed
-                self?.lastInsertTimestamp = Date().timeIntervalSince1970
-                self?.newDataForSnap = true;  //flag we have new shit on the block
+                //self?.lastInsertTimestamp = Date().timeIntervalSince1970
+                //self?.newDataForSnap = true;  //flag we have new shit on the block
                 //print("mapcombiner added run ")
                 self?._pulse(pulseBySeconds: 10)
                 
@@ -292,204 +286,12 @@ class MapCombiner : BaseObject  {
         
         
         /*if !run.isClosed() {
-            return;     //dont bother with non closed runs
-        }*/
+         return;     //dont bother with non closed runs
+         }*/
         
         
     }   //end addRun
     
-    func createSnapshot () -> DROPcategoryTypes? {
-        
-        //let point = Waypoint(WKT: "POINT(10 45)")
-        //let polygon = Geometry.create("POLYGON((35 10, 45 45.5, 15 40, 10 20, 35 10),(20 30, 35 35, 30 20, 20 30))")
-        let currentRunsCount = self.runs.o.count
-        
-        newDataForSnap = false;
-        
-        
-        if self.isProcessing {
-            return DROPcategoryTypes.busyProcessesing
-            
-        }
-        
-        if  currentRunsCount == 0 {
-            return DROPcategoryTypes.serviceNotReady
-            
-        }
-        
-        print ("createSnapshot \(self.name) called with \(currentRunsCount)")
-        self._pulse(pulseBySeconds: 35)    //give secs for the job
-        
-        //ignore further additions
-        self.startProcessing()
-        //data might appear after this,just copy the existing items and pass to createSnapshots
-        self.runQueue.sync { [weak self] in
-            //if self is lost, bugger off
-            //https://www.swiftbysundell.com/posts/capturing-objects-in-swift-closures
-            guard let strongSelf = self else {
-                return
-            }
-            
-            
-            if let currentRuns = strongSelf.runs.getWithinArea(lat: strongSelf.initialLocation.lat,lon: strongSelf.initialLocation.lon,distanceInMeters: strongSelf.getWithinArea) {
-                
-                //pushes the snap output thru an observer if one gets produced
-                strongSelf.createSnapshotFromRuns(runs: currentRuns , lat: initialLocation.lat,lon: initialLocation.lon, getWithinArea: strongSelf.getWithinArea )
-                
-            } else {
-                print ("createSnapshot: no valid runs in this area out of \(strongSelf.runs.o.count) ")
-                //no data with current location. let this guy TTL unless we get some data
-                self?.finishProcessing()
-                
-            }
-            
-        }
-        
-        return nil
-        
-    }   //end create snacreateSnapshot
-    
-    func createSnapshotFromRuns ( runs : Runs , lat: CLLocationDegrees , lon: CLLocationDegrees , getWithinArea : Double ) {
-        
-        
-        
-        switch (self.filteringMode) {
-            
-        case (.world):
-            self.createSnapshotFromRunsForWorld ( runs: runs , lat : lat, lon : lon , getWithinArea : getWithinArea )
-        case (.personal):
-            self.createSnapshotFromRunsForPersonal ( runs: runs )
-            
-        default: self.createSnapshotFromRunsForLocalCompetition ( runs: runs )
-        }
-        
-    }
-    
-    
-    
-    func createSnapshotFromRunsForWorld ( runs : Runs , lat: CLLocationDegrees , lon: CLLocationDegrees , getWithinArea : Double ) {
-        //its all there, put it into a stack
-        
-        
-        print ("createSnapshotFromRunsForWorld \(self.name) called with distance filtered \(runs.o.count)")
-        
-        self._pulse(pulseBySeconds: 5)    //give secs for the job
-        
-        guard let r = runs.allSorted() else {
-            
-            //got nothing
-            return;
-        }
-        var mapPolylineSet = [[CLLocationCoordinate2D]]()
-        
-        var simplifyTolerance = self.calculateSimplifyToleranceForView(getWithinArea: getWithinArea)
-        var runHashes = Set<String>();
-        
-        //older areas on the background
-        for i in r.o {
-            
-            //let myPolyline = MKPolyline(coordinates: coords, count: coords.count)
-            //make polylines
-            //let tolerance : Float = 0.001 //to 5.0
-            //the invoker of mapCombiner asks for tolerance for this map view
-            
-            if let fco = i.spikeFilteredCoordinates() {
-                
-                let simplifiedCoords = i.simplify(tolerance: simplifyTolerance )
-                 mapPolylineSet.append(simplifiedCoords!)
-                
-            }
-            
-            //append also non included hashes so cache wont dirty a snap because something that
-            //was not originally included happened again
-            runHashes.insert(i.hash)
-            
-            //let coords = simplifiedCoords.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
-            
-            //let coords = i.coordinates.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
-            //let myPolyline = MKPolyline(coordinates: coords, count: coords.count)
-           
-            
-        }
-        
-        let area = mapZoomLevels(target: self.getWithinArea);
-        
-        //do this in background queue
-        let newSnap = mapSnapshot( coordinates : mapPolylineSet , filteringMode : self.filteringMode , lat : lat , lon: lon , getWithinArea : area , hashes : runHashes , dirty : false,id :"msna"+String(Date().timeIntervalSince1970))
-        
-        /*let o : [MKPolyline]
-        let filteringMode : mapFilteringMode //throw everything in as default
-        let lat : CLLocationDegrees
-        let lon : CLLocationDegrees
-        let getWithinArea : Double */
-        
-        //let mapsnapshot cache listen to this and save the snap for future use
-        //when new runs arrive from somewhere, the snap cache gets dirtied
-        //if snap cache has no data, mapCombiner is called for rescue
-        
-        mapSnapshotObserver.update(newSnap) //mapView is listening
-        
-        self._pulse(pulseBySeconds: 5)    //give secs until going out
-        
-        self.finishProcessing();
-        
-        //self._finalize();   //discard me when a snap is done
-        
-    }
-    
-    func calculateSimplifyToleranceForView ( getWithinArea : Double ) -> Float {
-        
-        //get witin area 1000 - 50000m
-        //0.0000591102 - 0.0002
-        
-        let gwStep : Float = (50000 - 1500) / 100
-        let gwSpan = Float(getWithinArea) / gwStep;
-        let gwSpanNeg : Float = 100 - gwSpan;
-        
-        let varia : Float = (0.0002 - 0.0000591102) / 100;
-        let f : Float = varia * gwSpanNeg
-        return f
-    }
-    
-    func createSnapshotFromRunsForPersonal ( runs : Runs ) {
-        
-        guard let user = self.getUser() else {
-            return;
-        }
-        
-        guard let personalRuns = runs.readByUser(user: user.name) else {
-            //notify about no personal runs?
-            
-            self.finishProcessing()
-            self._pulse(pulseBySeconds: 300)    //live a bit longer
-            return;
-        }
-    }
-    
-    func createSnapshotFromRunsForLocalCompetition ( runs : Runs ) {
-        
-        guard let user = self.getUser() else {
-            return;
-        }
-        //pull clans out, then mix and macho
-        
-    }
-    
-    
-    
-    func changeFilteringMode ( filteringMode : mapFilteringMode ) {
-        
-        //might not be a good idea. run map combine with current filtering, then die?
-        if self.isProcessing { return }
-        self.filteringMode = filteringMode
-        
-    }
-    
-    func changeSimplifyTolerance ( tolerance : Float ) {
-        
-        if self.isProcessing { return }
-        self.simplifyTolerance = tolerance
-        
-    }
     
 }
+

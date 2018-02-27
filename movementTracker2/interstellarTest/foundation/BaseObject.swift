@@ -132,7 +132,9 @@ class BaseObject: NSObject {
     
     var isProcessing = false;
     var processingStartUnixTimestamp = Date().timeIntervalSince1970
+    var user : Any? = nil;
     
+    //var user = Player(playerID: <#String#>) ; //if the function depends on player info, use setPlayer for this. mapcombiner, runrecorder, data analysis
     
     //}	//end baseobject
     init( messageQueue : MessageQueue? ) {
@@ -148,6 +150,20 @@ class BaseObject: NSObject {
         //print("BaseObject: initializing new me \(self.name))")
     }
     
+    func setUser ( user: Player) {
+        
+        //if we have a user property, set it
+        if self.user == nil { return }
+        self.user = user;
+        
+    }
+    
+    func getUser () -> Player? {
+        
+        if self.user == nil { return nil }
+        return self.user as! Player
+        
+    }
     
 func propagateListenersToChild (cOBJ : [String] ) -> Bool {
     

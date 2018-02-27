@@ -9,17 +9,33 @@
 import Foundation
 
 struct Player  {
-    let playerID : String
-    let name : String
-    let clan : String
-    let email : String
-    let hash : String
-    let created : Double
-    var updated : Double
+    var playerID : String = ""
+    var name : String = ""
+    var clan : String = ""
+    var email : String = ""
+    var hash : String = ""
+    var created : Double = 0
+    var updated : Double = 0
     var runHashes : [String]
-    var latestRun : Double
-    var latestLocationGeoHash : String
+    var latestRunTimestamp : Double = 0
+    var latestRunHash : String = ""
+    var latestLocationGeoHash : String = ""
     
+    init(playerID : String,name:String,clan:String,email:String,hash:String,created :Double,updated:Double,runHashes:[String],latestRunTimestamp:Double,latestRunHash:String, latestLocationGeoHash:String) {
+        self.playerID = playerID
+        self.name = name
+        self.clan = clan
+        self.email = email
+        self.hash = hash
+        self.created = created
+        self.updated = updated
+        self.runHashes = runHashes
+        self.latestRunTimestamp = latestRunTimestamp
+        self.latestRunHash = latestRunHash;
+        self.latestLocationGeoHash = latestLocationGeoHash;
+        
+        
+    }
 /*var myID = String(Date().timeIntervalSince1970)
  var name = "defaultName"
  var created = Date().timeIntervalSince1970*/
@@ -30,7 +46,7 @@ struct Player  {
     }
     
     mutating func updateLatestLocation (time : Double, geoHash : String ) {
-        if self.latestRun > time {
+        if self.latestRunTimestamp > time {
             self.latestLocationGeoHash = geoHash;
             self.updated = Date().timeIntervalSince1970;
         }
@@ -38,6 +54,14 @@ struct Player  {
         
     }
     
+    
+    
+    mutating func updateLatestRun ( latestRunHash : String , latestRunTimestamp : Double ) {
+        
+        if self.latestRunTimestamp > latestRunTimestamp { return; }
+        self.latestRunHash = latestRunHash;
+        self.latestRunTimestamp = latestRunTimestamp;
+    }
     
 }  //targetID, senderID, Dictionary that is the message
 
@@ -98,6 +122,14 @@ class PlayerRoster {
         
     }
     
+    func getLocalPlayer () -> Player? {
+        
+        //its always the first one
+        if self.list.count == 0 { return nil; }
+        return self.list.first?.value;
+        
+    }
+    
     func addPlayerWithCompute(name:String,email:String,clan: String) -> Player? {
         
         let hash = name+"_"+email;
@@ -105,7 +137,7 @@ class PlayerRoster {
         let updated : Double = Date().timeIntervalSince1970;
         let id = String(self.list.count);
         
-        let p = Player(playerID:id,name:name,clan:clan,email:email,hash:hash,created:created,updated:updated,runHashes: [], latestRun : 0,latestLocationGeoHash:"" )
+        let p = Player(playerID:id,name:name,clan:clan,email:email,hash:hash,created:created,updated:updated,runHashes: [], latestRunTimestamp : 0 , latestRunHash : "",latestLocationGeoHash:"" )
         
         addPlayer(playa: p);
         
