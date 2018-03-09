@@ -65,7 +65,7 @@ class PacketExchangeJunction {
         peerExplorerKeepAliveObserver.subscribe { toggle in
             
             //make servus stay around for longe
-            DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.global(qos: .utility).async { //DispatchQueue.main.async {
                 self.peerExplorerKeepAlive()
             }
             
@@ -80,6 +80,7 @@ class PacketExchangeJunction {
             //create one if not found
             
             //peerDataRequester initiates a JSON pull from this host
+            //DispatchQueue.main.async {
             DispatchQueue.global(qos: .utility).async {
                 self.pollNewPeerForData(peer: peer)
             }
@@ -88,27 +89,34 @@ class PacketExchangeJunction {
         peerExplorerDidLosePeerObserver.subscribe() { peer in
             
             //var id = peer.identifier    //host cannot be seen now
+            //DispatchQueue.main.async {
             DispatchQueue.global(qos: .utility).async {
+                
+                
                 self.peerExplorerDidLosePeer(peer: peer)
             }
             
         }
         peerDataRequesterRunArrivedObserver.subscribe { run in
             
-            DispatchQueue.global(qos: .utility).async {
+            
+            DispatchQueue.main.async {
+                
+                //let a = self?.enabled;
+                
             //peer data requester got a run over the meshlink
                 if let hrr = self.addHoodoRunStreamListener() {
                 
-                //its there
-                hrr.addRun(run: run)
+                    //its there
+                    hrr.addRun(run: run)
                 
                 
                 }
             
                 if let strr = self.addRunStreamRecorder(){
                 
-                //this will page us if the run is actually stored
-                strr.storeRun(run: run)
+                    //this will page us if the run is actually stored
+                    strr.storeRun(run: run)
                 
                 }
             

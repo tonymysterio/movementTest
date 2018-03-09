@@ -701,6 +701,8 @@ class runRecorderJunction {
             rsr._pulse(pulseBySeconds: 60);
             rsr._initialize()
             rsr.houseKeepingRole = houseKeepingRoles.slave;
+            rsr.setUser(user: playerRoster.getLocalPlayer()!)
+        
             return rsr
         
         if scheduler.addObject(oID: rsr.myID, o: rsr) {

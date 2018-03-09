@@ -194,7 +194,11 @@ class jsonStreamReader : BaseObject {
                     //pipe straigt to RunDataIO to be saved or..
                     if f.isValid && f.isClosed(){
                         
-                        runStreamReaderDataArrivedObserver.update(f)
+                        //patch hash
+                        var ran = f;
+                        ran.hash = ran.getHash();
+                        
+                        runStreamReaderDataArrivedObserver.update(ran)
                         
                     } else {
                         

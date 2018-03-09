@@ -139,9 +139,49 @@ class PeerDataRequester : BaseObject  {
     
     }
     
+    func primeMyRunHashes () {
+        
+        //query pullRunsFromDisk for this
+        //self.server?.GET
+        _ = self.startProcessing();
+        //normally this should not be on cache
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            if let cachedHashes = cache.cachedHashes() {
+                
+                if let cuha = cache.cachedUserHashes() {
+                    
+                    for i in cuha {
+                        
+                        self.myExhangedHashes.insertForUser(user: i[0], hash: i[1])
+                        
+                    }
+                    //tell peer data provider what we got
+                    //peerDataProviderExistingHashesObserver.update(self.myExhangedHashes);
+                }
+                
+            }
+            
+        }
+        
+        _ = self.finishProcessing();
+    }
+    
     override func _housekeep_extend() -> DROPcategoryTypes? {
         
         if self.isProcessing {  return DROPcategoryTypes.busyProcessesing }
+        
+        //check if cache has new hashes
+        
+        /*if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            
+            if let r = cache.cachedHashes() {
+                let rr = r as exchangedHashes;
+                self.peerDataProviderExistingHashesReceived(hashes: rr )
+            }
+        }*/
+        
+        //peerDataProviderExistingHashesReceived
+        
         
         if !self.fetchMissingHashes {
             
@@ -195,18 +235,38 @@ class PeerDataRequester : BaseObject  {
         
         //pull a run hashu
         
-        self.startProcessing()
-        let hash = self.missingRunHashes.popLast()
+        self.startProcessing();
+        
+        guard let hash = self.missingRunHashes.popLast() else {
+            
+            //nothing to pull
+            self._finalize();
+            return;
+        }
+        
+        //do i have it im my cache.
+        //if disk read has been slow or i got it from somewhere else maybe
+        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+            
+            if let r = cache.getRun(hash: hash) {
+                
+                self.finishProcessing();
+                self.fetchMissingHash();
+                
+                return;
+            }
+        }
         
         //updates myExhangedHashes needs to update
         //maybe im downloading from multiple sources now
         //central storage for exchanged Hashes necessary!!
         
         
-        let resourceUrl = "http://"+self.hostname+":8080/gethash?hash=" + (hash)!
+        let resourceUrl = "http://"+self.hostname+":8080/gethash?hash=" + (hash)
         print (resourceUrl);
         //keep responses sho
         
+        self.finishProcessing();
         
         Alamofire.request(
             URL(string: resourceUrl)!,
@@ -220,7 +280,7 @@ class PeerDataRequester : BaseObject  {
                     print("peerdatarequest Error while fetching : \(response.result.error)")
                     //completion(nil)
                     self.orderedHashRequestErrorHandler();
-                    _ = self.finishProcessing();
+                    //_ = self.finishProcessing();
                     return
                 }
                 
@@ -230,17 +290,20 @@ class PeerDataRequester : BaseObject  {
                 guard let run = try! decoder.decode( Run?.self, from : response.data as! Data ) else {
                     
                     self.orderedHashRequestErrorHandler()
-                    _ = self.finishProcessing();
+                    //_ = self.finishProcessing();
                     return
                     
                 }
                 //TODO add some checking if this run is valid
                 //parsed this clients hashlist
-                self.orderedHashRequestSuccess ( run : run )
-                _ = self.finishProcessing();
+                
+                //some hashes maybe broken.
+                var ran = run;
+                ran.hash = ran.getHash();
+                
+                self.orderedHashRequestSuccess ( run : ran )
+                //_ = self.finishProcessing();
         }
-        
-        
         
     }
     
@@ -316,13 +379,17 @@ class PeerDataRequester : BaseObject  {
             myExhangedHashes.addMockItemToGetPullingFromTarget();
         }
         queue.sync {
+            
+            //peek at the cache and insert to myExchangedHashes?
+            
+            
             let myHlist = myExhangedHashes.getAll();
             var missing = [String]()
             for f in ordHashList.list {
             
-            if !(myHlist!.contains(f)) {
-                missing.append(f)
-            }
+                if !(myHlist!.contains(f)) {
+                    missing.append(f)
+                }
             
             }
         
@@ -335,7 +402,7 @@ class PeerDataRequester : BaseObject  {
             //whats left after my and his overlap?
             print ("orderedHashListRequestSuccess: im missing  \(missing)" )
             //push missing ones to request queue
-            self.missingRunHashes = missing;
+            self.missingRunHashes = missing.shuffled();
             self.fetchMissingHashes = true;
             self._pulse(pulseBySeconds: 120)
             

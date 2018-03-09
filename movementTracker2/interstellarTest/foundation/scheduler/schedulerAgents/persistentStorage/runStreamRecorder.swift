@@ -145,6 +145,8 @@ class RunStreamRecorder : BaseObject  {
         self.startProcessing()
         
         do {
+            
+            
             let fname = path + "/" + hash + ".json"
             //try Disk.save(run, to: .caches, as: fname)
             try Disk.save(run, to: .applicationSupport, as: fname)

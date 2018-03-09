@@ -44,7 +44,7 @@ struct RunLoader {
                     error();
                 }
             }*/
-            
+            print(run.hash);
             success(run)
             
         } else {
@@ -178,9 +178,14 @@ class PullRunsFromDisk: BaseObject  {
                         self.initialPull = true;
                     
                         self._pulse(pulseBySeconds: 2)
-                        runReceivedObservable.update(run)
+                        
+                        //patch hash
+                        var ran = run;
+                        ran.hash = ran.getHash();
+                        
+                        runReceivedObservable.update(ran)
                     
-                        print("run pulled \(run.hash) at \(run.geoHash) ")
+                        print("run pulled \(ran.hash) at \(ran.geoHash) ")
                         
                         print (run.totalDistance());
                         //print("tit");

@@ -351,8 +351,13 @@ class MapCombiner : BaseObject  {
     
     func createSnapshotFromRuns ( runs : Runs , lat: CLLocationDegrees , lon: CLLocationDegrees , getWithinArea : Double ) {
         
-        
-        
+        //xn0m7
+        let geoH = Geohash.encode(latitude: lat as Double, longitude: lon as Double);
+        let geohPart = geoH.prefix(5)
+        if geohPart == "xn0m7" {
+            
+            print ("catch");
+        }
         switch (self.filteringMode) {
             
         case (.world):
@@ -392,17 +397,20 @@ class MapCombiner : BaseObject  {
             //make polylines
             //let tolerance : Float = 0.001 //to 5.0
             //the invoker of mapCombiner asks for tolerance for this map view
-            
-            if let fco = i.spikeFilteredCoordinates() {
+            //let idis = i.di
+            //if let fco = i.spikeFilteredCoordinates() {
                 
-                let simplifiedCoords = i.simplify(tolerance: simplifyTolerance )
-                 mapPolylineSet.append(simplifiedCoords!)
+            if let simplifiedCoords = i.simplify(tolerance: simplifyTolerance ) {
                 
+                mapPolylineSet.append(simplifiedCoords)
+                runHashes.insert(i.hash)
             }
+            
+            //}
             
             //append also non included hashes so cache wont dirty a snap because something that
             //was not originally included happened again
-            runHashes.insert(i.hash)
+            
             
             //let coords = simplifiedCoords.map { CLLocationCoordinate2DMake($0.lon, $0.lat) }
             

@@ -128,9 +128,9 @@ class LocationLogger : BaseObject {
             //CL?.distanceFilter = 20;
             
         } else {
-            
-            CL?.desiredAccuracy = kCLLocationAccuracyNearestTenMeters //kCLLocationAccuracyBest
-            CL?.distanceFilter = 20;
+            //give all data to hckalman filter
+            CL?.desiredAccuracy = kCLLocationAccuracyBest //kCLLocationAccuracyNearestTenMeters //kCLLocationAccuracyBest
+           // CL?.distanceFilter = 20;
         }
         
         

@@ -169,7 +169,7 @@ struct Run : Codable {
     let temperature : Int*/
     var geoHash : String
     let version : String
-    let hash : String
+    var hash : String
     let startTime : Double
     var closeTime : Double
    
@@ -182,6 +182,8 @@ struct Run : Codable {
         self.closeTime = lac!.timestamp;
         let gh = Geohash.encode(latitude: lac!.lat, longitude: lac!.lon)
         self.geoHash = gh;
+        
+        self.hash = self.getHash();
         
     }
     
@@ -306,7 +308,13 @@ struct Run : Codable {
     
     
     func spikeFilteredCoordinates () -> [coordinate]? {
-        
+        //8313977749605824174
+        if self.hash == "3022403764078575598" {
+            
+            let aa = 1;
+            print("mum");
+            
+        }
         if self.coordinates.isEmpty {
             return nil
         }
@@ -714,12 +722,28 @@ struct Run : Codable {
         
         //24.200481
         //65.822289999999995
+        
+        guard let filt = self.spikeFilteredCoordinates() else { return nil }
+        
         var points : [CLLocationCoordinate2D] = []
-        for co in coordinates {
+        for co in filt {
             
             //points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(round(co.lon,toDecimalPlaces: 5)), longitude: CLLocationDegrees(round(co.lat,toDecimalPlaces: 5)) ))
             points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(co.lat), longitude: CLLocationDegrees(co.lon) ))
             
+        }
+        
+        if points.count < 40 {
+            //dont simplify very short bits
+            var points2 : [CLLocationCoordinate2D] = []
+            for co in self.coordinates {
+                
+                //points.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(round(co.lon,toDecimalPlaces: 5)), longitude: CLLocationDegrees(round(co.lat,toDecimalPlaces: 5)) ))
+                points2.append(CLLocationCoordinate2D( latitude: CLLocationDegrees(co.lat), longitude: CLLocationDegrees(co.lon) ))
+                
+            }
+            
+            return points2;
         }
         
         let simplified = SwiftSimplify.simplify(points, tolerance: tolerance, highQuality: false)

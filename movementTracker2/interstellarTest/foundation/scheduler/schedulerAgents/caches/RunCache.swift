@@ -122,6 +122,18 @@ struct RunCacheDisk : Codable {
         
     }   //runsInRegion
     
+    func runsOrdered () -> [(key : String, value : Run)]? {
+        
+        if self.list.count == 0 { return nil };
+        
+        let ordered = list.sorted {
+            $0.value.closeTime < $1.value.closeTime
+        }
+        
+        
+        return ordered;
+        
+    }
     
 }
 

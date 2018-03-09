@@ -64,8 +64,9 @@ class PeerDataProvider : BaseObject  {
          
          }*/
         
-        self.startServer()
-        
+        queue.sync {
+            self.startServer()
+        }
         return nil
         
     }
@@ -230,7 +231,7 @@ class PeerDataProvider : BaseObject  {
         //list of stuff we have got
         
         //if list of hashes does not happen, TTL shortly. no data, no play
-        queue.sync {
+        //queue.sync {
             
             //TODO: this should update not overwrite
             _ = self.startProcessing();
@@ -242,7 +243,7 @@ class PeerDataProvider : BaseObject  {
             //print (hashes)
             
             
-        }
+        //}
         
         primed = true;
     }
