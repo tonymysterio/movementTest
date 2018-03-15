@@ -56,7 +56,9 @@ class PacketExchangeJunction {
             //button pressed. gimme meshnet
             //bare minimum to get the show going-a
             //SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.peerDataProvider.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
-            SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
+            //prepare hash cache to store hashes for multiple peerDataProviders and requestors
+            
+            SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.servusMeshnetProvider.rawValue,schedulerAgents.hashCache.rawValue,schedulerAgents.peerDataProvider.rawValue]);
 
             
             DispatchQueue.main.async{
@@ -111,10 +113,24 @@ class PacketExchangeJunction {
         }
         peerDataRequesterRunArrivedObserver.subscribe { run in
             
+            //we pulled a run from another client
+            //it is not checked yet
             
             DispatchQueue.main.async {
                 
                 //let a = self?.enabled;
+                //lets see if we have a hash cache and store the run pair there
+                
+                scheduler.fetchAgent( agent: schedulerAgents.hashCache.rawValue , name: schedulerAgents.hashCache.rawValue , success: { [weak self] agent  in
+                    
+                    let hc = agent as! HashCache;
+                    let hash = run.getHash();
+                    hc.insertForUser(user: run.user, hash: hash);
+                    
+                    }, error: {
+                        
+                })
+                
                 
             //peer data requester got a run over the meshlink
                 if let hrr = self.addHoodoRunStreamListener() {
@@ -439,8 +455,52 @@ class PacketExchangeJunction {
         
     }
     
-    
     func pollNewPeerForData (peer : Peer ) {
+        
+        let name = "PEER" + peer.identifier;
+        
+        scheduler.fetchOrCreateAgent( agent: schedulerAgents.peerDataRequester.rawValue , name: name , success: { [weak self] agent  in
+            
+            let pdc = agent as! PeerDataRequester;
+            
+            if !pdc.isInitialized {
+                    
+                    pdc._initialize();
+                    pdc._pulse(pulseBySeconds: 120) //ample time to get a connection
+                    pdc.myID = name;
+                    pdc.hostname = peer.hostname!
+                    pdc.identifier = peer.identifier;
+                
+                }
+                
+            pdc.requestHashes( success: { [weak self] hashList in
+                
+                //knot point to keep track of all hashes from all clients
+                
+                //compare with my shit on the hashCache
+                
+                //ask for item i dont have
+                
+                
+                    } , error: {
+                        
+            
+                });
+            
+            //let pdc ignore if we have requested in the last microsecond
+            
+        
+            }, error: { [weak self] in
+                
+                
+                
+        })
+
+        
+        
+    }
+    
+    func pollNewPeerForDataDEPRE (peer : Peer ) {
         
         //see if we have a poller for this
         let name = "PEER" + peer.identifier;
@@ -448,7 +508,7 @@ class PacketExchangeJunction {
         
         if let pdc = self.addPeerDataRequester(peer: peer) {
             
-            pdc.requestHashes();
+            //pdc.requestHashes();
         }
         
         //prime some hash data hopefully

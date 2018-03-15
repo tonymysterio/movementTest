@@ -35,7 +35,7 @@ class PeerDataRequester : BaseObject  {
     //or plan b: pull what you can and query again in the end?
     
     override func _initialize () -> DROPcategoryTypes? {
-        
+        if isInitialized { return nil }
         //passing hashes of all my held data might lead to a massive packet to send over
         schedulerAgentType = schedulerAgents.peerDataRequester
         agentIcon = "📣";
@@ -87,7 +87,12 @@ class PeerDataRequester : BaseObject  {
         
     }
     
-    func requestHashes (  ) {
+    typealias rhashSuccess = ( _ hashList : orderedHashList ) -> Void
+    typealias rhashError = () -> Void
+    
+    //func fetchOrCreateAgent( agent : String , name: String?, success : @escaping aSuccess , error : @escaping aError) {
+        
+    func requestHashes ( success : @escaping rhashSuccess , error : @escaping rhashError ) {
         
         //simple JSON request
         // to: host with requestParameters
@@ -117,6 +122,8 @@ class PeerDataRequester : BaseObject  {
                     //completion(nil)
                     self.orderedHashListRequestErrorHandler()
                     
+                    error();
+                    
                     _ = self.finishProcessing();
                     return
                 }
@@ -130,13 +137,19 @@ class PeerDataRequester : BaseObject  {
                     
                     self.orderedHashListRequestErrorHandler()
                     
+                    error();
+                    
                     _ = self.finishProcessing();
                     return
                     
                 }
                 
                 //parsed this clients hashlist
+                
+                success(ordHashList)    //callback. junction should do magic
+                
                 self.orderedHashListRequestSuccess ( ordHashList : ordHashList )
+                
             }
     
     }
@@ -188,7 +201,10 @@ class PeerDataRequester : BaseObject  {
         if !self.fetchMissingHashes {
             
                 //try to get dat list
-                self.requestHashes()
+            self.requestHashes(success: { hashList in
+                
+                }, error: {});
+            
             }
         
         self.fetchMissingHash()
@@ -340,7 +356,9 @@ class PeerDataRequester : BaseObject  {
         if self.terminated { return }
         
         self.finishProcessing()
+        
         peerDataRequesterRunArrivedObserver.update(run) //tell packetExchange that we got the requested run
+        
         peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
         
         self.totalRunItemsImported = totalRunItemsImported + 1;
@@ -371,15 +389,47 @@ class PeerDataRequester : BaseObject  {
     func orderedHashListRequestSuccess ( ordHashList : orderedHashList ) {
         
         if self.terminated { return }
-        self.finishProcessing()
         
-        self._pulse(pulseBySeconds: 30);
+        queue.sync {
+        
+            self._pulse(pulseBySeconds: 30);
+            
+            guard let cache = storage.getObject(oID: schedulerAgents.hashCache.rawValue) as! HashCache? else {
+            
+                //cache should be alive here.
+                return;
+            }
+        
+            guard let missing = cache.missingFromMe ( ohl : ordHashList ) else {
+            
+                //do another query with different set of stuff
+                return;
+            }
+            
+            
+            //whats left after my and his overlap?
+            print ("orderedHashListRequestSuccess: im missing  \(missing) from \(self.hostname)" )
+                //push missing ones to request queue
+            self.missingRunHashes = missing.list.shuffled();
+            self.fetchMissingHashes = true;
+            self._pulse(pulseBySeconds: 120)
+        
+            peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
+        
+        }
+        return;
+        
+        
+        
         
         //see if i have received my own hashlist
         if myExhangedHashes.isEmpty() {
             //if no data, conjure some
             myExhangedHashes.addMockItemToGetPullingFromTarget();
         }
+        
+        
+        
         queue.sync {
             
             //peek at the cache and insert to myExchangedHashes?

@@ -33,6 +33,8 @@ enum schedulerAgents: String {
     
     case runCache = "runCache"
     case snapshotCache = "snapshotCache"
+    case hashCache = "hashCache"    //share hash cache for all participants of meshnet transfer
+    
     //controlled by packet exchange junction
     case peerDataRequester = "peerDataRequester"    //meshnet, asks for missing blocks
     case peerDataProvider = "peerDataProvider"   //meshnet, server that responds to block requests
@@ -106,9 +108,12 @@ func createSchedulerAgent ( agent: String) -> BaseObject? {
         
         return ServusMeshnetProvider(messageQueue: nil);
         
+    case "hashCache" :
         
+        return HashCache(messageQueue: nil);
         
     default:
+        print("createSchedulerAgent could not create \(agent), missing case!")
         return nil;
     }
     

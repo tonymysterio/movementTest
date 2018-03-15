@@ -101,6 +101,35 @@ struct exchangedHashes {
         
     }
     
+    func missingFromMe ( hashes : orderedHashList ) -> orderedHashList? {
+        
+        if list.isEmpty { return hashes }
+        //turn ohl into set
+        
+        var all = Set<String>()
+        for f in self.list {
+            
+            for ff in f.value.list {
+                all.insert(ff)
+            }
+            
+        }
+        
+        var missing  = [String]() //orderedHashList();
+        
+        for i in hashes.list {
+            if !all.contains(i) {
+                missing.append(i)
+            }
+        }
+        
+        if missing.isEmpty { return nil }
+        
+        return orderedHashList(list : missing);
+        
+    }
+    
+    
     mutating func addMockItemToGetPullingFromTarget (){
         
         self.insertForUser(user: "mock", hash:"mock")

@@ -60,6 +60,7 @@
 		268C23CA1FFEF8BB009175BF /* RunCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23C91FFEF8BB009175BF /* RunCache.swift */; };
 		268C23CE1FFF1A17009175BF /* SnapshotCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268C23CD1FFF1A17009175BF /* SnapshotCache.swift */; };
 		269CFC122057A40800C78CFE /* schedulerAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269CFC112057A40800C78CFE /* schedulerAgents.swift */; };
+		269CFC14205A37ED00C78CFE /* hashCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 269CFC13205A37ED00C78CFE /* hashCache.swift */; };
 		26A0CEFD200305160012BD5B /* serviceStatusJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */; };
 		26C43F6F1FEA2330005B7296 /* currentRunDataIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */; };
 		26C43F721FF085D8005B7296 /* packetExchangeJunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */; };
@@ -193,6 +194,7 @@
 		268C23CB1FFF00F2009175BF /* MapCombinerDEPRECATED.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapCombinerDEPRECATED.swift; sourceTree = "<group>"; };
 		268C23CD1FFF1A17009175BF /* SnapshotCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotCache.swift; sourceTree = "<group>"; };
 		269CFC112057A40800C78CFE /* schedulerAgents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = schedulerAgents.swift; sourceTree = "<group>"; };
+		269CFC13205A37ED00C78CFE /* hashCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hashCache.swift; sourceTree = "<group>"; };
 		26A0CEFC200305160012BD5B /* serviceStatusJunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = serviceStatusJunction.swift; sourceTree = "<group>"; };
 		26C43F6E1FEA2330005B7296 /* currentRunDataIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = currentRunDataIO.swift; sourceTree = "<group>"; };
 		26C43F711FF085D8005B7296 /* packetExchangeJunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = packetExchangeJunction.swift; sourceTree = "<group>"; };
@@ -505,6 +507,7 @@
 			children = (
 				268C23C91FFEF8BB009175BF /* RunCache.swift */,
 				268C23CD1FFF1A17009175BF /* SnapshotCache.swift */,
+				269CFC13205A37ED00C78CFE /* hashCache.swift */,
 			);
 			path = caches;
 			sourceTree = "<group>";
@@ -714,6 +717,7 @@
 				26E44C111FB0028000E63007 /* playVC.swift in Sources */,
 				260C5B9D1FE396980020F0AC /* Geohash.swift in Sources */,
 				260C5BA51FE780600020F0AC /* mapVC.swift in Sources */,
+				269CFC14205A37ED00C78CFE /* hashCache.swift in Sources */,
 				260C5B891FE396980020F0AC /* JSONstreamRequest.swift in Sources */,
 				26E44BED1FAFF15600E63007 /* locationDataRouter.swift in Sources */,
 				260C5B931FE396980020F0AC /* runStreamRecorder.swift in Sources */,

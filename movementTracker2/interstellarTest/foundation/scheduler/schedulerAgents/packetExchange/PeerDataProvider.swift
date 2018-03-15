@@ -25,6 +25,7 @@ class PeerDataProvider : BaseObject  {
     
     override func _initialize () -> DROPcategoryTypes? {
         
+        if isInitialized { return nil }
         //passing hashes of all my held data might lead to a massive packet to send over
         schedulerAgentType = schedulerAgents.peerDataProvider
         agentIcon = "📡";
@@ -66,7 +67,9 @@ class PeerDataProvider : BaseObject  {
          }*/
         
         queue.sync {
+            
             self.startServer()
+            
         }
         
         isInitialized = true;
@@ -96,6 +99,24 @@ class PeerDataProvider : BaseObject  {
             return HttpResponse.raw(200, "OK", nil, { w in
                 
                 var dux = "empty"
+                
+                //request primes
+                //at this point we could have new hashes that came in
+                if let cache = storage.getObject(oID: "hashCache") as! HashCache? {
+                    
+                    if let ch = cache.getHashesToShowFor(user: "")
+                    {
+                        //reply with these
+                        let encoder = JSONEncoder()
+                        let data = try! encoder.encode(ch)
+                        let naz = (String(data: data, encoding: .utf8)!)
+                        try w.write([UInt8](naz.utf8))
+                        
+                        _ = self.finishProcessing();
+                        return;
+                    }
+                }
+                
                 if !self.myExhangedHashes.isEmpty() {
                     
                     _ = self.startProcessing();
@@ -141,7 +162,7 @@ class PeerDataProvider : BaseObject  {
                         
                     }
                     
-                }
+                }   //simpler this way if cache wont exist
                 
                 
                 if let retrievedMessage = try Disk.retrieve(path, from: .caches, as: Run?.self) {

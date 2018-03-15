@@ -696,6 +696,78 @@ class Scheduler {
         
     }
     
+    func fetchAgent( agent : String , name: String?, success : @escaping aSuccess , error : @escaping aError) {
+        
+        //just fetch agent and callback when we are there
+        schedulerQueue.sync {
+            
+            if let a = self.storage.getObject(oID: name! ) {
+                
+                if !a.terminated {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        success(a);
+                    }
+                    return; //got our thing
+                }
+            }   //got our guy
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                error();
+            }
+            
+            
+        }   //end scheduler sync
+        
+    } //end fetch or create
+    
+    
+    typealias aSuccess = ( _ agent : BaseObject ) -> Void
+    typealias aError = () -> Void
+    
+    func fetchOrCreateAgent( agent : String , name: String?, success : @escaping aSuccess , error : @escaping aError) {
+        
+        schedulerQueue.sync {
+            
+            if let a = self.storage.getObject(oID: name! ) {
+                
+                if !a.terminated {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        success(a);
+                    }
+                    return; //got our thing
+                }
+            }   //got our guy
+            
+            //create our guy
+            if let o = createSchedulerAgent(agent: agent) {
+                
+                //addObject(oID: o.myID, o: o)    //scheduler adds in scheduler queue
+                self.storage.addObject(label: name!, object: o) //objects[oID]=o;
+                print ("scheduler added \(agent) ")
+                //debuMess(text: "scheduler added \(o.name) ")
+                
+                let ssi = serviceStatusItem(name: name!, data: 0, ttl: o.TTL, active: true, isProcessing : false );
+                
+                DispatchQueue.global(qos: .userInitiated).async {
+                    serviceStatusJunctionObserver.update(ssi);
+                }
+                
+                DispatchQueue.global(qos: .userInitiated).async {
+                    success(o);
+                }
+                
+                return;
+                
+            }
+            
+            DispatchQueue.global(qos: .userInitiated).async {
+                error();
+            }
+
+            
+        }   //end scheduler sync
+        
+    } //end fetch or create
     
     typealias aGroupSuccess = ( _ group : [BaseObject]? ) -> Void
     typealias aGroupError = () -> Void
@@ -722,9 +794,9 @@ class Scheduler {
                     if let o = createSchedulerAgent(agent: f) {
                     
                         //addObject(oID: o.myID, o: o)    //scheduler adds in scheduler queue
-                        self.storage.addObject(label: o.myID, object: o) //objects[oID]=o;
-                        print ("scheduler added \(o.name) ")
-                        debuMess(text: "scheduler added \(o.name) ")
+                        self.storage.addObject(label: f, object: o) //objects[oID]=o;
+                        print ("scheduler added \(f) ")
+                        //debuMess(text: "scheduler added \(o.name) ")
                         
                         let ssi = serviceStatusItem(name: o.name, data: 0, ttl: o.TTL, active: true, isProcessing : false );
                         

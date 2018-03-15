@@ -33,9 +33,13 @@ class ServusMeshnetProvider : BaseObject  {
         
         _pulse(pulseBySeconds: 60)
         
-        explorer = Explorer()
-        explorer.delegate = self
-        explorer.startExploring()
+        DispatchQueue.main.async{
+            self.explorer = Explorer()
+            self.explorer.delegate = self
+            self.explorer.startExploring()
+        }
+        
+        
         print("Started exploring nearby peers...")
         
         peerExplorerKeepAliveObserver.subscribe { toggle in
