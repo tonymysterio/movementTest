@@ -25,7 +25,7 @@ class MotionTracker : BaseObject {
     
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
-    var isInitialized = false //
+    //var isInitialized = false //
     var loggerData : [motionMessage] = []  //my shit goes in here
     var storeLoggerDataOnFinalize = false   //all data is disposable by default
     
@@ -45,7 +45,7 @@ class MotionTracker : BaseObject {
     
     //}
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         
         myCategory = objectCategoryTypes.motionlistener

@@ -18,16 +18,19 @@ class ServusMeshnetProvider : BaseObject  {
     //keep track of connections and stuff
     //let
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
+        schedulerAgentType = schedulerAgents.servusMeshnetProvider
+        agentIcon = "🕸";
         self.name = "servusMeshnetProvider"
         self.myID = "servusMeshnetProvider"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
         self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
-        
+        schedulerAgentType = schedulerAgents.servusMeshnetProvider
         //disappears
+        
         _pulse(pulseBySeconds: 60)
         
         explorer = Explorer()
@@ -67,6 +70,8 @@ class ServusMeshnetProvider : BaseObject  {
             _ = self._pulse(pulseBySeconds: 60)
             _ = self.finishProcessing()
         }*/
+        
+        isInitialized = true;
         
         return nil
     }

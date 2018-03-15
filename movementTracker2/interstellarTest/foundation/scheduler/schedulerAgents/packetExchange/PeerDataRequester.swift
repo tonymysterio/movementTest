@@ -15,6 +15,7 @@ import Alamofire
 
 class PeerDataRequester : BaseObject  {
     
+    
     let queue = DispatchQueue(label: "PeerDataRequesterQueue", qos: .utility)
     var host : String = "" //host where to pull the request from
     var requestParameters : String = ""
@@ -33,10 +34,11 @@ class PeerDataRequester : BaseObject  {
     //this way if the recipient is recieving runs from other parties, the changes get reflected
     //or plan b: pull what you can and query again in the end?
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         //passing hashes of all my held data might lead to a massive packet to send over
-        
+        schedulerAgentType = schedulerAgents.peerDataRequester
+        agentIcon = "📣";
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "PeerDataRequester"
         self.myID = "PeerDataRequester"
@@ -80,7 +82,7 @@ class PeerDataRequester : BaseObject  {
         }*/
         
         
-        
+        isInitialized = true;
         return nil
         
     }

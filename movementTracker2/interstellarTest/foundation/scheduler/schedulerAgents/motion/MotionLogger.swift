@@ -40,7 +40,7 @@ class MotionLogger : BaseObject {
     
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
-    var isInitialized = false //
+    //var isInitialized = false //
     var loggerData : [motionMessage] = []  //my shit goes in here
     var storeLoggerDataOnFinalize = false //as default, we wont store anything
                                             //something else must observe the data and decide if its worth keeping
@@ -61,7 +61,7 @@ class MotionLogger : BaseObject {
         
     //}
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         myCategory = objectCategoryTypes.uniqueServiceProvider
         name = "motionLogger"

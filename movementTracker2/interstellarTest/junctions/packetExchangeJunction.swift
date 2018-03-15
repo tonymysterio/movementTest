@@ -25,6 +25,8 @@ var peerDataRequesterRunArrivedSavedObserver = Observable<String>()
 class PacketExchangeJunction {
     
     var enabled = false;
+    var meshnetInitialized = false;
+    var initializing = false;
     
     //user initiates packet exchange with packetExchangeRequestObserver
     
@@ -39,6 +41,10 @@ class PacketExchangeJunction {
         
         print("PacketExchangeJunction here")
         
+        
+        SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.peerDataProvider.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
+
+        
     }
     
     
@@ -47,12 +53,18 @@ class PacketExchangeJunction {
         
         packetExchangeRequestObserver.subscribe { toggle in
             
+            //button pressed. gimme meshnet
+            //bare minimum to get the show going-a
+            //SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.peerDataProvider.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
+            SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
+
+            
             DispatchQueue.main.async{
+                
                 self.initiateMeshnet();
+                
             }
-            /*DispatchQueue.global(qos: .utility).async {
-                self.initiateMeshnet();
-            }*/
+            
         }
         
         peerExplorerDidSpotPeerObserver.subscribe { toggle in
@@ -138,8 +150,51 @@ class PacketExchangeJunction {
     
     }   //init
     
-    
     func initiateMeshnet() {
+        
+        if initializing { return }
+        initializing = true;
+        
+        //fetchOrCreateAgentGroup ( group : [String] , success : aGroupSuccess , error : aGroupError) {
+        let meshnetAgents = SchedulerAgentGroups.list["packetExchange"];
+        
+        scheduler.fetchOrCreateAgentGroup(group: meshnetAgents! , success: { [weak self] groups in
+            
+            self?.initializing = false;
+            
+            //list of items the meshnet needs
+            //we are on out of SYNC schduler queue now. scheduler responds with a global async queue for us to fool around
+            
+            for g in groups! {
+                
+                //might be hibernating
+                if !g.isInitialized {
+                    
+                    g._initialize();
+                    
+                }
+                
+            }
+            
+            self?.initializing = false;
+            
+        }, error: { [weak self] in
+            
+            self?.initializing = false;
+        
+        })
+        
+        
+    }
+    
+    func reset () {
+        
+        //teardown all meshnet components
+        
+        
+    }
+    
+    func initiateMeshnetDEPRE() {
         
         //self.recordStatusChange( toggle : toggle)
         //user initiated exchange in local p2p network
@@ -151,7 +206,7 @@ class PacketExchangeJunction {
         //call its .scanForRunHashes  might return nil
         //no own runs gives a nil
         
-        let sp = self.getServusMeshnetProvider()
+        //let sp = self.getServusMeshnetProvider()
         
         
         
@@ -161,7 +216,7 @@ class PacketExchangeJunction {
         //if we dont have one, create one. Low TTL, expire
         
         //add a server to listen to requests
-        let pp = self.getPeerDataProvider()
+        //let pp = self.getPeerDataProvider()
         
         //when data connection is lost, scheduler will page PeerDataProvider to shut down immediately
         
@@ -177,6 +232,7 @@ class PacketExchangeJunction {
         
     }
     
+    /*
     func getServusMeshnetProvider () -> ServusMeshnetProvider? {
         
         if let mlt = storage.getObject(oID: "servusMeshnetProvider") as! ServusMeshnetProvider? {
@@ -199,7 +255,7 @@ class PacketExchangeJunction {
         
         return nil
         
-    }
+    } */
     
     func peerExplorerKeepAlive (){
         

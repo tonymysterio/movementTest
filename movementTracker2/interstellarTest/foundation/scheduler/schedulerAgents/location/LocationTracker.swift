@@ -31,7 +31,7 @@ class LocationTracker : BaseObject {
     
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
-    var isInitialized = false //
+    //var isInitialized = false //
     var loggerData : [locationMessage] = []  //my shit goes in here
     var storeLoggerDataOnFinalize = false   //all data is disposable by default
     var previousLat : CLLocationDegrees = 0.0
@@ -52,7 +52,7 @@ class LocationTracker : BaseObject {
     
     //}
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         
         myCategory = objectCategoryTypes.locationlistener
@@ -68,6 +68,7 @@ class LocationTracker : BaseObject {
         
         //find locationlogger somewhere else. not all trackers are interested in current gps events
         
+        isInitialized = true;
         
         return nil
         

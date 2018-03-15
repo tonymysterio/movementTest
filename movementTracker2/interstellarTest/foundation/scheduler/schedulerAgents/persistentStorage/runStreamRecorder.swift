@@ -28,8 +28,9 @@ class RunStreamRecorder : BaseObject  {
     let queue = DispatchQueue(label: "runStreamRecorderQueue", qos: .utility)
     let path = "runData"
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
+        schedulerAgentType = schedulerAgents.runStreamRecorder;
         myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "runStreamRecorder"
         self.myID = "runStreamRecorder"
@@ -47,6 +48,7 @@ class RunStreamRecorder : BaseObject  {
         //if disk space is low, return
         //DROPcategoryTypes.lowDiskspace
         
+        isInitialized = true;
         return nil
         
     }

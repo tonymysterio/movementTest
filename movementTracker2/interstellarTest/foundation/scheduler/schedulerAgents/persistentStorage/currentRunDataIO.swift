@@ -33,8 +33,9 @@ class CurrentRunDataIO: BaseObject  {
     //recipients include mapCombiner (make map)
     //runsListView
     //kill this when finished (no caching here now)
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
+        schedulerAgentType = schedulerAgents.currentRunDataIO
         myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "currentRunDataIO"
         self.myID = "currentRunDataIO"
@@ -64,7 +65,7 @@ class CurrentRunDataIO: BaseObject  {
             }
         }*/
         
-        
+        isInitialized = true;
         return nil
         
     }

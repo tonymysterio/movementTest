@@ -19,10 +19,11 @@ class jsonStreamReader : BaseObject {
     let queue = DispatchQueue(label: "streamAnalyzerQueue", qos: .userInitiated)
     let dataFeederQueue = DispatchQueue(label: "dataFeedstreamAnalyzerQueue", qos: .userInitiated)
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
     
-    
-        myCategory = objectCategoryTypes.locationlistener
+        schedulerAgentType = schedulerAgents.jsonStreamReader
+        
+        //myCategory = objectCategoryTypes.locationlistener
         self.name = "jsonStreamReader"
         self.myID = "jsonStreamReader"
         self.myCategory = objectCategoryTypes.locationlistener

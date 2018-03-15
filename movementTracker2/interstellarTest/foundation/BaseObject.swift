@@ -79,9 +79,12 @@ class BaseObject: NSObject {
     var PULSEextendBySecondsDefault : Double = 5 //every time _pulsed, extend by this if not specified othewise
     var maxCategoryObjects = 2 //how many obs per cat, limits users in groups etc
                                 //exceeding this limit causes DROP and _purge handler, somebody has to retry
+    var schedulerAgentType : schedulerAgents?;
     
     var houseKeepingInterval = 1000;	//once  this is decided by scheduler
     var isHibernating = false
+    var isInitialized = false   //calling initialize will turn this on
+    var isPrimed = false;   //if the agent needs some data, this will set when we have it
     
     var myHibernationStrategy = hibernationStrategy.teardown    //teardown as default
     
@@ -133,6 +136,7 @@ class BaseObject: NSObject {
     var isProcessing = false;
     var processingStartUnixTimestamp = Date().timeIntervalSince1970
     var user : Any? = nil;
+    var agentIcon : String?;
     
     //var user = Player(playerID: <#String#>) ; //if the function depends on player info, use setPlayer for this. mapcombiner, runrecorder, data analysis
     
@@ -387,6 +391,15 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
         return nil
     
     }
+    
+    func _initialize () -> DROPcategoryTypes? {
+        
+        
+        isInitialized = true;
+        return nil
+        
+    }
+    
     func _housekeep () -> DROPcategoryTypes? {
         
         //returns a DROP type if something is not cool

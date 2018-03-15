@@ -84,10 +84,10 @@ class PullRunsFromDisk: BaseObject  {
     //react to memory warning. flush cache
     
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         
-        
+        schedulerAgentType = schedulerAgents.pullRunsFromDisk;
         myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "PullRunsFromDisk"
         self.myID = "PullRunsFromDisk"
@@ -109,6 +109,7 @@ class PullRunsFromDisk: BaseObject  {
         
         //if disk space is low, return
         //DROPcategoryTypes.lowDiskspace
+        isInitialized = true;
         
         return nil
         

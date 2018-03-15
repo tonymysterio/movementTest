@@ -147,8 +147,9 @@ class RunCache : BaseObject  {
     
     var lastInsertTimestamp = Date().timeIntervalSince1970
 
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
+        schedulerAgentType = schedulerAgents.runCache
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "runCache"
         self.myID = "runCache"
@@ -194,7 +195,7 @@ class RunCache : BaseObject  {
         }*/
         
         
-        
+        isInitialized = true;
         return nil
         
     }

@@ -194,8 +194,9 @@ class SnapshotCache : BaseObject  {
     
     var lastInsertTimestamp = Date().timeIntervalSince1970
     
-    func _initialize () -> DROPcategoryTypes? {
-
+    override func _initialize () -> DROPcategoryTypes? {
+        
+        schedulerAgentType = schedulerAgents.snapshotCache;
         self.name = "snapshotCache"
         self.myID = "snapshotCache"
         self.myCategory = objectCategoryTypes.cache;
@@ -245,6 +246,7 @@ class SnapshotCache : BaseObject  {
             }
         }
         
+        isInitialized = true;
         return  nil
     }
     

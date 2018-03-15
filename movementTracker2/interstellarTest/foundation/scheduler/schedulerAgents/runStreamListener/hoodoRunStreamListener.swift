@@ -27,7 +27,7 @@ class hoodoRunStreamListener : BaseObject  {
     var processedRuns = [Run]()
     var runs = Runs();
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         
         myCategory = objectCategoryTypes.locationlistener
@@ -52,6 +52,7 @@ class hoodoRunStreamListener : BaseObject  {
                 
         }
         
+        isInitialized = true;
         
         return nil
         

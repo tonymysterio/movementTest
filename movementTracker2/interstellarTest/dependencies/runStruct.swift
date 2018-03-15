@@ -217,19 +217,25 @@ struct Run : Codable {
     
     mutating func addCoordinate (coord : coordinate ) -> Bool {
         
-        if coordinates.isEmpty {
+        /*if coordinates.isEmpty {
             coordinates.append(coord)
             closeTime = coord.timestamp
             return true
         }
         //are we too close
+        //we might be spiking all over the shop
+        
         let location1 = CLLocation(latitude: (coord.lat), longitude: (coord.lon))
         let location2 = CLLocation(latitude: (coordinates.last?.lat)!, longitude: (coordinates.last?.lon)!)
         let d = location1.distance(from: location2) as Double;
         //NOTE: filters incoming 
-        if (d<5){ return false }
+        if (d<3){ return false }
         
         //time based filtering too?
+        */
+        
+        
+        //indiscriminatly add a coord. if it made this far, its probably good
         
         coordinates.append(coord)
         closeTime = coord.timestamp

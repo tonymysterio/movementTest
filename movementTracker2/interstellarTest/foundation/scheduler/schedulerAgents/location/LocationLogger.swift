@@ -31,7 +31,7 @@ class LocationLogger : BaseObject {
     
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
-    var isInitialized = false //
+    //var isInitialized = false //
     var inBackgroundMode = false;
     
     var debugGPSaccuracy = false;
@@ -62,11 +62,13 @@ class LocationLogger : BaseObject {
     
     //}
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         //DispatchQueue.main.async {
-        
-        
+        schedulerAgentType = schedulerAgents.locationLogger;
+        self.myCategory = objectCategoryTypes.uniqueServiceProvider
+        self.name = schedulerAgents.locationLogger.rawValue //"locationLogger"
+        self.myID = schedulerAgents.locationLogger.rawValue //"locationLogger"
         
         if (CL==nil){
             CL = CLLocationManager();
@@ -84,10 +86,7 @@ class LocationLogger : BaseObject {
         //when going hibernating (background mode), see if we got a run going, set background mode if yes
         
         
-        self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
-        self.name = "locationLogger"
-        self.myID = "locationLogger"
         
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.persist //dont care
@@ -191,6 +190,7 @@ class LocationLogger : BaseObject {
         //let t = CM.sta
         */
         
+        isInitialized = true;
         
     }
     
@@ -410,6 +410,8 @@ extension LocationLogger: CLLocationManagerDelegate {
     //cclocationmaanger as extension
     //this is to decouple code from a delegate
     //baseClass had to become a NSobject for this reason
+    
+    //pushes as much location data the adapter gives thru observable. this might be trouble
     
     func locationManager(_ manager: CLLocationManager,  didUpdateLocations locations: [CLLocation]) {
         

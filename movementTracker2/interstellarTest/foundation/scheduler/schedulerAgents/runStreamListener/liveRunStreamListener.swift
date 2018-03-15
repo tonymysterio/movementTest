@@ -20,18 +20,20 @@ class liveRunStreamListener : BaseObject  {
     var totalParsedObjects = 0 ;
     var maxBuffers = 10;
     
-    let queue = DispatchQueue(label: "liveRunStreamListener", qos: .userInitiated)
+    //let queue = DispatchQueue(label: "liveRunStreamListener", qos: .userInitiated)
+    let queue = DispatchQueue(label: schedulerAgents.liveRunStreamListener.rawValue , qos: .userInitiated)
     var currentRun : Run?
     var currentRunInitialized = false;
     var recording = false;
     var recordingCompleted = false;
     var fakedRun  = false;
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
+        schedulerAgentType = schedulerAgents.liveRunStreamListener;
         myCategory = objectCategoryTypes.locationlistener
-        self.name = "liveRunStreamListener"
-        self.myID = "liveRunStreamListener"
+        self.name = schedulerAgents.liveRunStreamListener.rawValue //"liveRunStreamListener"
+        self.myID = schedulerAgents.liveRunStreamListener.rawValue //"liveRunStreamListener"
         self.myCategory = objectCategoryTypes.locationlistener
         
         self.myHibernationStrategy = hibernationStrategy.persist  //dont hibernate
@@ -50,6 +52,7 @@ class liveRunStreamListener : BaseObject  {
         }*/
         
         self.recording = true;
+        isInitialized = true;
         
         return nil
         
@@ -130,24 +133,58 @@ class liveRunStreamListener : BaseObject  {
         
         if !self.recording { return nil }
         
+        //we might get fuuuuckloads of coordinates from location logger, hence sync
+        
         queue.sync {
             
-        self.startProcessing()
+            self.startProcessing()
             
-        if self.currentRun == nil {
-            if let pl = playerRoster.getPlayer(name: "samui") {
+            if self.currentRun == nil {
+                if let pl = playerRoster.getPlayer(name: "samui") {
                 self.prime(user : pl )
                 
+                }
             }
-        }
-        
-        guard let inse = self.currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
             
-            self.finishProcessing()
-            return //DROPcategoryTypes.duplicate
-        }
+            if self.currentRun?.coordinates.count == 0 {
+                
+                //prime the first coord no matter what it might be
+                self.currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon));
+                self.finishProcessing();
+                return;
+                
+            }
+            
+            //are we too close
+            //we might be spiking all over the shop
+            guard let laco = self.currentRun?.coordinates.last! else {
+                
+                    return;
+            }
+            
+            let location1 = CLLocation(latitude: (lat), longitude: (lon))
+            let location2 = CLLocation(latitude: (laco.lat), longitude: (laco.lon))
+            let d = location1.distance(from: location2) as Double;
+            
+            if (d<3){
+                
+                self.finishProcessing()
+                return
+                
+            }    //closer to 3 metres
+            
+            
+            //time based filtering too?
+            
+            
+            guard let inse = self.currentRun?.addCoordinate(coord: coordinate(timestamp: timestamp, lat: lat, lon: lon)) else {
+            
+                self.finishProcessing()
+                return //DROPcategoryTypes.duplicate
+            
+            }
         
-        self._pulse(pulseBySeconds: 60000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
+            self._pulse(pulseBySeconds: 60000)   //more listeningu time_pulse(pulseBySeconds: 16000)   //more listeningu time
         
         
         //maybe the map is listening to display my run

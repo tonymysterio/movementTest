@@ -762,7 +762,7 @@ class runRecorderJunction {
     
     }
     
-    func getPedometer () -> Pedometer? {
+    /*func getPedometer () -> Pedometer? {
         
         if let mlt = storage.getObject(oID: "pedometer") as! Pedometer? {
             
@@ -780,7 +780,7 @@ class runRecorderJunction {
         }
         
         return nil
-    }
+    }*/
     
     func initLocationServices () {
         

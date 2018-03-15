@@ -53,6 +53,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //the next ones are intelligently inside GlobalVariables.swift. what could go worng?
         
+        //junctions need these to invoke scheduler to give what they need
+        
+        SchedulerAgentGroups.add(ek: "runRecoder", e: [schedulerAgents.locationLogger.rawValue,schedulerAgents.liveRunStreamListener.rawValue]);
+        //SchedulerAgentGroups.add(ek: "packetExchange", e: [schedulerAgents.peerDataRequester.rawValue,schedulerAgents.peerDataProvider.rawValue,schedulerAgents.servusMeshnetProvider.rawValue]);
+
+        
+        
         messageQueue.initHousekeeping()
         scheduler.initHousekeeping();
         runRecorderJunct.initialize();

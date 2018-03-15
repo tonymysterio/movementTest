@@ -26,7 +26,6 @@ class Pedometer : BaseObject {
     
     var isLogging = false;
     var isPaused = false;   //gps off, something that is not fatal
-    var isInitialized = false //
     let PM = CMPedometer()
     
     var timer = Timer()
@@ -39,8 +38,9 @@ class Pedometer : BaseObject {
     var averagePace:Double! = nil
     var pace:Double! = nil
     
-    func _initialize(){
+    func _initialize() {
         
+        schedulerAgentType = schedulerAgents.pedometer;
         myCategory = objectCategoryTypes.motionlistener
         self.name = "pedometer"
         self.myID = "pedometer"
@@ -86,7 +86,7 @@ class Pedometer : BaseObject {
             }
         })
         
-        
+        isInitialized = true;
         
     }
     

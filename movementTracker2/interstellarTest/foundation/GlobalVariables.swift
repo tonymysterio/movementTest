@@ -24,6 +24,9 @@ let packetExchange = PacketExchangeJunction()
 let serviceStatus = serviceStatusJunction()
 let playerRoster = PlayerRoster();
 
+var SchedulerAgentGroups = schedulerAgentGroups();
+
+
 
 struct notificationMeiwaku {
     
@@ -35,25 +38,6 @@ struct notificationMeiwaku {
 }
 
 //dont put observers here, put them with each producer
-
-//makign this into an enum means updating the base object every time a new variation is created
-enum objectCategoryTypes: String {
-    
-    case generic = "generic" //string out of enums!
-    case user = "user"
-    case group = "group"
-    case debugger = "debugger"
-    case uniqueServiceProvider = "uniqueServiceProvider"  //can only have one of these running at any time
-    //like gps logger, motion logger...  //when adding to object storage, confirm that only on is alive
-    
-    case motionlistener = "motionlistener"  //listens to coreMotion events
-    case locationlistener = "locationlistener" //listens to coreLocation events
-    case cache = "cache" //cache for something
-    case mapCombiner = "mapCombiner";
-    static func allValues() -> [objectCategoryTypes] {
-        return [.generic, .user, .group, .debugger, .uniqueServiceProvider ,.motionlistener , .locationlistener, .cache, .mapCombiner]
-    }
-}
 
 
 //typealias CommMessage = [ String : Any] //comm messages from other objectos

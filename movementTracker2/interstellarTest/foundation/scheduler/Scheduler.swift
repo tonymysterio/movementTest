@@ -425,7 +425,27 @@ class Scheduler {
     
     }
     
-    
+    func getAgentByType ( agentType : String ) -> BaseObject? {
+        
+        //simply pick the first alive agent
+        
+        let objectsCopy = storage.objects
+        for ( kez , a) in objectsCopy {
+            
+            if a.schedulerAgentType?.rawValue == agentType {
+                if !a.terminated {
+                 
+                    return a;
+                    
+                }
+                
+            }
+            
+        }
+        
+        return nil;
+        
+    }   //
     
     func addObject (oID : String, o : BaseObject ) -> Bool {
         
@@ -673,6 +693,67 @@ class Scheduler {
         } else {
             return false
         }
+        
+    }
+    
+    
+    typealias aGroupSuccess = ( _ group : [BaseObject]? ) -> Void
+    typealias aGroupError = () -> Void
+
+    func fetchOrCreateAgentGroup ( group : [String] , success : @escaping aGroupSuccess , error : @escaping aGroupError) {
+        
+        //a guy like start a run on runrecorder junction will find this useful
+        //it returns a closure with agents on the group order
+        //error, didnt happen, try again
+        //TODO get this on scheduler thread
+        schedulerQueue.sync {
+            
+        
+            var ag = [BaseObject]();
+            for f in group {
+            
+                if let g = self.getAgentByType(agentType: f) {
+                
+                    ag.append(g as! BaseObject);
+                
+                    } else {
+                
+                    //didnt exist, create. let the receiver to initialize and what ever
+                    if let o = createSchedulerAgent(agent: f) {
+                    
+                        //addObject(oID: o.myID, o: o)    //scheduler adds in scheduler queue
+                        self.storage.addObject(label: o.myID, object: o) //objects[oID]=o;
+                        print ("scheduler added \(o.name) ")
+                        debuMess(text: "scheduler added \(o.name) ")
+                        
+                        let ssi = serviceStatusItem(name: o.name, data: 0, ttl: o.TTL, active: true, isProcessing : false );
+                        
+                        DispatchQueue.global(qos: .userInitiated).async {
+                            serviceStatusJunctionObserver.update(ssi);
+                        }
+                        
+                        ag.append(o as BaseObject);
+                    
+                    }
+                }
+            
+            }
+        
+            if ag.isEmpty {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    error();
+                }
+            }
+        
+            //XXXreturned values are still on scheduler thread for manipulation
+            //XXXmake sure the agents user their own queues for whatever
+            //force the callback to use some other queue so i can carry on with whatever
+            DispatchQueue.global(qos: .userInitiated).async {
+                success(ag);    //return created or existing agents
+            }
+            
+        
+        }   //doing this on scheduler queue
         
     }
     

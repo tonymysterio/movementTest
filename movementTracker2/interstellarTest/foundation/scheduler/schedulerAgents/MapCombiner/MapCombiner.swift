@@ -74,11 +74,10 @@ class MapCombiner : BaseObject  {
         
         
     }
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
-        //self.name = "mapCombiner"
-        //self.myID = "mapCombiner"
+        schedulerAgentType = schedulerAgents.mapCombiner;
         self.myCategory = objectCategoryTypes.mapCombiner
         
         //map viewcontroller is the only one who needs heaps of run data possibly
@@ -175,6 +174,9 @@ class MapCombiner : BaseObject  {
             return DROPcategoryTypes.readyImmediately   //map junction could ask me to crunch
                     //numbers immediately based on the cache data
         }
+        
+        
+        isInitialized = true;
         
         return nil
         

@@ -23,10 +23,11 @@ class PeerDataProvider : BaseObject  {
     var myExhangedHashes = exchangedHashes()
     private var server: HttpServer?
     
-    func _initialize () -> DROPcategoryTypes? {
+    override func _initialize () -> DROPcategoryTypes? {
         
         //passing hashes of all my held data might lead to a massive packet to send over
-        
+        schedulerAgentType = schedulerAgents.peerDataProvider
+        agentIcon = "📡";
         //myCategory = objectCategoryTypes.uniqueServiceProvider  //only one file accessor at a time
         self.name = "PeerDataProvider"
         self.myID = "PeerDataProvider"
@@ -67,6 +68,8 @@ class PeerDataProvider : BaseObject  {
         queue.sync {
             self.startServer()
         }
+        
+        isInitialized = true;
         return nil
         
     }
