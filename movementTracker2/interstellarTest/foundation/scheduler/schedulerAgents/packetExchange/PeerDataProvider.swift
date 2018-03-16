@@ -34,7 +34,7 @@ class PeerDataProvider : BaseObject  {
         self.myID = "PeerDataProvider"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
-        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myHibernationStrategy = hibernationStrategy.hibernate  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
         
         //disappears
@@ -112,7 +112,7 @@ class PeerDataProvider : BaseObject  {
                         let naz = (String(data: data, encoding: .utf8)!)
                         try w.write([UInt8](naz.utf8))
                         
-                        _ = self.finishProcessing();
+                        //_ = self.finishProcessing();
                         return;
                     }
                 }
@@ -165,7 +165,7 @@ class PeerDataProvider : BaseObject  {
                 }   //simpler this way if cache wont exist
                 
                 
-                if let retrievedMessage = try Disk.retrieve(path, from: .caches, as: Run?.self) {
+                if let retrievedMessage = try Disk.retrieve(path, from: .applicationSupport, as: Run?.self) {
                     
                     let encoder = JSONEncoder()
                     let data = try! encoder.encode(retrievedMessage)

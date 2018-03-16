@@ -36,6 +36,9 @@ class PeerDataRequester : BaseObject  {
     
     override func _initialize () -> DROPcategoryTypes? {
         if isInitialized { return nil }
+        
+        self.startProcessing();
+        
         //passing hashes of all my held data might lead to a massive packet to send over
         schedulerAgentType = schedulerAgents.peerDataRequester
         agentIcon = "📣";
@@ -44,7 +47,7 @@ class PeerDataRequester : BaseObject  {
         self.myID = "PeerDataRequester"
         self.myCategory = objectCategoryTypes.generic
         
-        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myHibernationStrategy = hibernationStrategy.hibernate  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
         
         //disappears
@@ -83,6 +86,7 @@ class PeerDataRequester : BaseObject  {
         
         
         isInitialized = true;
+        self.finishProcessing();
         return nil
         
     }
@@ -150,6 +154,7 @@ class PeerDataRequester : BaseObject  {
                 
                 self.orderedHashListRequestSuccess ( ordHashList : ordHashList )
                 
+                _ = self.finishProcessing();
             }
     
     }
@@ -264,7 +269,21 @@ class PeerDataRequester : BaseObject  {
         
         //do i have it im my cache.
         //if disk read has been slow or i got it from somewhere else maybe
-        if let cache = storage.getObject(oID: "runCache") as! RunCache? {
+        
+        if let cache = storage.getObject(oID: "hashCache") as! HashCache? {
+            
+            if let ch = cache.getHashesToShowFor(user: "")
+            {
+                //reply with these
+                
+                self.finishProcessing();
+                fetchMissingHash();
+                
+            }
+        }
+        
+        
+        /*if let cache = storage.getObject(oID: "runCache") as! RunCache? {
             
             if let r = cache.getRun(hash: hash) {
                 
@@ -273,7 +292,7 @@ class PeerDataRequester : BaseObject  {
                 
                 return;
             }
-        }
+        }*/
         
         //updates myExhangedHashes needs to update
         //maybe im downloading from multiple sources now
@@ -417,6 +436,7 @@ class PeerDataRequester : BaseObject  {
             peerExplorerKeepAliveObserver.update(true)  //ask packetEx to keep servus running a bit longer
         
         }
+        
         return;
         
         

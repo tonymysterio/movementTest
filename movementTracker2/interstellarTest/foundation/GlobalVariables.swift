@@ -199,6 +199,23 @@ struct exchangedHashes {
         
     }
     
+    func doIhaveHash ( hash : String ) -> Bool {
+        
+        //just dig thru everything and fish out if we have da hash
+        
+        for f in self.list {
+            
+            for ff in f.value.list {
+                if ff == hash {
+                    return true;
+                }
+            }
+            
+        }
+        
+        return false;
+        
+    }
     
     func findUnique ( users: [String]? ) -> Set<String>? {
         
@@ -357,7 +374,8 @@ class MainStorageForObjects {
     var queue = DispatchQueue(label: "MainStorageForObjectsQueue")
     var objects = [ String : BaseObject]();
     func addObject(label: String, object: BaseObject) -> Void {
-        queue.async {
+        queue.sync {
+            print ("MainStorageForObjects added \(label) under MainStorageForObjectsQueue");
             self.objects[label] = object
         }
     }

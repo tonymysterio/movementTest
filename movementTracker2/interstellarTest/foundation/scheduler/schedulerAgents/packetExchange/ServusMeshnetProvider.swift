@@ -26,7 +26,7 @@ class ServusMeshnetProvider : BaseObject  {
         self.myID = "servusMeshnetProvider"
         self.myCategory = objectCategoryTypes.uniqueServiceProvider
         
-        self.myHibernationStrategy = hibernationStrategy.finalize  //dont hibernate
+        self.myHibernationStrategy = hibernationStrategy.hibernate  //dont hibernate
         self.myMemoryPressureStrategy = memoryPressureStrategy.finalize
         schedulerAgentType = schedulerAgents.servusMeshnetProvider
         //disappears
@@ -82,7 +82,7 @@ class ServusMeshnetProvider : BaseObject  {
     
     override func _finalize() -> DROPcategoryTypes? {
         
-        explorer.stopExploring()
+        explorer?.stopExploring()
         
         return self._teardown()
         

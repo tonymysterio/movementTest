@@ -124,6 +124,13 @@ class HashCache : BaseObject  {
         
     }
     
+    func doIhaveHash ( hash : String ) -> Bool {
+        
+        return cache.doIhaveHash(hash: hash)
+        //return cache.doIhaveHash ( hash: hash );
+        
+    }
+    
     func missingFromMe ( ohl : orderedHashList ) -> orderedHashList? {
         
         if cache.isEmpty() { return ohl; }

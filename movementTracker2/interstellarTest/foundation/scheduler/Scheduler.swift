@@ -160,7 +160,7 @@ class Scheduler {
             
                 schedulerQueue.sync {
                     
-                    
+                    //NOTE: peerDataProvider dies with hibernation
                     let result = a._hibernate();
                     hibernationReplies.append(result)
                     
@@ -278,7 +278,11 @@ class Scheduler {
         for ( kez , a) in objectsCopy { //just the the object
             
             //if ( a == nil ) { continue; }
-            
+            print(" housekeeping  \(kez)");
+            if kez == "PEER8F1F9530-4E2F-44EB-92F2-22D59FE61138" {
+                
+                let grab = 1;
+            }
             if interruptHousekeeping==false  {
                 
                 schedulerQueue.sync {
@@ -742,8 +746,9 @@ class Scheduler {
             if let o = createSchedulerAgent(agent: agent) {
                 
                 //addObject(oID: o.myID, o: o)    //scheduler adds in scheduler queue
+                o._pulse(pulseBySeconds: 5) //give 5 secs to initialize so it wont be purged before initialize
                 self.storage.addObject(label: name!, object: o) //objects[oID]=o;
-                print ("scheduler added \(agent) ")
+                print ("scheduler queued add for \(agent) ")
                 //debuMess(text: "scheduler added \(o.name) ")
                 
                 let ssi = serviceStatusItem(name: name!, data: 0, ttl: o.TTL, active: true, isProcessing : false );
@@ -794,8 +799,9 @@ class Scheduler {
                     if let o = createSchedulerAgent(agent: f) {
                     
                         //addObject(oID: o.myID, o: o)    //scheduler adds in scheduler queue
+                        o._pulse(pulseBySeconds: 5) //give 5 secs to initialize so it wont be purged before initialize
                         self.storage.addObject(label: f, object: o) //objects[oID]=o;
-                        print ("scheduler added \(f) ")
+                        print ("scheduler queued add for \(f) ")
                         //debuMess(text: "scheduler added \(o.name) ")
                         
                         let ssi = serviceStatusItem(name: o.name, data: 0, ttl: o.TTL, active: true, isProcessing : false );

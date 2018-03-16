@@ -402,6 +402,9 @@ func propagateListenersToChild (cOBJ : [String] ) -> Bool {
     
     func _housekeep () -> DROPcategoryTypes? {
         
+        //if the guy is still initializing, it will istantly time out
+        //dont check for initializing here, give the guy some pulse time in creation
+        
         //returns a DROP type if something is not cool
         if self.name == "jsonStreamReader" {
             
